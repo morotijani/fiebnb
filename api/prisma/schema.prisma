@@ -1,0 +1,211 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  GUEST
+  HOMEOWNER
+  GUEST_HOUSE_ADMIN
+  HOTEL_MANAGER
+  RECEPTIONIST
+  ADMIN
+}
+
+enum PropertyStatus {
+  AVAILABLE
+  UNAVAILABLE
+}
+
+enum RoomStatus {
+  AVAILABLE
+  MAINTENANCE
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  DISPUTED
+  REFUNDED
+  COMPLETED
+  BLOCKED
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum TransactionType {
+  COLLECTION
+  DISBURSEMENT
+}
+
+enum BookingSource {
+  APP
+  WALK_IN
+}
+
+enum DisputeStatus {
+  OPEN
+  RESOLVED_GUEST
+  RESOLVED_HOST
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id            String  @id @default(uuid())
+  name          String
+  email         String? @unique
+  password_hash String?
+  phone_number  String  @unique
+  role              Role    @default(GUEST)
+  momo_number       String?
+  is_phone_verified Boolean @default(false)
+
+  // Relations
+  properties          Property[]          @relation("PropertyOwner")
+  bookings            Booking[]           @relation("GuestBookings")
+  onboardingRequests  OnboardingRequest[] @relation("UserOnboarding")
+  otpVerifications    OtpVerification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Property {
+  id            String         @id @default(uuid())
+  owner_id      String
+  title         String
+  latitude      Float?
+  longitude     Float?
+  base_price    Float
+  is_multi_room Boolean        @default(false)
+  status        PropertyStatus @default(AVAILABLE)
+
+  // Relations
+  owner    User      @relation("PropertyOwner", fields: [owner_id], references: [id])
+  rooms    Room[]
+  bookings Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Room {
+  id              String     @id @default(uuid())
+  property_id     String
+  room_number     String
+  price_per_night Float?
+  status          RoomStatus @default(AVAILABLE)
+  images          String[]   @default([])
+
+  // Relations
+  property Property  @relation(fields: [property_id], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Booking {
+  id             String        @id @default(uuid())
+  guest_id       String? // Nullable because a walk-in might not have a registered app account initially
+  property_id    String
+  room_id        String?
+  check_in       DateTime
+  check_out      DateTime
+  total_amount   Float
+  status         BookingStatus @default(PENDING)
+  booking_source BookingSource @default(APP)
+  payment_method String?
+
+  // Relations
+  guest        User?         @relation("GuestBookings", fields: [guest_id], references: [id])
+  property     Property      @relation(fields: [property_id], references: [id])
+  room         Room?         @relation(fields: [room_id], references: [id])
+  transactions Transaction[]
+  disputes     Dispute[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([room_id, check_in])
+  @@index([property_id, status])
+  // Wait, Prisma requires Enums to be specified directly, no quotes.
+  // We'll see if 'where' is supported and valid.
+  // @@index([room_id, check_in], where: { status: { in: [CONFIRMED, PENDING, BLOCKED] } })
+  // Actually, I will write the raw SQL for the partial index in the migration file to be extremely safe against Prisma version limitations.
+  // I'll leave the two B-Tree indexes here.
+}
+
+model Transaction {
+  id                    String            @id @default(uuid())
+  booking_id            String? // Nullable if disbursement is not tied to a single booking
+  client_reference      String            @unique
+  hubtel_transaction_id String?           @unique
+  amount                Float
+  type                  TransactionType   @default(COLLECTION)
+  status                TransactionStatus @default(PENDING)
+  timestamp             DateTime          @default(now())
+
+  // Relations
+  booking Booking? @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+}
+
+model Dispute {
+  id              String        @id @default(uuid())
+  booking_id      String
+  reason_text     String
+  evidence_images String[] // Array of URLs
+  status          DisputeStatus @default(OPEN)
+  admin_notes     String?
+
+  // Relations
+  booking Booking @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OnboardingRequest {
+  id              String        @id @default(uuid())
+  user_id         String
+  requested_role  Role
+  documents       String[]
+  status          RequestStatus @default(PENDING)
+  admin_notes     String?
+
+  user            User          @relation("UserOnboarding", fields: [user_id], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model OtpVerification {
+  id           String   @id @default(uuid())
+  user_id      String
+  phone_number    String
+  otp_code        String
+  failed_attempts Int      @default(0)
+  expires_at      DateTime
+  created_at   DateTime @default(now())
+
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([phone_number])
+}
