@@ -303,3 +303,29 @@ exports.updateBookingStatus = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+// Fetch all bookings for the manager's properties
+exports.getAllBookings = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    let bookings;
+
+    if (req.user.role === 'ADMIN') {
+      bookings = await prisma.booking.findMany({
+        include: { guest: true, room: true, property: true },
+        orderBy: { check_in: 'desc' }
+      });
+    } else {
+      bookings = await prisma.booking.findMany({
+        where: { property: { owner_id: userId } },
+        include: { guest: true, room: true, property: true },
+        orderBy: { check_in: 'desc' }
+      });
+    }
+    
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error('Error fetching all bookings:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import axiosClient from '../../api/axiosClient';
 
 export default function EditRoomModal({ room, onClose }) {
   const queryClient = useQueryClient();
@@ -9,16 +10,8 @@ export default function EditRoomModal({ room, onClose }) {
 
   const updateMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`http://localhost:3000/api/rooms/${room.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer dummy-token'
-        },
-        body: JSON.stringify({ price_per_night: price, status })
-      });
-      if (!res.ok) throw new Error('Failed to update room');
-      return await res.json();
+      const res = await axiosClient.put(`/rooms/${room.id}`, { price_per_night: price, status });
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['rooms']);
@@ -31,20 +24,12 @@ export default function EditRoomModal({ room, onClose }) {
       setIsUploading(true);
       try {
         // 1. Get Presigned URL
-        const presignedRes = await fetch('http://localhost:3000/api/storage/upload-url', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: 'Bearer dummy-token'
-          },
-          body: JSON.stringify({ 
-            filename: file.name,
-            contentType: file.type 
-          })
+        const presignedRes = await axiosClient.post('/storage/upload-url', {
+          filename: file.name,
+          contentType: file.type 
         });
         
-        if (!presignedRes.ok) throw new Error('Failed to get upload URL');
-        const { uploadUrl, publicUrl } = await presignedRes.json();
+        const { uploadUrl, publicUrl } = presignedRes.data;
 
         // 2. Upload file directly to Cloudflare R2
         const uploadRes = await fetch(uploadUrl, {
@@ -56,17 +41,11 @@ export default function EditRoomModal({ room, onClose }) {
         if (!uploadRes.ok) throw new Error('Failed to upload file to storage');
 
         // 3. Append to Room Images
-        const appendRes = await fetch(`http://localhost:3000/api/rooms/${room.id}/photos`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: 'Bearer dummy-token'
-          },
-          body: JSON.stringify({ imageUrl: publicUrl })
+        const appendRes = await axiosClient.post(`/rooms/${room.id}/photos`, {
+          imageUrl: publicUrl
         });
 
-        if (!appendRes.ok) throw new Error('Failed to append photo to room');
-        return await appendRes.json();
+        return appendRes.data;
       } finally {
         setIsUploading(false);
       }

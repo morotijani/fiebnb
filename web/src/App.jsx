@@ -5,6 +5,8 @@ import DashboardLayout from './components/layout/DashboardLayout';
 import DashboardOverview from './views/DashboardOverview';
 import CalendarView from './views/CalendarView';
 import RoomsView from './views/RoomsView';
+import GuestsView from './views/GuestsView';
+import SettingsView from './views/SettingsView';
 
 // Auth Views
 import LoginView from './views/auth/LoginView';
@@ -85,6 +87,8 @@ function App() {
                 <Route path="/" element={<DashboardOverview />} />
                 <Route path="/calendar" element={<CalendarView />} />
                 <Route path="/rooms" element={<RoomsView />} />
+                <Route path="/guests" element={<GuestsView />} />
+                <Route path="/settings" element={<SettingsView />} />
                 <Route path="*" element={
                   <div className="flex h-full items-center justify-center text-slate-500">
                     Page Under Construction

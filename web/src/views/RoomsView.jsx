@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import EditRoomModal from '../components/dashboard/EditRoomModal';
+import AddRoomModal from '../components/dashboard/AddRoomModal';
 import axiosClient from '../api/axiosClient';
 
 export default function RoomsView() {
   const [selectedPropertyId, setSelectedPropertyId] = useState('');
   const [editingRoom, setEditingRoom] = useState(null);
+  const [isAddingRoom, setIsAddingRoom] = useState(false);
 
   // Fetch properties for the selector
   const { data: properties, isLoading: isLoadingProps } = useQuery({
@@ -60,6 +62,17 @@ export default function RoomsView() {
             </select>
           </div>
         )}
+
+        <button 
+          onClick={() => setIsAddingRoom(true)}
+          disabled={!selectedPropertyId}
+          className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors shadow-sm flex items-center space-x-2"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          <span>Add Room</span>
+        </button>
       </div>
 
       {/* Rooms Grid */}
@@ -139,6 +152,14 @@ export default function RoomsView() {
         <EditRoomModal 
           room={editingRoom} 
           onClose={() => setEditingRoom(null)} 
+        />
+      )}
+
+      {/* Add Modal */}
+      {isAddingRoom && (
+        <AddRoomModal
+          propertyId={selectedPropertyId}
+          onClose={() => setIsAddingRoom(false)}
         />
       )}
     </div>

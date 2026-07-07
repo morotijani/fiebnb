@@ -1,5 +1,5 @@
 const express = require('express');
-const { createBooking, quickBlock, getTodayBookings, getAvailableRooms, walkInBooking, getTimelineData, getBookingById, updateBookingStatus } = require('../controllers/bookingController');
+const { createBooking, quickBlock, getTodayBookings, getAvailableRooms, walkInBooking, getTimelineData, getBookingById, updateBookingStatus, getAllBookings } = require('../controllers/bookingController');
 const { requireAuth, requireRole } = require('../middleware/auth.middleware');
 
 const router = express.Router();
@@ -12,6 +12,9 @@ router.post('/quick-block', requireRole(['RECEPTIONIST', 'GUEST_HOUSE_ADMIN', 'H
 
 // Front desk queue - today's bookings
 router.get('/today', requireRole(['RECEPTIONIST', 'GUEST_HOUSE_ADMIN', 'HOMEOWNER', 'HOTEL_MANAGER', 'ADMIN']), getTodayBookings);
+
+// All bookings for guests page
+router.get('/all', requireRole(['GUEST_HOUSE_ADMIN', 'HOMEOWNER', 'HOTEL_MANAGER', 'ADMIN']), getAllBookings);
 
 // Get available rooms for walk-in
 router.get('/available-rooms', requireRole(['RECEPTIONIST', 'GUEST_HOUSE_ADMIN', 'HOMEOWNER', 'HOTEL_MANAGER', 'ADMIN']), getAvailableRooms);

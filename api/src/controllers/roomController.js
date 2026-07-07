@@ -79,3 +79,29 @@ exports.appendRoomImage = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+// Create a new room
+exports.createRoom = async (req, res) => {
+  try {
+    const { property_id, room_number, price_per_night, status } = req.body;
+
+    if (!property_id || !room_number) {
+      return res.status(400).json({ error: 'property_id and room_number are required' });
+    }
+
+    const newRoom = await prisma.room.create({
+      data: {
+        property_id,
+        room_number,
+        price_per_night: price_per_night ? parseFloat(price_per_night) : 0,
+        status: status || 'AVAILABLE',
+        images: []
+      }
+    });
+
+    res.status(201).json({ message: 'Room created successfully', room: newRoom });
+  } catch (error) {
+    console.error('Error creating room:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
