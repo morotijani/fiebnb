@@ -4,31 +4,11 @@ import { useDashboard } from '../../context/DashboardContext';
 import { useEffect } from 'react';
 import { io } from 'socket.io-client';
 
+import axiosClient from '../../api/axiosClient';
+
 const fetchTimelineData = async () => {
-  try {
-    const res = await fetch('http://localhost:3000/api/bookings/timeline', {
-      headers: { Authorization: 'Bearer dummy-token' }
-    });
-    if (!res.ok) throw new Error(`API returned ${res.status}`);
-    return await res.json();
-  } catch (error) {
-    console.warn('Timeline API fetch failed, falling back to mock data:', error);
-    // Mock data fallback if backend is down
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    const createDate = (offset) => { const d = new Date(today); d.setDate(d.getDate() + offset); return d.toISOString(); };
-    return {
-      rooms: [
-        { id: 'r1', room_number: '101 - Deluxe', price_per_night: 150 },
-        { id: 'r2', room_number: '102 - Standard', price_per_night: 100 },
-        { id: 'r3', room_number: '105 - Suite', price_per_night: 200 },
-      ],
-      bookings: [
-        { id: 'b1', room_id: 'r1', guest_name: 'Alice Smith', check_in: createDate(0), check_out: createDate(3), status: 'CONFIRMED' },
-        { id: 'b2', room_id: 'r2', guest_name: 'Maintenance', check_in: createDate(1), check_out: createDate(5), status: 'BLOCKED' },
-      ]
-    };
-  }
+  const res = await axiosClient.get('/bookings/timeline');
+  return res.data;
 };
 
 export default function ResourceTimeline() {

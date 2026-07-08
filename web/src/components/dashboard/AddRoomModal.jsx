@@ -1,20 +1,31 @@
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosClient from '../../api/axiosClient';
 
 export default function AddRoomModal({ propertyId, onClose }) {
   const queryClient = useQueryClient();
   const [roomNumber, setRoomNumber] = useState('');
-  const [price, setPrice] = useState('');
+  const [categoryId, setCategoryId] = useState('');
   const [status, setStatus] = useState('AVAILABLE');
   const [error, setError] = useState(null);
+
+  // Fetch categories
+  const { data: categories, isLoading: isLoadingCategories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const res = await axiosClient.get('/categories');
+      // Filter categories by the selected property
+      return res.data.filter(c => c.property_id === propertyId);
+    },
+    enabled: !!propertyId
+  });
 
   const createMutation = useMutation({
     mutationFn: async () => {
       const res = await axiosClient.post('/rooms', {
         property_id: propertyId,
         room_number: roomNumber,
-        price_per_night: price,
+        category_id: categoryId,
         status
       });
       return res.data;
@@ -32,6 +43,10 @@ export default function AddRoomModal({ propertyId, onClose }) {
     e.preventDefault();
     if (!roomNumber) {
       setError('Room number is required');
+      return;
+    }
+    if (!categoryId) {
+      setError('Please select a category');
       return;
     }
     createMutation.mutate();
@@ -74,21 +89,20 @@ export default function AddRoomModal({ propertyId, onClose }) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Price */}
+              {/* Category */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Price per Night (₵)</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-slate-500 sm:text-sm">₵</span>
-                  </div>
-                  <input
-                    type="number"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    className="pl-7 block w-full rounded-lg border-slate-300 bg-slate-50 border focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2.5 transition-colors"
-                    placeholder="150"
-                  />
-                </div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Room Category</label>
+                <select
+                  value={categoryId}
+                  onChange={(e) => setCategoryId(e.target.value)}
+                  className="block w-full rounded-lg border-slate-300 bg-slate-50 border focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2.5 transition-colors"
+                  disabled={isLoadingCategories}
+                >
+                  <option value="">Select Category</option>
+                  {categories?.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name} (₵{cat.price_per_night})</option>
+                  ))}
+                </select>
               </div>
 
               {/* Status */}

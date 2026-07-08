@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import EditRoomModal from '../components/dashboard/EditRoomModal';
 import AddRoomModal from '../components/dashboard/AddRoomModal';
+import CategoriesModal from '../components/dashboard/CategoriesModal';
 import axiosClient from '../api/axiosClient';
 
 export default function RoomsView() {
   const [selectedPropertyId, setSelectedPropertyId] = useState('');
   const [editingRoom, setEditingRoom] = useState(null);
   const [isAddingRoom, setIsAddingRoom] = useState(false);
+  const [isManagingCategories, setIsManagingCategories] = useState(false);
 
   // Fetch properties for the selector
   const { data: properties, isLoading: isLoadingProps } = useQuery({
@@ -63,16 +65,26 @@ export default function RoomsView() {
           </div>
         )}
 
-        <button 
-          onClick={() => setIsAddingRoom(true)}
-          disabled={!selectedPropertyId}
-          className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors shadow-sm flex items-center space-x-2"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          <span>Add Room</span>
-        </button>
+        <div className="flex gap-3 w-full sm:w-auto">
+          <button 
+            onClick={() => setIsManagingCategories(true)}
+            disabled={!selectedPropertyId}
+            className="px-4 py-2 bg-white text-slate-700 font-medium rounded-lg hover:bg-slate-50 disabled:opacity-50 border border-slate-300 transition-colors shadow-sm"
+          >
+            Manage Categories
+          </button>
+          
+          <button 
+            onClick={() => setIsAddingRoom(true)}
+            disabled={!selectedPropertyId}
+            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors shadow-sm flex items-center space-x-2"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Add Room</span>
+          </button>
+        </div>
       </div>
 
       {/* Rooms Grid */}
@@ -127,8 +139,11 @@ export default function RoomsView() {
                 <div>
                   <h3 className="text-lg font-bold text-slate-800">Room {room.room_number}</h3>
                   <div className="mt-2 flex items-center justify-between">
-                    <span className="text-sm text-slate-500">Nightly Rate</span>
-                    <span className="text-xl font-bold text-blue-600">₵{room.price_per_night || 0}</span>
+                    <span className="text-sm text-slate-500">Category / Rate</span>
+                    <div className="text-right">
+                      <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">{room.category?.name || 'Standard'}</div>
+                      <span className="text-xl font-bold text-blue-600">₵{room.category?.price_per_night || 0}</span>
+                    </div>
                   </div>
                 </div>
 
@@ -160,6 +175,14 @@ export default function RoomsView() {
         <AddRoomModal
           propertyId={selectedPropertyId}
           onClose={() => setIsAddingRoom(false)}
+        />
+      )}
+
+      {/* Categories Modal */}
+      {isManagingCategories && (
+        <CategoriesModal
+          propertyId={selectedPropertyId}
+          onClose={() => setIsManagingCategories(false)}
         />
       )}
     </div>

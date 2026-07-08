@@ -61,6 +61,10 @@ export default function WalkInModal({ isOpen, onClose, initialData }) {
 
   if (!isOpen) return null;
 
+  const minCheckOutDate = new Date();
+  minCheckOutDate.setDate(minCheckOutDate.getDate() + 1);
+  const minDateString = minCheckOutDate.toISOString().split('T')[0];
+
   const handleSubmit = (e) => {
     e.preventDefault();
     mutation.mutate(formData);
@@ -75,6 +79,12 @@ export default function WalkInModal({ isOpen, onClose, initialData }) {
             <X size={20} />
           </button>
         </div>
+
+        {mutation.isError && (
+          <div className="mb-4 p-3 bg-red-50 text-red-600 border border-red-200 rounded-lg text-sm">
+            {mutation.error?.response?.data?.error || mutation.error.message || 'Failed to create booking.'}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -116,7 +126,7 @@ export default function WalkInModal({ isOpen, onClose, initialData }) {
               ) : (
                 rooms.map(room => (
                   <option key={room.id} value={room.id}>
-                    Room {room.room_number} - ₵{room.price_per_night}/night
+                    Room {room.room_number} - ₵{room.category?.price_per_night}/night
                   </option>
                 ))
               )}
@@ -129,6 +139,7 @@ export default function WalkInModal({ isOpen, onClose, initialData }) {
               <input 
                 type="date" 
                 required
+                min={minDateString}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm"
                 value={formData.check_out}
                 onChange={(e) => setFormData({...formData, check_out: e.target.value})}

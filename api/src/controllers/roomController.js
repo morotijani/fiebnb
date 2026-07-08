@@ -1,5 +1,6 @@
 const prisma = require('../prismaClient');
 
+
 // Fetch all rooms for a specific property
 exports.getRoomsByProperty = async (req, res) => {
   try {
@@ -11,6 +12,10 @@ exports.getRoomsByProperty = async (req, res) => {
 
     const rooms = await prisma.room.findMany({
       where: { property_id: propertyId },
+      include: {
+        property: true,
+        category: true
+      },
       orderBy: { room_number: 'asc' }
     });
 
@@ -25,7 +30,7 @@ exports.getRoomsByProperty = async (req, res) => {
 exports.updateRoom = async (req, res) => {
   try {
     const { id } = req.params;
-    const { price_per_night, status } = req.body;
+    const { category_id, status } = req.body;
 
     if (id.startsWith('r')) {
       // Mock fallback
@@ -35,7 +40,7 @@ exports.updateRoom = async (req, res) => {
     const updatedRoom = await prisma.room.update({
       where: { id },
       data: {
-        price_per_night: price_per_night ? parseFloat(price_per_night) : undefined,
+        category_id,
         status
       }
     });
@@ -83,23 +88,20 @@ exports.appendRoomImage = async (req, res) => {
 // Create a new room
 exports.createRoom = async (req, res) => {
   try {
-    const { property_id, room_number, price_per_night, status } = req.body;
+    const { property_id, room_number, category_id, status } = req.body;
+    const images = req.files ? req.files.map(f => `/uploads/rooms/${f.filename}`) : [];
 
-    if (!property_id || !room_number) {
-      return res.status(400).json({ error: 'property_id and room_number are required' });
-    }
-
-    const newRoom = await prisma.room.create({
+    const room = await prisma.room.create({
       data: {
         property_id,
         room_number,
-        price_per_night: price_per_night ? parseFloat(price_per_night) : 0,
+        category_id,
         status: status || 'AVAILABLE',
-        images: []
+        images
       }
     });
 
-    res.status(201).json({ message: 'Room created successfully', room: newRoom });
+    res.status(201).json({ message: 'Room created successfully', room: room });
   } catch (error) {
     console.error('Error creating room:', error);
     res.status(500).json({ error: 'Internal server error' });

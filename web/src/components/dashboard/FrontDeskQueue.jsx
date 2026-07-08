@@ -2,30 +2,11 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useDashboard } from '../../context/DashboardContext';
 
-// Mock fetcher (assuming auth is handled elsewhere)
+import axiosClient from '../../api/axiosClient';
+
 const fetchTodayBookings = async () => {
-  try {
-    const res = await fetch('http://localhost:3000/api/bookings/today', {
-      headers: { Authorization: `Bearer dummy-token` } // Replace with actual auth mechanism
-    });
-    if (!res.ok) throw new Error(`API returned ${res.status}`);
-    return await res.json();
-  } catch (error) {
-    console.warn('API fetch failed, falling back to mock data:', error);
-    // Return mock data so the dashboard can be previewed
-    return {
-      arrivals: [
-        { id: 1, guest: { name: 'Alice Smith' }, room: { room_number: '101' }, status: 'PENDING' },
-        { id: 2, guest: { name: 'Bob Jones' }, room: { room_number: '102' }, status: 'CONFIRMED' }
-      ],
-      departures: [
-        { id: 3, guest: { name: 'Charlie Brown' }, room: { room_number: '201' }, status: 'COMPLETED' }
-      ],
-      inHouse: [
-        { id: 4, guest: { name: 'Diana Prince' }, room: { room_number: '305' }, status: 'CONFIRMED' }
-      ]
-    };
-  }
+  const res = await axiosClient.get('/bookings/today');
+  return res.data;
 };
 
 export default function FrontDeskQueue() {

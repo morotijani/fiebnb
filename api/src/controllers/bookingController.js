@@ -99,9 +99,12 @@ exports.getTodayBookings = async (req, res) => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
+    const propertyFilter = req.user.role === 'ADMIN' ? {} : { property: { owner_id: req.user.id } };
+
     // Fetch bookings that overlap with today
     const bookings = await prisma.booking.findMany({
       where: {
+        ...propertyFilter,
         AND: [
           { check_in: { lt: tomorrow } },
           { check_out: { gte: today } }
@@ -143,14 +146,37 @@ exports.getTodayBookings = async (req, res) => {
 // Fetch available rooms for Walk-In modal
 exports.getAvailableRooms = async (req, res) => {
   try {
-    // For scaffolding/preview purposes, return mock available rooms
-    // In production, this queries the Room table where no overlapping Bookings exist
-    const mockAvailableRooms = [
-      { id: 'r1', room_number: '101', price_per_night: 150 },
-      { id: 'r2', room_number: '105', price_per_night: 200 },
-      { id: 'r3', room_number: '202', price_per_night: 180 },
-    ];
-    res.status(200).json(mockAvailableRooms);
+    const userId = req.user.id;
+    const userRole = req.user.role;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const propertyFilter = userRole === 'ADMIN' ? {} : { property: { owner_id: userId } };
+
+    // Get rooms that do NOT have a booking overlapping with today
+    const availableRooms = await prisma.room.findMany({
+      where: {
+        ...propertyFilter,
+        status: 'AVAILABLE',
+        bookings: {
+          none: {
+            status: { in: ['PENDING', 'CONFIRMED', 'BLOCKED'] },
+            check_in: { lt: tomorrow },
+            check_out: { gt: today }
+          }
+        }
+      },
+      select: {
+        id: true,
+        room_number: true,
+        category: true
+      }
+    });
+
+    res.status(200).json(availableRooms);
   } catch (error) {
     console.error('Error fetching available rooms:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -160,20 +186,79 @@ exports.getAvailableRooms = async (req, res) => {
 // Handle Walk-In Booking submission
 exports.walkInBooking = async (req, res) => {
   try {
-    const { guest_name, phone_number, room_id, check_out, payment_method, property_id } = req.body;
+    const { guest_name, phone_number, room_id, check_out, payment_method } = req.body;
     
-    // In production:
-    // 1. Look up or create User with phone_number
-    // 2. Create Booking linking the User and Room
-    // 3. Mark Room as unavailable for the period
+    if (!guest_name || !phone_number || !room_id || !check_out) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
 
-    // Mock successful response
-    const booking = {
-      id: 'mock-booking-123',
-      status: 'CONFIRMED',
-      payment_method,
-      booking_source: 'WALK_IN'
-    };
+    const room = await prisma.room.findUnique({
+      where: { id: room_id },
+      include: { category: true }
+    });
+
+    if (!room) {
+      return res.status(404).json({ error: 'Room not found' });
+    }
+
+    const checkInDate = new Date();
+    checkInDate.setHours(0, 0, 0, 0); // Start of today
+    
+    // Parse check_out without timezone issues by interpreting as local date
+    const checkOutDate = new Date(check_out);
+    checkOutDate.setHours(0, 0, 0, 0);
+    
+    // Ensure checkOutDate is strictly after checkInDate
+    if (checkOutDate <= checkInDate) {
+      return res.status(400).json({ error: 'Check-out date must be after today' });
+    }
+    
+    const diffTime = checkOutDate - checkInDate;
+    const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+    
+    const total_amount = room.category.price_per_night * diffDays;
+
+    const isAvailable = await checkAvailability(room.property_id, room.id, checkInDate, checkOutDate);
+    if (!isAvailable) {
+      return res.status(400).json({ error: 'Room is already occupied for these dates' });
+    }
+
+    // Use a transaction to safely upsert user and create booking
+    const booking = await prisma.$transaction(async (tx) => {
+      // Create guest if not exists, or get existing
+      let guest = await tx.user.findFirst({
+        where: { phone_number }
+      });
+      
+      if (!guest) {
+        guest = await tx.user.create({
+          data: {
+            name: guest_name,
+            phone_number,
+            role: 'GUEST'
+          }
+        });
+      }
+
+      return tx.booking.create({
+        data: {
+          guest_id: guest.id,
+          property_id: room.property_id,
+          room_id: room.id,
+          check_in: checkInDate,
+          check_out: checkOutDate,
+          total_amount,
+          payment_method,
+          booking_source: 'WALK_IN',
+          status: 'CONFIRMED'
+        },
+        include: {
+          guest: true,
+          room: true,
+          property: true
+        }
+      });
+    });
 
     // Emit event
     const io = socket.getIo();
@@ -194,36 +279,55 @@ exports.walkInBooking = async (req, res) => {
 // Fetch 30-day timeline data
 exports.getTimelineData = async (req, res) => {
   try {
-    // For scaffolding/preview purposes, return mock timeline data
-    // In production, this queries the Room and Booking tables based on the date range
+    const userId = req.user.id;
+    const userRole = req.user.role;
+    const propertyFilter = userRole === 'ADMIN' ? {} : { property: { owner_id: userId } };
+
     const today = new Date();
     today.setHours(0,0,0,0);
-    
-    const mockRooms = [
-      { id: 'r1', room_number: '101 - Deluxe', price_per_night: 150 },
-      { id: 'r2', room_number: '102 - Standard', price_per_night: 100 },
-      { id: 'r3', room_number: '105 - Suite', price_per_night: 200 },
-      { id: 'r4', room_number: '202 - Deluxe', price_per_night: 180 },
-      { id: 'r5', room_number: '204 - Economy', price_per_night: 80 },
-    ];
+    const thirtyDaysFromNow = new Date(today);
+    thirtyDaysFromNow.setDate(today.getDate() + 30);
 
-    // Create some mock bookings offset from today
-    const createDate = (daysOffset) => {
-      const d = new Date(today);
-      d.setDate(d.getDate() + daysOffset);
-      return d.toISOString();
-    };
+    // Fetch all rooms for the user's properties
+    const rooms = await prisma.room.findMany({
+      where: propertyFilter,
+      select: {
+        id: true,
+        room_number: true,
+        category: true
+      },
+      orderBy: {
+        room_number: 'asc'
+      }
+    });
 
-    const mockBookings = [
-      { id: 'b1', room_id: 'r1', guest_name: 'Alice Smith', check_in: createDate(0), check_out: createDate(3), status: 'CONFIRMED' },
-      { id: 'b2', room_id: 'r1', guest_name: 'Walk-In', check_in: createDate(4), check_out: createDate(6), status: 'COMPLETED' },
-      { id: 'b3', room_id: 'r2', guest_name: 'Maintenance', check_in: createDate(1), check_out: createDate(5), status: 'BLOCKED' },
-      { id: 'b4', room_id: 'r3', guest_name: 'Charlie Brown', check_in: createDate(-2), check_out: createDate(2), status: 'CONFIRMED' },
-      { id: 'b5', room_id: 'r4', guest_name: 'Diana Prince', check_in: createDate(10), check_out: createDate(15), status: 'PENDING' },
-      { id: 'b6', room_id: 'r5', guest_name: 'Bruce Wayne', check_in: createDate(20), check_out: createDate(25), status: 'CONFIRMED' },
-    ];
+    const roomIds = rooms.map(r => r.id);
 
-    res.status(200).json({ rooms: mockRooms, bookings: mockBookings });
+    // Fetch bookings for these rooms that overlap with the 30-day window
+    const bookings = await prisma.booking.findMany({
+      where: {
+        room_id: { in: roomIds },
+        status: { not: 'CANCELLED' },
+        AND: [
+          { check_in: { lt: thirtyDaysFromNow } },
+          { check_out: { gt: today } }
+        ]
+      },
+      include: {
+        guest: { select: { name: true } }
+      }
+    });
+
+    const formattedBookings = bookings.map(b => ({
+      id: b.id,
+      room_id: b.room_id,
+      guest_name: b.guest?.name || 'Walk-In Guest',
+      check_in: b.check_in,
+      check_out: b.check_out,
+      status: b.status
+    }));
+
+    res.status(200).json({ rooms, bookings: formattedBookings });
   } catch (error) {
     console.error('Error fetching timeline data:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -234,22 +338,6 @@ exports.getTimelineData = async (req, res) => {
 exports.getBookingById = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    // For scaffolding, check if it's a mock ID from the frontend mock data
-    if (id.startsWith('b') || id.startsWith('mock')) {
-      return res.status(200).json({
-        id,
-        guest: { name: id === 'b1' ? 'Alice Smith' : 'Walk-In Guest', email: 'guest@example.com', phone: '123-456-7890' },
-        room: { room_number: '101 - Deluxe', type: 'DELUXE' },
-        check_in: new Date().toISOString(),
-        check_out: new Date(new Date().setDate(new Date().getDate() + 3)).toISOString(),
-        status: id === 'b3' ? 'BLOCKED' : 'CONFIRMED',
-        total_amount: 450,
-        payment_method: 'POS',
-        booking_source: 'WALK_IN',
-        createdAt: new Date().toISOString()
-      });
-    }
 
     const booking = await prisma.booking.findUnique({
       where: { id },
@@ -276,13 +364,6 @@ exports.updateBookingStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-
-    // For scaffolding mock data
-    if (id.startsWith('b') || id.startsWith('mock')) {
-      const io = socket.getIo();
-      if (io) io.emit('bookingUpdated', { id, status });
-      return res.status(200).json({ message: `Mock booking status updated to ${status}` });
-    }
 
     const updatedBooking = await prisma.booking.update({
       where: { id },

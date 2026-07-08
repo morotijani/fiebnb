@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDashboard } from '../../context/DashboardContext';
 import { format } from 'date-fns';
+import axiosClient from '../../api/axiosClient';
 
 export default function BookingDetailsSidebar() {
   const { isBookingSidebarOpen, selectedBookingId, closeBookingSidebar } = useDashboard();
@@ -10,27 +11,16 @@ export default function BookingDetailsSidebar() {
     queryKey: ['bookingDetails', selectedBookingId],
     queryFn: async () => {
       if (!selectedBookingId) return null;
-      const res = await fetch(`http://localhost:3000/api/bookings/${selectedBookingId}`, {
-        headers: { Authorization: 'Bearer dummy-token' }
-      });
-      if (!res.ok) throw new Error('Failed to fetch booking details');
-      return await res.json();
+      const res = await axiosClient.get(`/bookings/${selectedBookingId}`);
+      return res.data;
     },
     enabled: !!selectedBookingId
   });
 
   const updateStatusMutation = useMutation({
     mutationFn: async (newStatus) => {
-      const res = await fetch(`http://localhost:3000/api/bookings/${selectedBookingId}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer dummy-token'
-        },
-        body: JSON.stringify({ status: newStatus })
-      });
-      if (!res.ok) throw new Error('Failed to update status');
-      return await res.json();
+      const res = await axiosClient.put(`/bookings/${selectedBookingId}/status`, { status: newStatus });
+      return res.data;
     },
     onSuccess: () => {
       // Invalidate queries to refresh the sidebar and the timelines/queues
