@@ -91,7 +91,7 @@ export default function GuestsView() {
                     {getStatusBadge(booking.status)}
                   </td>
                   <td className="p-4 text-right font-medium text-slate-800">
-                    ${booking.total_amount}
+                    ₵{booking.total_amount}
                   </td>
                 </tr>
               ))}

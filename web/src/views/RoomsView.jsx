@@ -128,7 +128,7 @@ export default function RoomsView() {
                   <h3 className="text-lg font-bold text-slate-800">Room {room.room_number}</h3>
                   <div className="mt-2 flex items-center justify-between">
                     <span className="text-sm text-slate-500">Nightly Rate</span>
-                    <span className="text-xl font-bold text-blue-600">${room.price_per_night || 0}</span>
+                    <span className="text-xl font-bold text-blue-600">₵{room.price_per_night || 0}</span>
                   </div>
                 </div>
 

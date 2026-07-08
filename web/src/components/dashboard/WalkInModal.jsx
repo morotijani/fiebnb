@@ -1,23 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
+import axiosClient from '../../api/axiosClient';
 
 const fetchAvailableRooms = async () => {
-  const res = await fetch('http://localhost:3000/api/bookings/available-rooms', {
-    headers: { Authorization: 'Bearer dummy-token' }
-  });
-  if (!res.ok) throw new Error('API failed');
-  return res.json();
+  const res = await axiosClient.get('/bookings/available-rooms');
+  return res.data;
 };
 
 const submitWalkIn = async (payload) => {
-  const res = await fetch('http://localhost:3000/api/bookings/walk-in', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer dummy-token' },
-    body: JSON.stringify(payload)
-  });
-  if (!res.ok) throw new Error('API failed');
-  return res.json();
+  const res = await axiosClient.post('/bookings/walk-in', payload);
+  return res.data;
 };
 
 export default function WalkInModal({ isOpen, onClose, initialData }) {

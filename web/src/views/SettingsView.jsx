@@ -260,7 +260,7 @@ function PropertiesTab() {
             <div>
               <h4 className="font-semibold text-slate-800">{prop.title}</h4>
               <p className="text-xs text-slate-500 mt-1">
-                Base Price: ${prop.base_price} • {prop.is_multi_room ? 'Multi-Room' : 'Single Unit'}
+                Base Price: ₵{prop.base_price} • {prop.is_multi_room ? 'Multi-Room' : 'Single Unit'}
               </p>
             </div>
             <div>

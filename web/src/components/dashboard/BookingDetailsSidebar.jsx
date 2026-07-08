@@ -133,7 +133,7 @@ export default function BookingDetailsSidebar() {
                 <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Payment Details</h3>
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-slate-600">Total Amount</span>
-                  <span className="text-lg font-bold text-slate-800">${booking.total_amount}</span>
+                  <span className="text-lg font-bold text-slate-800">₵{booking.total_amount}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-600">Method</span>

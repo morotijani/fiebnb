@@ -76,10 +76,10 @@ export default function AddRoomModal({ propertyId, onClose }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Price */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Price per Night ($)</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Price per Night (₵)</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-slate-500 sm:text-sm">$</span>
+                    <span className="text-slate-500 sm:text-sm">₵</span>
                   </div>
                   <input
                     type="number"
