@@ -55,7 +55,7 @@ exports.createProperty = async (req, res) => {
 exports.updateProperty = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, base_price, status, address, digital_address, latitude, longitude } = req.body;
+    const { title, base_price, status, address, digital_address, latitude, longitude, images } = req.body;
 
     const updatedProperty = await prisma.property.update({
       where: { id },
@@ -66,7 +66,8 @@ exports.updateProperty = async (req, res) => {
         ...(address !== undefined && { address }),
         ...(digital_address !== undefined && { digital_address }),
         ...(latitude !== undefined && { latitude: parseFloat(latitude) }),
-        ...(longitude !== undefined && { longitude: parseFloat(longitude) })
+        ...(longitude !== undefined && { longitude: parseFloat(longitude) }),
+        ...(images !== undefined && { images })
       }
     });
 

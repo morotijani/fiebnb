@@ -5,6 +5,13 @@ import AddRoomModal from '../components/dashboard/AddRoomModal';
 import CategoriesModal from '../components/dashboard/CategoriesModal';
 import axiosClient from '../api/axiosClient';
 
+const getImageUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http') || url.startsWith('blob:')) return url;
+  const baseUrl = import.meta.env.VITE_STORAGE_URL || 'http://localhost:3000';
+  return `${baseUrl}${url}`;
+};
+
 export default function RoomsView() {
   const [selectedPropertyId, setSelectedPropertyId] = useState('');
   const [editingRoom, setEditingRoom] = useState(null);
@@ -173,7 +180,7 @@ export default function RoomsView() {
               {/* Image Header */}
               <div className="h-48 bg-slate-100 relative">
                 {room.images && room.images.length > 0 ? (
-                  <img src={room.images[0]} alt={`Room ${room.room_number}`} className="w-full h-full object-cover" />
+                  <img src={getImageUrl(room.images[0])} alt={`Room ${room.room_number}`} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
                     <svg className="w-10 h-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

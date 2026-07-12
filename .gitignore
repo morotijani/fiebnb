@@ -3,12 +3,17 @@ composer.phar
 /node_modules/
 .env
 .env.local
+
+/api/node_modules
 /api/node_modules/
 /api/.env
+
+/web/node_modules
 /web/node_modules/
 /web/dist/
 /web/vendor/
 /web/.env
+
 /mobile/.env
 /mobile/node_modules/
 

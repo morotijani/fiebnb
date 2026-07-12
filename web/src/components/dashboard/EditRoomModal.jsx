@@ -3,6 +3,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import axiosClient from '../../api/axiosClient';
 
+const getImageUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http') || url.startsWith('blob:')) return url;
+  const baseUrl = import.meta.env.VITE_STORAGE_URL || 'http://localhost:3000';
+  return `${baseUrl}${url}`;
+};
+
 export default function EditRoomModal({ room, properties, onClose }) {
   const queryClient = useQueryClient();
   const [roomNumber, setRoomNumber] = useState(room.room_number || '');
@@ -47,28 +54,19 @@ export default function EditRoomModal({ room, properties, onClose }) {
     setIsUploading(true);
 
     try {
-      const newUrls = [];
+      let newUrls = [];
       
-      // Upload pending images to R2
-      for (const file of pendingImages) {
-        // 1. Get Presigned URL
-        const presignedRes = await axiosClient.post('/storage/upload-url', {
-          fileName: file.name,
-          fileType: file.type,
-          bucketType: 'PUBLIC_PROPERTY'
+      if (pendingImages.length > 0) {
+        const formData = new FormData();
+        pendingImages.forEach(file => {
+          formData.append('files', file);
+        });
+
+        const uploadRes = await axiosClient.post('/storage/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
         });
         
-        const { uploadUrl, publicUrl } = presignedRes.data;
-
-        // 2. Upload file directly to Cloudflare R2
-        const uploadRes = await fetch(uploadUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': file.type },
-          body: file
-        });
-
-        if (!uploadRes.ok) throw new Error('Failed to upload file to storage');
-        newUrls.push(publicUrl);
+        newUrls = uploadRes.data.urls;
       }
 
       const finalImages = [...existingImages, ...newUrls];
@@ -210,7 +208,7 @@ export default function EditRoomModal({ room, properties, onClose }) {
               {/* Existing Images */}
               {existingImages.map((img, idx) => (
                 <div key={`existing-${idx}`} className="relative h-32 rounded-lg overflow-hidden border border-slate-200 group">
-                  <img src={img} alt={`Room ${idx}`} className="w-full h-full object-cover" />
+                  <img src={getImageUrl(img)} alt={`Room ${idx}`} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button type="button" onClick={() => removeExistingImage(idx)} className="text-white text-xs font-medium bg-red-500 px-3 py-1.5 rounded hover:bg-red-600">Remove</button>
                   </div>

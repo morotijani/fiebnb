@@ -41,3 +41,20 @@ exports.getUploadUrl = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+exports.uploadFiles = async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: 'No files uploaded' });
+    }
+
+    // Construct the URLs
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const urls = req.files.map(file => `/uploads/${file.filename}`);
+
+    res.status(200).json({ urls });
+  } catch (error) {
+    console.error('Error uploading files:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
