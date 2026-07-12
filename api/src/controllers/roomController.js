@@ -30,19 +30,34 @@ exports.getRoomsByProperty = async (req, res) => {
 exports.updateRoom = async (req, res) => {
   try {
     const { id } = req.params;
-    const { category_id, status } = req.body;
+    const { category_id, status, room_number, images, property_id } = req.body;
 
     if (id.startsWith('r')) {
       // Mock fallback
       return res.status(200).json({ message: 'Mock room updated successfully' });
     }
 
+    // Check for uniqueness if room_number is provided
+    if (room_number) {
+      const existing = await prisma.room.findFirst({
+        where: {
+          room_number,
+          id: { not: id }
+        }
+      });
+      if (existing) {
+        return res.status(400).json({ error: 'Room name or number must be unique' });
+      }
+    }
+
+    const dataToUpdate = { category_id, status };
+    if (room_number !== undefined) dataToUpdate.room_number = room_number;
+    if (images !== undefined) dataToUpdate.images = images;
+    if (property_id !== undefined) dataToUpdate.property_id = property_id;
+
     const updatedRoom = await prisma.room.update({
       where: { id },
-      data: {
-        category_id,
-        status
-      }
+      data: dataToUpdate
     });
 
     res.status(200).json({ message: 'Room updated successfully', room: updatedRoom });
@@ -90,6 +105,16 @@ exports.createRoom = async (req, res) => {
   try {
     const { property_id, room_number, category_id, status } = req.body;
     const images = req.files ? req.files.map(f => `/uploads/rooms/${f.filename}`) : [];
+
+    // Check for uniqueness
+    const existing = await prisma.room.findFirst({
+      where: {
+        room_number
+      }
+    });
+    if (existing) {
+      return res.status(400).json({ error: 'Room name or number must be unique' });
+    }
 
     const room = await prisma.room.create({
       data: {

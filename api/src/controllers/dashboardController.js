@@ -11,7 +11,14 @@ exports.getDashboardSummary = async (req, res) => {
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     // Common filter to scope queries to the user's properties (if they aren't ADMIN)
-    const propertyFilter = userRole === 'ADMIN' ? {} : { property: { owner_id: userId } };
+    const propertyFilter = userRole === 'ADMIN' ? {} : { 
+      property: {
+        OR: [
+          { owner_id: userId },
+          { staff: { some: { user_id: userId } } }
+        ]
+      } 
+    };
 
     // 1. Today's Check-ins
     // Count of bookings where check_in is >= today and < tomorrow
@@ -50,7 +57,7 @@ exports.getDashboardSummary = async (req, res) => {
     // 3. Available Rooms
     // Total rooms minus rooms occupied today
     const totalRooms = await prisma.room.count({
-      where: userRole === 'ADMIN' ? {} : { property: { owner_id: userId } }
+      where: propertyFilter
     });
 
     const occupiedRooms = await prisma.booking.count({

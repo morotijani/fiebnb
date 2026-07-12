@@ -4,9 +4,12 @@ composer.phar
 .env
 .env.local
 /api/node_modules/
+/api/.env
 /web/node_modules/
 /web/dist/
 /web/vendor/
+/web/.env
+/mobile/.env
 /mobile/node_modules/
 
 # Commit your application's lock file https://getcomposer.org/doc/01-basic-usage.md#commit-your-composer-lock-file-to-version-control

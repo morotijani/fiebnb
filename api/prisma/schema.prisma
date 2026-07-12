@@ -79,6 +79,7 @@ model User {
 
   // Relations
   properties          Property[]          @relation("PropertyOwner")
+  staffAssignments    PropertyStaff[]
   bookings            Booking[]           @relation("GuestBookings")
   onboardingRequests  OnboardingRequest[] @relation("UserOnboarding")
   otpVerifications    OtpVerification[]
@@ -88,17 +89,20 @@ model User {
 }
 
 model Property {
-  id            String         @id @default(uuid())
-  owner_id      String
-  title         String
-  latitude      Float?
-  longitude     Float?
-  base_price    Float
-  is_multi_room Boolean        @default(false)
-  status        PropertyStatus @default(AVAILABLE)
+  id              String         @id @default(uuid())
+  owner_id        String
+  title           String
+  address         String?
+  digital_address String?
+  latitude        Float?
+  longitude       Float?
+  base_price      Float
+  is_multi_room   Boolean        @default(false)
+  status          PropertyStatus @default(AVAILABLE)
 
   // Relations
-  owner    User      @relation("PropertyOwner", fields: [owner_id], references: [id])
+  owner    User            @relation("PropertyOwner", fields: [owner_id], references: [id])
+  staff    PropertyStaff[]
   rooms    Room[]
   bookings Booking[]
   categories RoomCategory[]
@@ -118,6 +122,19 @@ model RoomCategory {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model PropertyStaff {
+  id          String   @id @default(uuid())
+  user_id     String
+  property_id String
+  
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  property    Property @relation(fields: [property_id], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+
+  @@unique([user_id, property_id])
 }
 
 model Room {

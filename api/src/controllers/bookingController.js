@@ -99,7 +99,14 @@ exports.getTodayBookings = async (req, res) => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const propertyFilter = req.user.role === 'ADMIN' ? {} : { property: { owner_id: req.user.id } };
+    const propertyFilter = req.user.role === 'ADMIN' ? {} : { 
+      property: {
+        OR: [
+          { owner_id: req.user.id },
+          { staff: { some: { user_id: req.user.id } } }
+        ]
+      }
+    };
 
     // Fetch bookings that overlap with today
     const bookings = await prisma.booking.findMany({
@@ -154,7 +161,14 @@ exports.getAvailableRooms = async (req, res) => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const propertyFilter = userRole === 'ADMIN' ? {} : { property: { owner_id: userId } };
+    const propertyFilter = userRole === 'ADMIN' ? {} : { 
+      property: {
+        OR: [
+          { owner_id: userId },
+          { staff: { some: { user_id: userId } } }
+        ]
+      }
+    };
 
     // Get rooms that do NOT have a booking overlapping with today
     const availableRooms = await prisma.room.findMany({
@@ -281,7 +295,14 @@ exports.getTimelineData = async (req, res) => {
   try {
     const userId = req.user.id;
     const userRole = req.user.role;
-    const propertyFilter = userRole === 'ADMIN' ? {} : { property: { owner_id: userId } };
+    const propertyFilter = userRole === 'ADMIN' ? {} : { 
+      property: {
+        OR: [
+          { owner_id: userId },
+          { staff: { some: { user_id: userId } } }
+        ]
+      }
+    };
 
     const today = new Date();
     today.setHours(0,0,0,0);

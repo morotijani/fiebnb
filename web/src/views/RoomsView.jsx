@@ -11,6 +11,11 @@ export default function RoomsView() {
   const [isAddingRoom, setIsAddingRoom] = useState(false);
   const [isManagingCategories, setIsManagingCategories] = useState(false);
 
+  // Filters
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+
   // Fetch properties for the selector
   const { data: properties, isLoading: isLoadingProps } = useQuery({
     queryKey: ['properties'],
@@ -36,6 +41,22 @@ export default function RoomsView() {
       return res.data;
     },
     enabled: !!selectedPropertyId
+  });
+  // Fetch categories to populate filter
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const res = await axiosClient.get('/categories');
+      return res.data;
+    }
+  });
+  const propertyCategories = categories?.filter(c => c.property_id === selectedPropertyId) || [];
+
+  const filteredRooms = rooms?.filter(room => {
+    const matchesSearch = room.room_number?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = filterCategory ? room.category_id === filterCategory : true;
+    const matchesStatus = filterStatus ? room.status === filterStatus : true;
+    return matchesSearch && matchesCategory && matchesStatus;
   });
 
   return (
@@ -87,6 +108,44 @@ export default function RoomsView() {
         </div>
       </div>
 
+      {/* Filters Bar */}
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-4 items-center">
+        <div className="flex-1 w-full relative">
+          <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input 
+            type="text" 
+            placeholder="Search by room name or number..." 
+            className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-4 w-full sm:w-auto">
+          <select 
+            className="w-full sm:w-40 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-700"
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+          >
+            <option value="">All Categories</option>
+            {propertyCategories.map(cat => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
+
+          <select 
+            className="w-full sm:w-40 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-700"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option value="">All Statuses</option>
+            <option value="AVAILABLE">Available</option>
+            <option value="MAINTENANCE">Out of Order</option>
+          </select>
+        </div>
+      </div>
+
       {/* Rooms Grid */}
       {isLoadingRooms ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -98,18 +157,18 @@ export default function RoomsView() {
         <div className="p-6 text-red-500 bg-white rounded-xl border border-red-200 shadow-sm">
           Error loading rooms. Ensure the backend is running.
         </div>
-      ) : !rooms || rooms.length === 0 ? (
+      ) : !filteredRooms || filteredRooms.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-xl border border-slate-200 shadow-sm">
           <div className="text-slate-400 mb-2">
             <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
           </div>
-          <p className="text-slate-500 font-medium">No rooms found for this property.</p>
+          <p className="text-slate-500 font-medium">No rooms found.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {rooms?.map(room => (
+          {filteredRooms?.map(room => (
             <div key={room.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow group">
               {/* Image Header */}
               <div className="h-48 bg-slate-100 relative">
@@ -166,6 +225,7 @@ export default function RoomsView() {
       {editingRoom && (
         <EditRoomModal 
           room={editingRoom} 
+          properties={properties}
           onClose={() => setEditingRoom(null)} 
         />
       )}
@@ -174,6 +234,7 @@ export default function RoomsView() {
       {isAddingRoom && (
         <AddRoomModal
           propertyId={selectedPropertyId}
+          properties={properties}
           onClose={() => setIsAddingRoom(false)}
         />
       )}

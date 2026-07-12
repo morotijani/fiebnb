@@ -112,10 +112,13 @@ export default function ResourceTimeline() {
               <div key={room.id} className="contents group">
                 {/* Sticky Left Room Name */}
                 <div 
-                  className="sticky left-0 bg-white group-hover:bg-slate-50 border-b border-r border-slate-200 z-10 flex items-center px-4 py-3 text-sm font-medium text-slate-700 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors"
+                  className="sticky left-0 bg-white group-hover:bg-slate-50 border-b border-r border-slate-200 z-10 flex flex-col justify-center px-4 py-2 text-sm shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors"
                   style={{ gridColumn: 1, gridRow: rowIndex }}
                 >
-                  {room.room_number}
+                  <span className="font-bold text-slate-800">{room.room_number}</span>
+                  <span className="text-xs text-slate-500 font-medium truncate w-full" title={room.category?.name || 'Uncategorized'}>
+                    {room.category?.name || 'Uncategorized'}
+                  </span>
                 </div>
                 
                 {/* Background Empty Cells for Clicking */}

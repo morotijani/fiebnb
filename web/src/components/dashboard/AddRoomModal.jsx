@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import axiosClient from '../../api/axiosClient';
 
-export default function AddRoomModal({ propertyId, onClose }) {
+export default function AddRoomModal({ propertyId, properties, onClose }) {
   const queryClient = useQueryClient();
   const [roomNumber, setRoomNumber] = useState('');
+  const [modalPropertyId, setModalPropertyId] = useState(propertyId);
   const [categoryId, setCategoryId] = useState('');
   const [status, setStatus] = useState('AVAILABLE');
   const [error, setError] = useState(null);
@@ -15,15 +17,15 @@ export default function AddRoomModal({ propertyId, onClose }) {
     queryFn: async () => {
       const res = await axiosClient.get('/categories');
       // Filter categories by the selected property
-      return res.data.filter(c => c.property_id === propertyId);
+      return res.data.filter(c => c.property_id === modalPropertyId);
     },
-    enabled: !!propertyId
+    enabled: !!modalPropertyId
   });
 
   const createMutation = useMutation({
     mutationFn: async () => {
       const res = await axiosClient.post('/rooms', {
-        property_id: propertyId,
+        property_id: modalPropertyId,
         room_number: roomNumber,
         category_id: categoryId,
         status
@@ -31,11 +33,17 @@ export default function AddRoomModal({ propertyId, onClose }) {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['rooms', propertyId]);
+      toast.success('Room created successfully');
+      queryClient.invalidateQueries(['rooms', propertyId]); // Invalidate original to refresh list if same
+      if (modalPropertyId !== propertyId) {
+        queryClient.invalidateQueries(['rooms', modalPropertyId]);
+      }
       onClose();
     },
     onError: (err) => {
-      setError(err.response?.data?.error || 'Failed to create room');
+      const msg = err.response?.data?.error || 'Failed to create room';
+      setError(msg);
+      toast.error(msg);
     }
   });
 
@@ -87,6 +95,24 @@ export default function AddRoomModal({ propertyId, onClose }) {
                 required
               />
             </div>
+            
+            {properties && properties.length > 1 && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Property</label>
+                <select
+                  value={modalPropertyId}
+                  onChange={(e) => {
+                    setModalPropertyId(e.target.value);
+                    setCategoryId(''); // Reset category since property changed
+                  }}
+                  className="block w-full rounded-lg border-slate-300 bg-slate-50 border focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2.5 transition-colors"
+                >
+                  {properties.map(p => (
+                    <option key={p.id} value={p.id}>{p.title}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Category */}

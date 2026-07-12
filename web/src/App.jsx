@@ -16,6 +16,7 @@ import GuestComingSoon from './views/auth/GuestComingSoon';
 
 // Context
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { Toaster } from 'react-hot-toast';
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,7 @@ const PublicRoute = () => {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <Toaster position="top-right" />
       <AuthProvider>
         <BrowserRouter>
           <Routes>
@@ -81,8 +83,8 @@ function App() {
               <Route index element={<GuestComingSoon />} />
             </Route>
 
-            {/* Protected Dashboard Routes (Hotel Managers, Admins, Homeowners) */}
-            <Route element={<ProtectedRoute allowedRoles={['HOTEL_MANAGER', 'ADMIN', 'HOMEOWNER']} />}>
+            {/* Protected Dashboard Routes (Hotel Managers, Admins, Homeowners, Receptionists) */}
+            <Route element={<ProtectedRoute allowedRoles={['HOTEL_MANAGER', 'ADMIN', 'HOMEOWNER', 'RECEPTIONIST', 'GUEST_HOUSE_ADMIN']} />}>
               <Route element={<DashboardLayout />}>
                 <Route path="/" element={<DashboardOverview />} />
                 <Route path="/calendar" element={<CalendarView />} />

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import axiosClient from '../../api/axiosClient';
 
 export default function CategoriesModal({ propertyId, onClose }) {
@@ -28,12 +29,17 @@ export default function CategoriesModal({ propertyId, onClose }) {
       return res.data;
     },
     onSuccess: () => {
+      toast.success('Category added successfully');
       queryClient.invalidateQueries(['categories']);
       setName('');
       setPrice('');
       setError(null);
     },
-    onError: (err) => setError(err.response?.data?.error || 'Failed to add category')
+    onError: (err) => {
+      const msg = err.response?.data?.error || 'Failed to add category';
+      setError(msg);
+      toast.error(msg);
+    }
   });
 
   const updateMutation = useMutation({
@@ -42,6 +48,7 @@ export default function CategoriesModal({ propertyId, onClose }) {
       return res.data;
     },
     onSuccess: () => {
+      toast.success('Category updated successfully');
       queryClient.invalidateQueries(['categories']);
       queryClient.invalidateQueries(['rooms']);
       setEditingId(null);
@@ -49,7 +56,11 @@ export default function CategoriesModal({ propertyId, onClose }) {
       setPrice('');
       setError(null);
     },
-    onError: (err) => setError(err.response?.data?.error || 'Failed to update category')
+    onError: (err) => {
+      const msg = err.response?.data?.error || 'Failed to update category';
+      setError(msg);
+      toast.error(msg);
+    }
   });
 
   const deleteMutation = useMutation({
@@ -57,10 +68,15 @@ export default function CategoriesModal({ propertyId, onClose }) {
       await axiosClient.delete(`/categories/${id}`);
     },
     onSuccess: () => {
+      toast.success('Category deleted successfully');
       queryClient.invalidateQueries(['categories']);
       setError(null);
     },
-    onError: (err) => setError(err.response?.data?.error || 'Failed to delete category')
+    onError: (err) => {
+      const msg = err.response?.data?.error || 'Failed to delete category';
+      setError(msg);
+      toast.error(msg);
+    }
   });
 
   const handleSubmit = (e) => {
