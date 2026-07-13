@@ -13,6 +13,7 @@ import LoginView from './views/auth/LoginView';
 import RegisterView from './views/auth/RegisterView';
 import OtpVerificationView from './views/auth/OtpVerificationView';
 import GuestComingSoon from './views/auth/GuestComingSoon';
+import OnboardingView from './views/auth/OnboardingView';
 
 // Context
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -76,11 +77,12 @@ function App() {
               <Route path="/verify-otp" element={<OtpVerificationView />} />
             </Route>
 
-            {/* Guest Restricted Route */}
+            {/* Guest Restricted Route / Onboarding */}
             <Route path="/guest" element={
               <ProtectedRoute allowedRoles={['GUEST']} />
             }>
               <Route index element={<GuestComingSoon />} />
+              <Route path="onboarding" element={<OnboardingView />} />
             </Route>
 
             {/* Protected Dashboard Routes (Hotel Managers, Admins, Homeowners, Receptionists) */}

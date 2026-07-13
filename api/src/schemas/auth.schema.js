@@ -47,10 +47,22 @@ const homeownerUpgradeSchema = z.object({
   })
 });
 
+const unifiedOnboardingSchema = z.object({
+  body: z.object({
+    title: z.string().min(1, 'Property Name is required'),
+    property_type: z.enum(['HOTEL', 'GUESTHOUSE', 'APARTMENT', 'HOMEOWNER']),
+    address: z.string().optional(),
+    digital_address: z.string().optional(),
+    base_price: z.number().min(0, 'Base price must be a positive number'),
+    document_urls: z.array(z.string()).optional()
+  })
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
   hotelManagerUpgradeSchema,
   homeownerUpgradeSchema,
+  unifiedOnboardingSchema,
   otpSchema
 };

@@ -24,6 +24,13 @@ enum PropertyStatus {
   UNAVAILABLE
 }
 
+enum PropertyType {
+  HOTEL
+  GUESTHOUSE
+  APARTMENT
+  HOMEOWNER
+}
+
 enum RoomStatus {
   AVAILABLE
   MAINTENANCE
@@ -92,6 +99,8 @@ model Property {
   id              String         @id @default(uuid())
   owner_id        String
   title           String
+  description     String?
+  property_type   PropertyType   @default(HOTEL)
   address         String?
   digital_address String?
   latitude        Float?
@@ -219,6 +228,7 @@ model OnboardingRequest {
   id              String        @id @default(uuid())
   user_id         String
   requested_role  Role
+  property_type   PropertyType?
   documents       String[]
   status          RequestStatus @default(PENDING)
   admin_notes     String?

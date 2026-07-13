@@ -75,3 +75,72 @@ exports.requestHotelManagerUpgrade = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+exports.submitOnboarding = async (req, res) => {
+  const userId = req.user.id;
+  const { title, property_type, address, digital_address, base_price, document_urls } = req.body;
+
+  try {
+    const is_multi_room = property_type === 'HOTEL' || property_type === 'GUESTHOUSE';
+
+    if (property_type === 'APARTMENT' || property_type === 'HOMEOWNER') {
+      // Instant creation and role upgrade
+      const [updatedUser, property] = await prisma.$transaction([
+        prisma.user.update({
+          where: { id: userId },
+          data: { role: 'HOMEOWNER' }
+        }),
+        prisma.property.create({
+          data: {
+            owner_id: userId,
+            title,
+            property_type,
+            is_multi_room,
+            address: address || '',
+            digital_address: digital_address || '',
+            base_price: parseFloat(base_price),
+            status: 'AVAILABLE'
+          }
+        })
+      ]);
+
+      const access_token = generateAccessToken(updatedUser.id, updatedUser.role);
+      const refresh_token = generateRefreshToken(updatedUser.id);
+
+      return res.json({
+        message: 'Onboarding completed. You are now a HOMEOWNER.',
+        access_token,
+        refresh_token,
+        user: {
+          id: updatedUser.id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          role: updatedUser.role
+        },
+        property
+      });
+    } else {
+      // Needs verification for HOTEL or GUESTHOUSE
+      const requested_role = property_type === 'HOTEL' ? 'HOTEL_MANAGER' : 'GUEST_HOUSE_ADMIN';
+      
+      const request = await prisma.onboardingRequest.create({
+        data: {
+          user_id: userId,
+          requested_role,
+          property_type,
+          documents: document_urls || [],
+          admin_notes: `Property Name: ${title}\nAddress: ${address}\nBase Price: ${base_price}`,
+          status: 'PENDING'
+        }
+      });
+
+      return res.json({ 
+        message: 'Onboarding request submitted successfully. Awaiting admin verification.', 
+        request 
+      });
+    }
+  } catch (error) {
+    console.error('Submit onboarding error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

@@ -319,3 +319,35 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+exports.updatePassword = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Current password and new password are required' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.password_hash) {
+      return res.status(401).json({ error: 'Invalid user or no password set' });
+    }
+
+    const isValid = await comparePassword(currentPassword, user.password_hash);
+    if (!isValid) {
+      return res.status(400).json({ error: 'Incorrect current password' });
+    }
+
+    const password_hash = await hashPassword(newPassword);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password_hash }
+    });
+
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Error updating password:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

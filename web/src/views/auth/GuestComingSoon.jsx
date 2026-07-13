@@ -31,6 +31,17 @@ const GuestComingSoon = () => {
           Please use the Fiebnb Mobile App to manage your bookings and profile for now.
         </p>
 
+        <div className="bg-blue-50 rounded-xl p-4 mb-8">
+          <p className="text-sm text-blue-800 mb-3">Want to list your property on Fiebnb?</p>
+          <button
+            onClick={() => navigate('/guest/onboarding')}
+            className="w-full flex justify-center items-center gap-2 py-2 px-4 bg-blue-600 text-white rounded-lg shadow-sm text-sm font-medium hover:bg-blue-700 transition-colors"
+          >
+            <span className="material-symbols-outlined text-lg">add_home</span>
+            Setup Your Property
+          </button>
+        </div>
+
         <button
           onClick={handleLogout}
           className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-slate-200 rounded-xl shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all active:scale-[0.98]"

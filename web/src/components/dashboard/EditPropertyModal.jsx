@@ -25,7 +25,7 @@ export default function EditPropertyModal({ property, onClose }) {
     digital_address: property.digital_address || '',
     latitude: property.latitude || defaultCenter.lat,
     longitude: property.longitude || defaultCenter.lng,
-    is_multi_room: property.is_multi_room || false,
+    property_type: property.property_type || 'HOTEL',
   });
 
   const [existingImages, setExistingImages] = useState(property.images || []);
@@ -240,14 +240,18 @@ export default function EditPropertyModal({ property, onClose }) {
               )}
             </div>
 
-            <div className="flex items-center pt-2">
-              <input 
-                type="checkbox" id="isMultiRoom"
-                checked={formData.is_multi_room} 
-                onChange={e => setFormData({...formData, is_multi_room: e.target.checked})}
-                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="isMultiRoom" className="ml-2 text-sm text-slate-700">Multi-room property (e.g. Hotel / Guesthouse)</label>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Property Type</label>
+              <select 
+                value={formData.property_type} 
+                onChange={e => setFormData({...formData, property_type: e.target.value})}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+              >
+                <option value="HOTEL">Hotel</option>
+                <option value="GUESTHOUSE">Guesthouse</option>
+                <option value="APARTMENT">Apartment</option>
+                <option value="HOMEOWNER">Homeowner (Long term)</option>
+              </select>
             </div>
 
             {/* Photos Section */}

@@ -143,6 +143,15 @@ function ProfileTab() {
           <p className="text-xs text-slate-500 mt-1">Email cannot be changed directly.</p>
         </div>
         <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Account Role</label>
+          <input 
+            type="text" 
+            value={profile?.role || ''}
+            disabled
+            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 cursor-not-allowed capitalize"
+          />
+        </div>
+        <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
           <input 
             type="text" 
@@ -171,7 +180,92 @@ function ProfileTab() {
           </button>
         </div>
       </form>
+
+      <div className="mt-12 pt-8 border-t border-slate-200 max-w-lg">
+        <h2 className="text-lg font-semibold text-slate-800 mb-4">Security</h2>
+        <PasswordChangeForm />
+      </div>
     </div>
+  );
+}
+
+function PasswordChangeForm() {
+  const [passwords, setPasswords] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+
+  const passwordMutation = useMutation({
+    mutationFn: async (data) => {
+      const res = await axiosClient.put('/auth/password', data);
+      return res.data;
+    },
+    onSuccess: () => {
+      alert('Password updated successfully!');
+      setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    },
+    onError: (err) => {
+      alert(err.response?.data?.error || 'Failed to update password');
+    }
+  });
+
+  const handlePasswordSubmit = (e) => {
+    e.preventDefault();
+    if (passwords.newPassword !== passwords.confirmPassword) {
+      alert('New passwords do not match');
+      return;
+    }
+    passwordMutation.mutate({
+      currentPassword: passwords.currentPassword,
+      newPassword: passwords.newPassword
+    });
+  };
+
+  return (
+    <form onSubmit={handlePasswordSubmit} className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-slate-700 mb-1">Current Password</label>
+        <input 
+          type="password" 
+          required
+          value={passwords.currentPassword}
+          onChange={(e) => setPasswords({...passwords, currentPassword: e.target.value})}
+          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-slate-700 mb-1">New Password</label>
+        <input 
+          type="password" 
+          required
+          minLength={6}
+          value={passwords.newPassword}
+          onChange={(e) => setPasswords({...passwords, newPassword: e.target.value})}
+          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-slate-700 mb-1">Confirm New Password</label>
+        <input 
+          type="password" 
+          required
+          minLength={6}
+          value={passwords.confirmPassword}
+          onChange={(e) => setPasswords({...passwords, confirmPassword: e.target.value})}
+          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+        />
+      </div>
+      <div className="pt-2">
+        <button 
+          type="submit" 
+          disabled={passwordMutation.isLoading}
+          className="px-6 py-2 bg-slate-800 text-white rounded-lg font-medium hover:bg-slate-900 transition-colors disabled:opacity-50"
+        >
+          {passwordMutation.isLoading ? 'Updating...' : 'Update Password'}
+        </button>
+      </div>
+    </form>
   );
 }
 
@@ -187,7 +281,7 @@ function PropertiesTab() {
 
   const [isAdding, setIsAdding] = useState(false);
   const [editingProperty, setEditingProperty] = useState(null);
-  const [newProp, setNewProp] = useState({ title: '', base_price: '', is_multi_room: false });
+  const [newProp, setNewProp] = useState({ title: '', base_price: '', property_type: 'HOTEL' });
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
@@ -197,7 +291,7 @@ function PropertiesTab() {
     onSuccess: () => {
       queryClient.invalidateQueries(['properties']);
       setIsAdding(false);
-      setNewProp({ title: '', base_price: '', is_multi_room: false });
+      setNewProp({ title: '', base_price: '', property_type: 'HOTEL' });
     },
     onError: (err) => {
       alert(err.response?.data?.error || 'Failed to add property');
@@ -247,13 +341,18 @@ function PropertiesTab() {
               className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
-          <div className="flex items-center">
-            <input 
-              type="checkbox" id="isMultiRoom"
-              checked={newProp.is_multi_room} onChange={e => setNewProp({...newProp, is_multi_room: e.target.checked})}
-              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-            />
-            <label htmlFor="isMultiRoom" className="ml-2 text-sm text-slate-700">Is this a multi-room property (e.g. Hotel)?</label>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Property Type</label>
+            <select 
+              value={newProp.property_type} 
+              onChange={e => setNewProp({...newProp, property_type: e.target.value})}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+            >
+              <option value="HOTEL">Hotel</option>
+              <option value="GUESTHOUSE">Guesthouse</option>
+              <option value="APARTMENT">Apartment</option>
+              <option value="HOMEOWNER">Homeowner (Long term)</option>
+            </select>
           </div>
           <div className="flex space-x-3 pt-2">
             <button type="submit" disabled={createMutation.isLoading} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
@@ -272,10 +371,10 @@ function PropertiesTab() {
         )}
         {properties?.map(prop => (
           <div key={prop.id} className="flex justify-between items-center p-4 bg-white border border-slate-200 rounded-xl hover:shadow-sm transition-shadow">
-            <div>
-              <h4 className="font-semibold text-slate-800">{prop.title}</h4>
-              <p className="text-xs text-slate-500 mt-1">
-                {prop.address ? prop.address : 'No address set'} • ₵{prop.base_price} • {prop.is_multi_room ? 'Multi-Room' : 'Single Unit'}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-semibold text-slate-800 truncate">{prop.title}</h3>
+              <p className="text-sm text-slate-500 mt-1">
+                {prop.address ? prop.address : 'No address set'} • ₵{prop.base_price} • {prop.property_type}
               </p>
               <p className="text-xs text-slate-400 mt-0.5">
                 Joined: {prop.createdAt ? format(new Date(prop.createdAt), 'MMM d, yyyy') : 'N/A'}

@@ -28,7 +28,8 @@ exports.getMyProperties = async (req, res) => {
 
 exports.createProperty = async (req, res) => {
   try {
-    const { title, base_price, is_multi_room } = req.body;
+    const { title, base_price, property_type } = req.body;
+    const is_multi_room = property_type === 'HOTEL' || property_type === 'GUESTHOUSE';
     const owner_id = req.user.id;
 
     if (!title || base_price === undefined) {
@@ -39,7 +40,8 @@ exports.createProperty = async (req, res) => {
       data: {
         title,
         base_price: parseFloat(base_price),
-        is_multi_room: is_multi_room || false,
+        property_type: property_type || 'HOTEL',
+        is_multi_room,
         owner_id,
         status: 'AVAILABLE'
       }
@@ -55,13 +57,17 @@ exports.createProperty = async (req, res) => {
 exports.updateProperty = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, base_price, status, address, digital_address, latitude, longitude, images } = req.body;
+    const { title, base_price, property_type, status, address, digital_address, latitude, longitude, images } = req.body;
 
     const updatedProperty = await prisma.property.update({
       where: { id },
       data: {
         ...(title && { title }),
         ...(base_price !== undefined && { base_price: parseFloat(base_price) }),
+        ...(property_type !== undefined && { 
+          property_type,
+          is_multi_room: property_type === 'HOTEL' || property_type === 'GUESTHOUSE'
+        }),
         ...(status && { status }),
         ...(address !== undefined && { address }),
         ...(digital_address !== undefined && { digital_address }),
