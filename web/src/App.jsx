@@ -8,6 +8,12 @@ import RoomsView from './views/RoomsView';
 import GuestsView from './views/GuestsView';
 import SettingsView from './views/SettingsView';
 
+// Admin Views
+import AdminDashboard from './views/admin/AdminDashboard';
+import OnboardingRequests from './views/admin/OnboardingRequests';
+import AdminUsers from './views/admin/AdminUsers';
+import AdminProperties from './views/admin/AdminProperties';
+
 // Auth Views
 import LoginView from './views/auth/LoginView';
 import RegisterView from './views/auth/RegisterView';
@@ -43,6 +49,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
   // If specific roles are required, check them
   if (allowedRoles && !allowedRoles.includes(user.role)) {
     if (user.role === 'GUEST') return <Navigate to="/guest" replace />;
+    if (user.role === 'ADMIN') return <Navigate to="/admin" replace />;
     return <Navigate to="/" replace />; // Fallback
   }
 
@@ -57,6 +64,7 @@ const PublicRoute = () => {
 
   if (user) {
     if (user.role === 'GUEST') return <Navigate to="/guest" replace />;
+    if (user.role === 'ADMIN') return <Navigate to="/admin" replace />;
     return <Navigate to="/" replace />;
   }
 
@@ -86,7 +94,7 @@ function App() {
             </Route>
 
             {/* Protected Dashboard Routes (Hotel Managers, Admins, Homeowners, Receptionists) */}
-            <Route element={<ProtectedRoute allowedRoles={['HOTEL_MANAGER', 'ADMIN', 'HOMEOWNER', 'RECEPTIONIST', 'GUEST_HOUSE_ADMIN']} />}>
+            <Route element={<ProtectedRoute allowedRoles={['HOTEL_MANAGER', 'HOMEOWNER', 'RECEPTIONIST', 'GUEST_HOUSE_ADMIN']} />}>
               <Route element={<DashboardLayout />}>
                 <Route path="/" element={<DashboardOverview />} />
                 <Route path="/calendar" element={<CalendarView />} />
@@ -98,6 +106,17 @@ function App() {
                     Page Under Construction
                   </div>
                 } />
+              </Route>
+            </Route>
+
+            {/* Admin Routes */}
+            <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+              <Route element={<DashboardLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="requests" element={<OnboardingRequests />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="properties" element={<AdminProperties />} />
+                <Route path="settings" element={<SettingsView />} />
               </Route>
             </Route>
           </Routes>

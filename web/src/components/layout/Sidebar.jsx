@@ -1,11 +1,17 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, Settings, Users, LogOut, X } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Settings, Users, LogOut, X, ClipboardList, Home } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export default function Sidebar({ isOpen, setIsOpen }) {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   
-  const navItems = [
+  const navItems = user?.role === 'ADMIN' ? [
+    { name: 'Overview', path: '/admin', icon: LayoutDashboard },
+    { name: 'Requests', path: '/admin/requests', icon: ClipboardList },
+    { name: 'Users', path: '/admin/users', icon: Users },
+    { name: 'Properties', path: '/admin/properties', icon: Home },
+    { name: 'Settings', path: '/settings', icon: Settings },
+  ] : [
     { name: 'Overview', path: '/', icon: LayoutDashboard },
     { name: 'Calendar', path: '/calendar', icon: CalendarDays },
     { name: 'Rooms & Rates', path: '/rooms', icon: LayoutDashboard },
