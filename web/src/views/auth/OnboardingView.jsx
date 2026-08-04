@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axiosClient from '../../api/axiosClient';
 import toast from 'react-hot-toast';
@@ -39,131 +39,153 @@ export default function OnboardingView() {
         // Instant upgrade
         loginWithTokens(res.data.access_token, res.data.refresh_token, res.data.user);
         toast.success(res.data.message);
-        navigate('/');
+        navigate('/success');
       } else {
         // Pending admin approval
         toast.success(res.data.message);
         navigate('/guest'); // Or some pending view
       }
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to submit onboarding');
+      toast.error(err.response?.data?.error || err.message || 'Failed to submit onboarding');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden p-8">
-        <h2 className="text-2xl font-bold text-slate-900 text-center mb-2">Let's setup your property</h2>
-        <p className="text-sm text-slate-500 text-center mb-8">Step {step} of 3</p>
-
-        {/* Progress Bar */}
-        <div className="w-full bg-slate-100 h-2 rounded-full mb-8 overflow-hidden">
-          <div className="bg-blue-600 h-full transition-all duration-300" style={{ width: `${(step / 3) * 100}%` }}></div>
+    <div className="auth-shell">
+      <aside className="auth-aside">
+        <img className="bg" src="https://picsum.photos/seed/fiebnb-auth-onboarding/900/1200" alt="Background" />
+        <div className="veil"></div>
+        <div className="content top-logo">
+          <Link to="/"><img src="/assets/fiebnb-logo-horizontal-reversed.svg" alt="Fiebnb" style={{height: '34px'}} /></Link>
         </div>
+        <div className="content bottom">
+          <div className="weave-strip short"><span></span><span></span><span></span><span></span></div>
+          <h2>Let's setup your property</h2>
+          <p>Join thousands of hosts earning with Fiebnb. Set up your property in just a few steps.</p>
+        </div>
+      </aside>
 
-        <form onSubmit={step === 3 ? handleSubmit : (e) => { e.preventDefault(); nextStep(); }}>
-          
-          {step === 1 && (
-            <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">What kind of property is this?</label>
-                <select 
-                  required
-                  value={formData.property_type}
-                  onChange={(e) => setFormData({...formData, property_type: e.target.value})}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
-                >
-                  <option value="HOTEL">Hotel (Multi-room)</option>
-                  <option value="GUESTHOUSE">Guesthouse (Multi-room)</option>
-                  <option value="APARTMENT">Apartment (Single unit)</option>
-                  <option value="HOMEOWNER">Homeowner (Long term rent)</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Property Name / Title</label>
-                <input 
-                  type="text" 
-                  required
-                  value={formData.title}
-                  onChange={(e) => setFormData({...formData, title: e.target.value})}
-                  placeholder="e.g. Sunset Paradise Resort"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-            </div>
-          )}
+      <main className="auth-main">
+        <div className="auth-card" style={{maxWidth: '500px'}}>
+          <Link to="/" className="mobile-logo"><img src="/assets/fiebnb-logo-horizontal.svg" alt="Fiebnb" /></Link>
 
-          {step === 2 && (
-            <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Location Address</label>
-                <input 
-                  type="text" 
-                  required
-                  value={formData.address}
-                  onChange={(e) => setFormData({...formData, address: e.target.value})}
-                  placeholder="e.g. 123 Beach Road, Accra"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Digital Address (Optional)</label>
-                <input 
-                  type="text" 
-                  value={formData.digital_address}
-                  onChange={(e) => setFormData({...formData, digital_address: e.target.value})}
-                  placeholder="e.g. GA-123-4567"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-            </div>
-          )}
+          <h1>Property Setup</h1>
+          <p className="sub">Step {step} of 3</p>
 
-          {step === 3 && (
-            <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Base Price per Night (₵)</label>
-                <input 
-                  type="number" 
-                  required
-                  min="0"
-                  step="0.01"
-                  value={formData.base_price}
-                  onChange={(e) => setFormData({...formData, base_price: e.target.value})}
-                  placeholder="e.g. 150"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-                <p className="text-xs text-slate-500 mt-1">This can be changed later or overridden per room category.</p>
-              </div>
-            </div>
-          )}
-
-          <div className="flex justify-between mt-8 pt-4 border-t border-slate-100">
-            {step > 1 ? (
-              <button 
-                type="button" 
-                onClick={prevStep}
-                className="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors"
-              >
-                Back
-              </button>
-            ) : (
-              <div></div>
-            )}
-            
-            <button 
-              type="submit" 
-              disabled={isLoading}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
-            >
-              {step === 3 ? (isLoading ? 'Submitting...' : 'Complete') : 'Next Step'}
-            </button>
+          {/* Progress Bar */}
+          <div style={{width: '100%', background: 'var(--slate-soft)', height: '6px', borderRadius: '3px', marginBottom: '30px', overflow: 'hidden'}}>
+            <div style={{background: 'var(--brand)', height: '100%', transition: 'all 0.3s ease', width: `${(step / 3) * 100}%`}}></div>
           </div>
 
-        </form>
-      </div>
+          <form onSubmit={step === 3 ? handleSubmit : (e) => { e.preventDefault(); nextStep(); }}>
+            
+            {step === 1 && (
+              <div style={{animation: 'fadeIn 0.3s ease'}}>
+                <div style={{marginBottom: '20px'}}>
+                  <label className="form-label">What kind of property is this?</label>
+                  <select 
+                    required
+                    value={formData.property_type}
+                    onChange={(e) => setFormData({...formData, property_type: e.target.value})}
+                    className="form-control"
+                  >
+                    <option value="HOTEL">Hotel (Multi-room)</option>
+                    <option value="GUESTHOUSE">Guesthouse (Multi-room)</option>
+                    <option value="APARTMENT">Apartment (Single unit)</option>
+                    <option value="HOMEOWNER">Homeowner (Long term rent)</option>
+                  </select>
+                </div>
+                <div style={{marginBottom: '20px'}}>
+                  <label className="form-label">Property Name / Title</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={formData.title}
+                    onChange={(e) => setFormData({...formData, title: e.target.value})}
+                    placeholder="e.g. Sunset Paradise Resort"
+                    className="form-control"
+                  />
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div style={{animation: 'fadeIn 0.3s ease'}}>
+                <div style={{marginBottom: '20px'}}>
+                  <label className="form-label">Location Address</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={formData.address}
+                    onChange={(e) => setFormData({...formData, address: e.target.value})}
+                    placeholder="e.g. 123 Beach Road, Accra"
+                    className="form-control"
+                  />
+                </div>
+                <div style={{marginBottom: '20px'}}>
+                  <label className="form-label">Digital Address (Optional)</label>
+                  <input 
+                    type="text" 
+                    value={formData.digital_address}
+                    onChange={(e) => setFormData({...formData, digital_address: e.target.value})}
+                    placeholder="e.g. GA-123-4567"
+                    className="form-control"
+                  />
+                </div>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div style={{animation: 'fadeIn 0.3s ease'}}>
+                <div style={{marginBottom: '20px'}}>
+                  <label className="form-label">
+                    {['APARTMENT', 'HOMEOWNER'].includes(formData.property_type) 
+                      ? 'Base Price per month (₵)' 
+                      : 'Base Price per Night (₵)'}
+                  </label>
+                  <input 
+                    type="number" 
+                    required
+                    min="0"
+                    step="0.01"
+                    value={formData.base_price}
+                    onChange={(e) => setFormData({...formData, base_price: e.target.value})}
+                    placeholder="e.g. 150"
+                    className="form-control"
+                  />
+                  <p style={{fontSize: '12px', color: 'var(--ink-soft)', marginTop: '6px'}}>This can be changed later or overridden per room category.</p>
+                </div>
+              </div>
+            )}
+
+            <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '32px', paddingTop: '20px', borderTop: '1px solid var(--line)'}}>
+              {step > 1 ? (
+                <button 
+                  type="button" 
+                  onClick={prevStep}
+                  className="btn btn-outline"
+                >
+                  Back
+                </button>
+              ) : (
+                <div></div>
+              )}
+              
+              <button 
+                type="submit" 
+                disabled={isLoading}
+                className="btn btn-primary"
+                style={{minWidth: '120px'}}
+              >
+                {step === 3 ? (isLoading ? 'Submitting...' : 'Complete Setup') : 'Next Step'}
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </main>
     </div>
   );
 }

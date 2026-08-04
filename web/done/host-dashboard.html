@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Host dashboard — Fiebnb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body{ background:var(--paper-dim); }
+  .dash{ display:grid; grid-template-columns:250px 1fr; min-height:100vh; }
+  .dash-side{ background:var(--ink); color:var(--paper); padding:26px 18px; display:flex; flex-direction:column; }
+  .dash-side .logo{ color:var(--white); padding:0 10px; margin-bottom:34px; }
+  .dash-nav a{ display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:12px; font-size:14.5px; color:rgba(250,246,239,0.72); font-weight:500; margin-bottom:2px; }
+  .dash-nav a svg{ width:17px; height:17px; }
+  .dash-nav a:hover{ background:rgba(250,246,239,0.06); color:var(--white); }
+  .dash-nav a.active{ background:rgba(250,246,239,0.1); color:var(--white); }
+  .dash-nav .grp-label{ font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:rgba(250,246,239,0.4); padding:18px 14px 6px; }
+  .dash-side .bottom{ margin-top:auto; }
+  .switch-guest{ display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:12px; background:rgba(250,246,239,0.06); font-size:13px; color:rgba(250,246,239,0.75); }
+
+  .dash-main{ padding:32px 40px 80px; }
+  .dash-topbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; flex-wrap:wrap; gap:14px; }
+  .dash-topbar h1{ font-size:28px; }
+  .dash-topbar p{ color:var(--ink-soft); font-size:14.5px; margin-top:4px; }
+
+  .stat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-bottom:32px; }
+  .stat-card{ background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px; }
+  .stat-card .top{ display:flex; justify-content:space-between; align-items:flex-start; }
+  .stat-card .ic{ width:36px; height:36px; border-radius:10px; background:var(--sand); display:flex; align-items:center; justify-content:center; }
+  .stat-card .ic svg{ width:17px; height:17px; stroke:var(--brick-deep); }
+  .stat-card .delta{ font-size:12px; font-weight:700; color:var(--forest-deep); background:#E1EAE0; padding:3px 8px; border-radius:var(--r-pill); }
+  .stat-card b{ display:block; font-family:var(--font-display); font-size:28px; margin-top:14px; }
+  .stat-card span{ color:var(--ink-soft); font-size:13px; }
+
+  .panel{ background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px; margin-bottom:24px; }
+  .panel-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+  .panel-head h2{ font-size:18px; }
+
+  table{ width:100%; border-collapse:collapse; }
+  th{ text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); padding:10px 12px; border-bottom:1px solid var(--line); }
+  td{ padding:14px 12px; border-bottom:1px solid var(--line); font-size:14.5px; vertical-align:middle; }
+  tr:last-child td{ border-bottom:none; }
+  .li-row{ display:flex; align-items:center; gap:12px; }
+  .li-row img{ width:52px; height:44px; border-radius:8px; object-fit:cover; }
+  .li-row b{ display:block; font-size:14px; }
+  .li-row span{ color:var(--ink-soft); font-size:12.5px; }
+  .status{ font-size:12px; font-weight:700; padding:4px 10px; border-radius:var(--r-pill); }
+  .status.live{ background:#E1EAE0; color:var(--forest-deep); }
+  .status.pending{ background:var(--gold-pale); color:var(--gold-deep); }
+  .status.paused{ background:var(--sand); color:var(--ink-soft); }
+  .row-actions{ display:flex; gap:8px; }
+
+  .req-card{ display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid var(--line); }
+  .req-card:last-child{ border-bottom:none; }
+  .req-card img{ width:44px; height:44px; border-radius:50%; object-fit:cover; }
+  .req-card .info{ flex:1; }
+  .req-card b{ font-size:14px; }
+  .req-card span{ display:block; color:var(--ink-soft); font-size:12.5px; margin-top:2px; }
+
+  .two-col{ display:grid; grid-template-columns:1.6fr 1fr; gap:24px; align-items:flex-start; }
+
+  @media (max-width: 1100px){
+    .dash{ grid-template-columns:1fr; }
+    .dash-side{ display:none; }
+    .stat-grid{ grid-template-columns:1fr 1fr; }
+    .two-col{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="dash">
+  <aside class="dash-side">
+    <a href="index.html" class="logo">
+      <span class="mark"><span class="weave-strip"><span></span><span></span><span></span><span></span></span></span>
+      Fiebnb
+    </a>
+    <nav class="dash-nav">
+      <div class="grp-label">Manage</div>
+      <a href="#" class="active"><i data-lucide="layout-dashboard"></i> Overview</a>
+      <a href="#"><i data-lucide="home"></i> My listings</a>
+      <a href="#"><i data-lucide="calendar-days"></i> Calendar</a>
+      <a href="#"><i data-lucide="inbox"></i> Booking requests</a>
+      <div class="grp-label">Grow</div>
+      <a href="#"><i data-lucide="wallet"></i> Payouts</a>
+      <a href="#"><i data-lucide="bar-chart-3"></i> Insights</a>
+      <a href="#"><i data-lucide="message-circle"></i> Messages</a>
+      <div class="grp-label">Account</div>
+      <a href="#"><i data-lucide="settings"></i> Settings</a>
+      <a href="#"><i data-lucide="circle-help"></i> Support</a>
+    </nav>
+    <div class="bottom">
+      <a href="index.html" class="switch-guest"><i data-lucide="repeat" style="width:15px;height:15px"></i> Switch to guest mode</a>
+    </div>
+  </aside>
+
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div>
+        <h1>Welcome back, Abena</h1>
+        <p>Here's how Abena Guesthouse & Apartments is doing this month.</p>
+      </div>
+      <button class="btn btn-primary"><i data-lucide="plus" style="width:16px;height:16px"></i> Add a listing</button>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="top"><div class="ic"><i data-lucide="banknote"></i></div><span class="delta">+18%</span></div>
+        <b>₵14,280</b><span>Earnings this month</span>
+      </div>
+      <div class="stat-card">
+        <div class="top"><div class="ic"><i data-lucide="calendar-check"></i></div><span class="delta">+4</span></div>
+        <b>27</b><span>Bookings this month</span>
+      </div>
+      <div class="stat-card">
+        <div class="top"><div class="ic"><i data-lucide="percent"></i></div><span class="delta">+6%</span></div>
+        <b>78%</b><span>Occupancy rate</span>
+      </div>
+      <div class="stat-card">
+        <div class="top"><div class="ic"><i data-lucide="star"></i></div><span class="delta">4.8★</span></div>
+        <b>96</b><span>Guest reviews</span>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Your listings</h2>
+          <a href="#" class="btn btn-outline btn-sm">Manage all</a>
+        </div>
+        <table>
+          <thead><tr><th>Listing</th><th>Type</th><th>Price</th><th>Status</th><th></th></tr></thead>
+          <tbody id="host-listings-table"></tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Booking requests</h2></div>
+        <div class="req-card">
+          <img src="https://picsum.photos/seed/fiebnb-req1/100/100" alt="">
+          <div class="info"><b>Yaw Mensah</b><span>The Osu Palm Guesthouse · 3 nights, Jul 18</span></div>
+          <button class="btn btn-dark btn-sm">Accept</button>
+        </div>
+        <div class="req-card">
+          <img src="https://picsum.photos/seed/fiebnb-req2/100/100" alt="">
+          <div class="info"><b>Efua Boateng</b><span>Furnished 2-Bed, East Legon · 6 months</span></div>
+          <button class="btn btn-dark btn-sm">Accept</button>
+        </div>
+        <div class="req-card">
+          <img src="https://picsum.photos/seed/fiebnb-req3/100/100" alt="">
+          <div class="info"><b>Kojo Asante</b><span>Trasacco Luxury Villa Room · 2 nights, Jul 22</span></div>
+          <button class="btn btn-dark btn-sm">Accept</button>
+        </div>
+        <a href="#" class="btn btn-ghost btn-block" style="margin-top:8px">View all requests</a>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Payout history</h2>
+        <a href="#" class="btn btn-outline btn-sm">Download statement</a>
+      </div>
+      <table>
+        <thead><tr><th>Date</th><th>Guest</th><th>Listing</th><th>Amount</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Jul 4, 2026</td><td>Nana Ama O.</td><td>The Osu Palm Guesthouse</td><td>₵780</td><td><span class="status live">Paid</span></td></tr>
+          <tr><td>Jun 29, 2026</td><td>Kwabena T.</td><td>Furnished 2-Bed, East Legon</td><td>₵4,800</td><td><span class="status live">Paid</span></td></tr>
+          <tr><td>Jun 21, 2026</td><td>Adjoa F.</td><td>Trasacco Luxury Villa Room</td><td>₵1,780</td><td><span class="status pending">Processing</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script src="js/main.js"></script>
+<script>
+  function statusPill(s){
+    const map = { live:["Live","live"], pending:["Pending review","pending"], paused:["Paused","paused"] };
+    const [label, cls] = map[s];
+    return `<span class="status ${cls}">${label}</span>`;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const mine = FIEBNB_LISTINGS.slice(0,5);
+    const statuses = ["live","live","pending","live","paused"];
+    document.getElementById("host-listings-table").innerHTML = mine.map((l,i)=>`
+      <tr>
+        <td><div class="li-row"><img src="https://picsum.photos/seed/${l.seed}/120/100" alt=""><div><b>${l.title}</b><span>${l.area}, ${l.city}</span></div></div></td>
+        <td>${l.type}</td>
+        <td>₵${l.price.toLocaleString()}/${l.unit}</td>
+        <td>${statusPill(statuses[i])}</td>
+        <td><div class="row-actions"><button class="icon-btn" style="width:32px;height:32px"><i data-lucide="pencil" style="width:14px;height:14px"></i></button><button class="icon-btn" style="width:32px;height:32px"><i data-lucide="more-horizontal" style="width:14px;height:14px"></i></button></div></td>
+      </tr>`).join("");
+    if(window.lucide) lucide.createIcons();
+  });
+</script>
+</body>
+</html>

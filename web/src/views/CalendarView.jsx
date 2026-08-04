@@ -1,19 +1,22 @@
 import ResourceTimeline from '../components/dashboard/ResourceTimeline';
+import { useDashboard } from '../context/DashboardContext';
 
 export default function CalendarView() {
+  const { openWalkInModal } = useDashboard();
+  
   return (
-    <div className="h-full flex flex-col space-y-6 animate-in fade-in duration-500">
-      <div className="flex justify-between items-end">
+    <div style={{height: '100%', display: 'flex', flexDirection: 'column'}}>
+      <div className="dash-topbar">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Booking Calendar</h2>
-          <p className="text-slate-500 mt-1">Manage room availability and manual walk-in blocks.</p>
+          <h1>Booking Calendar</h1>
+          <p>Manage room availability and manual walk-in blocks.</p>
         </div>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
+        <button className="btn btn-primary" onClick={() => openWalkInModal()}>
           + New Walk-in
         </button>
       </div>
 
-      <div className="flex-1 min-h-0">
+      <div style={{flex: 1, minHeight: 0, minWidth: 0}}>
         <ResourceTimeline />
       </div>
     </div>

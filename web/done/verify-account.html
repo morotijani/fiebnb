@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify your account — Fiebnb</title>
+<link rel="icon" href="assets/fiebnb-icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="auth-shell">
+  <aside class="auth-aside">
+    <img class="bg" src="https://picsum.photos/seed/fiebnb-auth-verify/900/1200" alt="">
+    <div class="veil"></div>
+    <div class="content top-logo">
+      <a href="index.html"><img src="assets/fiebnb-logo-horizontal-reversed.svg" alt="Fiebnb" style="height:34px"></a>
+    </div>
+    <div class="content bottom">
+      <div class="weave-strip short"><span></span><span></span><span></span><span></span></div>
+      <h2>One last step</h2>
+      <p>Verifying your account helps keep every stay, host and guest on Fiebnb trustworthy.</p>
+    </div>
+  </aside>
+
+  <main class="auth-main">
+    <div class="auth-card">
+      <a href="index.html" class="mobile-logo"><img src="assets/fiebnb-logo-horizontal.svg" alt="Fiebnb"></a>
+
+      <h1>Verify your account</h1>
+      <p class="sub">Enter the 6-digit code we sent to activate your account.</p>
+
+      <div class="contact-target">
+        <i data-lucide="mail-check" style="width:18px;height:18px;stroke:var(--brick-deep)"></i>
+        <span>Sent to <b>a***a@email.com</b> · <a href="#" style="color:var(--brick);font-weight:600">not you?</a></span>
+      </div>
+
+      <form onsubmit="event.preventDefault(); alert('This is a front-end prototype — your account has not actually been verified.'); window.location='index.html';">
+        <div class="form-field">
+          <label>Verification code</label>
+          <div class="otp-row" id="otp-row">
+            <input type="text" inputmode="numeric" maxlength="1" required>
+            <input type="text" inputmode="numeric" maxlength="1" required>
+            <input type="text" inputmode="numeric" maxlength="1" required>
+            <input type="text" inputmode="numeric" maxlength="1" required>
+            <input type="text" inputmode="numeric" maxlength="1" required>
+            <input type="text" inputmode="numeric" maxlength="1" required>
+          </div>
+        </div>
+
+        <div class="resend-row">
+          <span>Didn't get a code?</span>
+          <a href="resend-verification.html">Resend it</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Verify account</button>
+      </form>
+
+      <p class="auth-footer-note">Wrong email or phone? <a href="signup.html">Go back and edit it</a></p>
+    </div>
+  </main>
+</div>
+
+<script src="js/main.js"></script>
+<script>
+  initOtpInputs("otp-row");
+</script>
+</body>
+</html>

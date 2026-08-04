@@ -28,7 +28,7 @@ exports.getMyProperties = async (req, res) => {
 
 exports.createProperty = async (req, res) => {
   try {
-    const { title, base_price, property_type } = req.body;
+    const { title, description, base_price, property_type, address, digital_address, latitude, longitude, images } = req.body;
     const is_multi_room = property_type === 'HOTEL' || property_type === 'GUESTHOUSE';
     const owner_id = req.user.id;
 
@@ -39,11 +39,17 @@ exports.createProperty = async (req, res) => {
     const newProperty = await prisma.property.create({
       data: {
         title,
+        ...(description && { description }),
         base_price: parseFloat(base_price),
         property_type: property_type || 'HOTEL',
         is_multi_room,
         owner_id,
-        status: 'AVAILABLE'
+        status: 'AVAILABLE',
+        ...(address && { address }),
+        ...(digital_address && { digital_address }),
+        ...(latitude !== undefined && { latitude: parseFloat(latitude) }),
+        ...(longitude !== undefined && { longitude: parseFloat(longitude) }),
+        ...(images && { images })
       }
     });
 
@@ -57,12 +63,13 @@ exports.createProperty = async (req, res) => {
 exports.updateProperty = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, base_price, property_type, status, address, digital_address, latitude, longitude, images } = req.body;
+    const { title, description, base_price, property_type, status, address, digital_address, latitude, longitude, images } = req.body;
 
     const updatedProperty = await prisma.property.update({
       where: { id },
       data: {
         ...(title && { title }),
+        ...(description !== undefined && { description }),
         ...(base_price !== undefined && { base_price: parseFloat(base_price) }),
         ...(property_type !== undefined && { 
           property_type,

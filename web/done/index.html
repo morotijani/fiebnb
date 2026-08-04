@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiebnb — Find your stay, anywhere in Ghana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  /* ---- page-specific: home ---- */
+  .hero{ padding:52px 0 0; position:relative; overflow:hidden; }
+  .hero-grid{ display:grid; grid-template-columns:1fr; gap:0; }
+  .hero-copy{ max-width:640px; padding:40px 0 56px; position:relative; z-index:2; }
+  .hero-copy h1{ font-size:clamp(40px,5.4vw,68px); line-height:1.03; margin-top:18px; }
+  .hero-copy h1 em{ font-style:italic; color:var(--brick); }
+  .hero-copy p.lede{ margin-top:22px; max-width:480px; }
+
+  .hero-collage{
+    position:absolute; top:0; right:0; bottom:0; width:56%;
+    display:grid; grid-template-columns:1.1fr 0.9fr; gap:14px;
+    padding:0 0 0 40px;
+  }
+  .hero-collage .col{ display:flex; flex-direction:column; gap:14px; }
+  .hero-collage .col:nth-child(2){ margin-top:56px; }
+  .hero-collage img{ border-radius:var(--r-lg); object-fit:cover; width:100%; box-shadow:var(--shadow-card); }
+  .hero-collage .col:nth-child(1) img:nth-child(1){ height:280px; }
+  .hero-collage .col:nth-child(1) img:nth-child(2){ height:180px; }
+  .hero-collage .col:nth-child(2) img:nth-child(1){ height:200px; }
+  .hero-collage .col:nth-child(2) img:nth-child(2){ height:230px; }
+
+  .search-card{
+    background:var(--white); border-radius:var(--r-lg); box-shadow:var(--shadow-lift);
+    border:1px solid var(--line);
+    display:grid; grid-template-columns:1.3fr 1fr 1fr 1fr auto;
+    margin:0 0 -64px; position:relative; z-index:3;
+  }
+  .search-field{ padding:16px 22px; border-right:1px solid var(--line); }
+  .search-field:last-of-type{ border-right:none; }
+  .search-field label{ display:block; font-size:11.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:5px; }
+  .search-field select, .search-field input{
+    width:100%; border:none; background:transparent; font-size:14.5px; font-weight:500; color:var(--ink); padding:0; outline:none;
+  }
+  .search-submit{ display:flex; align-items:center; padding:10px; }
+  .search-submit .btn{ width:58px; height:58px; border-radius:16px; padding:0; }
+
+  .stats-bar{ padding:120px 0 60px; display:flex; gap:56px; flex-wrap:wrap; }
+  .stat b{ display:block; font-family:var(--font-display); font-size:32px; }
+  .stat span{ color:var(--ink-soft); font-size:13.5px; }
+
+  .cat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+  .cat-card{
+    position:relative; border-radius:var(--r-lg); overflow:hidden; height:280px;
+    display:flex; align-items:flex-end; padding:22px; color:var(--white);
+    isolation:isolate; transition:transform .3s ease;
+  }
+  .cat-card:hover{ transform:translateY(-6px); }
+  .cat-card img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; }
+  .cat-card::after{ content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(28,20,16,0) 30%, rgba(28,20,16,0.82) 100%); z-index:-1; }
+  .cat-card h3{ color:var(--white); font-size:22px; }
+  .cat-card p{ font-size:13px; opacity:0.85; margin:4px 0 0; }
+
+  .listing-card{ min-width:300px; max-width:300px; }
+  .listing-card .thumb{ position:relative; height:220px; border-radius:var(--r-lg); overflow:hidden; margin-bottom:12px; }
+  .listing-card .thumb img{ width:100%; height:100%; object-fit:cover; transition:transform .4s ease; }
+  .listing-card:hover .thumb img{ transform:scale(1.06); }
+  .listing-card .fav{ position:absolute; top:12px; right:12px; width:34px; height:34px; border-radius:50%; background:rgba(28,20,16,0.55); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; }
+  .listing-card .fav svg{ stroke:var(--white); width:17px; height:17px; }
+  .listing-card .badge{ position:absolute; top:12px; left:12px; }
+  .listing-title-row{ display:flex; justify-content:space-between; gap:10px; align-items:baseline; }
+  .listing-title-row h4{ font-family:var(--font-body); font-weight:600; font-size:15.5px; }
+  .listing-rating{ display:flex; align-items:center; gap:4px; font-size:13.5px; font-weight:600; flex-shrink:0; }
+  .listing-rating svg{ width:13px; height:13px; fill:var(--gold-deep); stroke:none; }
+  .listing-loc{ color:var(--ink-soft); font-size:13.5px; margin-top:2px; }
+  .listing-price{ margin-top:8px; font-size:14.5px; }
+  .listing-price b{ font-size:16px; }
+
+  .why-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:28px; }
+  .why-card{ padding:32px 26px; border-radius:var(--r-lg); background:var(--white); border:1px solid var(--line); }
+  .why-card .ic{ width:46px; height:46px; border-radius:12px; background:var(--sand); display:flex; align-items:center; justify-content:center; margin-bottom:20px; }
+  .why-card .ic svg{ width:22px; height:22px; stroke:var(--brick-deep); }
+  .why-card h3{ font-size:18px; margin-bottom:8px; }
+  .why-card p{ color:var(--ink-soft); font-size:14.5px; line-height:1.6; }
+
+  .host-cta{
+    border-radius:32px; background:var(--ink); color:var(--paper);
+    padding:64px; display:grid; grid-template-columns:1.1fr 0.9fr; gap:40px; align-items:center; overflow:hidden; position:relative;
+  }
+  .host-cta::before{ content:""; position:absolute; inset:0; background:radial-gradient(600px 300px at 85% 20%, rgba(200,155,60,0.25), transparent 70%); }
+  .host-cta h2{ color:var(--white); font-size:38px; position:relative; }
+  .host-cta p{ color:rgba(250,246,239,0.75); margin-top:16px; max-width:420px; font-size:15.5px; line-height:1.6; position:relative; }
+  .host-cta .actions{ display:flex; gap:14px; margin-top:28px; position:relative; }
+  .host-stats{ position:relative; display:flex; flex-direction:column; gap:18px; }
+  .host-stat{ background:rgba(250,246,239,0.06); border:1px solid rgba(250,246,239,0.14); border-radius:16px; padding:18px 22px; display:flex; justify-content:space-between; align-items:center; }
+  .host-stat b{ font-family:var(--font-display); font-size:26px; color:var(--gold-pale); }
+  .host-stat span{ font-size:13px; color:rgba(250,246,239,0.7); }
+
+  .testimonial-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+  .testi{ padding:30px; border-radius:var(--r-lg); background:var(--paper-dim); border:1px solid var(--line); }
+  .testi p{ font-family:var(--font-display); font-size:18px; line-height:1.5; font-style:italic; }
+  .testi-who{ display:flex; align-items:center; gap:12px; margin-top:20px; }
+  .testi-who img{ width:40px; height:40px; border-radius:50%; object-fit:cover; }
+  .testi-who b{ font-size:14px; display:block; }
+  .testi-who span{ font-size:12.5px; color:var(--ink-soft); }
+
+  @media (max-width: 1080px){
+    .hero-collage{ display:none; }
+    .search-card{ grid-template-columns:1fr 1fr; }
+    .search-field{ border-right:none; border-bottom:1px solid var(--line); }
+    .search-submit{ grid-column:1 / -1; padding:16px; }
+    .search-submit .btn{ width:100%; border-radius:var(--r-pill); }
+    .cat-grid{ grid-template-columns:1fr 1fr; }
+    .why-grid, .testimonial-grid{ grid-template-columns:1fr; }
+    .host-cta{ grid-template-columns:1fr; padding:40px 28px; }
+    .stats-bar{ padding-top:56px; gap:32px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-row">
+    <a href="index.html" class="logo">
+      <span class="mark"><span class="weave-strip"><span></span><span></span><span></span><span></span></span></span>
+      Fiebnb
+    </a>
+    <div class="nav-links">
+      <a href="browse.html" class="active">Stays</a>
+      <a href="browse.html?type=hotel">Hotels</a>
+      <a href="browse.html?type=long-term">Long-term rentals</a>
+      <a href="host-dashboard.html">Become a host</a>
+    </div>
+    <div class="nav-actions">
+      <a href="host-dashboard.html" class="btn btn-ghost btn-sm">List your property</a>
+      <button class="icon-btn" aria-label="Search"><i data-lucide="search" style="width:17px;height:17px"></i></button>
+      <button class="icon-btn" aria-label="Account"><i data-lucide="user" style="width:17px;height:17px"></i></button>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow">Ghana's own stay marketplace</p>
+      <h1>Come home to a<br>place that <em>fie</em>els<br>like yours.</h1>
+      <p class="lede">From Osu guesthouses to Airport City apartments — book verified short stays or settle into a long-term rental, all in one place. <em style="font-style:normal;color:var(--ink-soft)">Fie</em> means "home."</p>
+    </div>
+    <div class="hero-collage">
+      <div class="col">
+        <img src="https://picsum.photos/seed/fiebnb-hero1/600/560" alt="">
+        <img src="https://picsum.photos/seed/fiebnb-hero2/600/360" alt="">
+      </div>
+      <div class="col">
+        <img src="https://picsum.photos/seed/fiebnb-hero3/600/400" alt="">
+        <img src="https://picsum.photos/seed/fiebnb-hero4/600/460" alt="">
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <form class="search-card" onsubmit="return false;">
+      <div class="search-field">
+        <label for="s-loc">Where</label>
+        <input id="s-loc" type="text" placeholder="Accra, Kumasi, Cape Coast…" value="Accra, Greater Accra">
+      </div>
+      <div class="search-field">
+        <label for="s-type">Stay type</label>
+        <select id="s-type">
+          <option>Short stay</option>
+          <option>Hotel / Guesthouse</option>
+          <option>Long-term rental</option>
+        </select>
+      </div>
+      <div class="search-field">
+        <label for="s-dates">Check-in — Check-out</label>
+        <input id="s-dates" type="text" placeholder="Add dates">
+      </div>
+      <div class="search-field">
+        <label for="s-guests">Guests</label>
+        <select id="s-guests">
+          <option>1 guest</option>
+          <option selected>2 guests</option>
+          <option>3 guests</option>
+          <option>4+ guests</option>
+        </select>
+      </div>
+      <div class="search-submit">
+        <button class="btn btn-primary" type="submit" onclick="window.location='browse.html'" aria-label="Search stays">
+          <i data-lucide="search" style="width:19px;height:19px"></i>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="wrap">
+    <div class="stats-bar">
+      <div class="stat"><b>3,400+</b><span>Verified listings nationwide</span></div>
+      <div class="stat"><b>16</b><span>Regions covered</span></div>
+      <div class="stat"><b>4.8★</b><span>Average guest rating</span></div>
+      <div class="stat"><b>1,900+</b><span>Hosts earning on Fiebnb</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="section">
+    <div class="wrap">
+      <p class="eyebrow">Browse by type</p>
+      <div class="section-head">
+        <h2>Whatever "home for now" means to you</h2>
+      </div>
+      <div class="cat-grid">
+        <a class="cat-card" href="browse.html?type=hotel">
+          <img src="https://picsum.photos/seed/fiebnb-cat-hotel/500/560" alt="">
+          <div><h3>Hotels</h3><p>420 listings</p></div>
+        </a>
+        <a class="cat-card" href="browse.html?type=guesthouse">
+          <img src="https://picsum.photos/seed/fiebnb-cat-guest/500/560" alt="">
+          <div><h3>Guesthouses</h3><p>860 listings</p></div>
+        </a>
+        <a class="cat-card" href="browse.html?type=apartment">
+          <img src="https://picsum.photos/seed/fiebnb-cat-apt/500/560" alt="">
+          <div><h3>Apartments</h3><p>1,240 listings</p></div>
+        </a>
+        <a class="cat-card" href="browse.html?type=long-term">
+          <img src="https://picsum.photos/seed/fiebnb-cat-long/500/560" alt="">
+          <div><h3>Long-term rentals</h3><p>580 listings</p></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap"><div class="weave-strip thin"><span></span><span></span><span></span><span></span></div></div>
+
+  <section class="section" id="featured">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Handpicked</p>
+          <h2>Popular stays in Accra right now</h2>
+        </div>
+        <a href="browse.html" class="btn btn-outline btn-sm">View all stays <i data-lucide="arrow-right" style="width:15px;height:15px"></i></a>
+      </div>
+      <div class="rail" id="featured-rail"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <p class="eyebrow">Why Fiebnb</p>
+      <div class="section-head"><h2>Booking a stay, done properly</h2></div>
+      <div class="why-grid">
+        <div class="why-card">
+          <div class="ic"><i data-lucide="badge-check"></i></div>
+          <h3>Verified owners, always</h3>
+          <p>Every hotel, guesthouse and landlord on Fiebnb is ID-verified and site-inspected before their first listing goes live.</p>
+        </div>
+        <div class="why-card">
+          <div class="ic"><i data-lucide="shield-check"></i></div>
+          <h3>Protected payments</h3>
+          <p>Pay by Mobile Money or card with funds held securely until 24 hours after you check in — for stays of a night or a year.</p>
+        </div>
+        <div class="why-card">
+          <div class="ic"><i data-lucide="headphones"></i></div>
+          <h3>Real local support</h3>
+          <p>A Ghana-based support team, reachable on WhatsApp, that actually knows the difference between East Legon and Airport Residential.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="host-cta">
+        <div>
+          <p class="eyebrow" style="color:var(--gold-pale)">For property owners</p>
+          <h2>Turn your rooms into<br>steady income.</h2>
+          <p>Whether you run a guesthouse, manage an apartment block, or rent out a family property long-term — list free and reach thousands of verified guests across Ghana.</p>
+          <div class="actions">
+            <a href="host-dashboard.html" class="btn" style="background:var(--gold);color:var(--ink)">List your property</a>
+            <a href="host-dashboard.html" class="btn btn-outline" style="border-color:rgba(250,246,239,0.3);color:var(--paper)">See host tools</a>
+          </div>
+        </div>
+        <div class="host-stats">
+          <div class="host-stat"><span>Avg. monthly payout, Accra host</span><b>₵6,200</b></div>
+          <div class="host-stat"><span>Time to first booking</span><b>9 days</b></div>
+          <div class="host-stat"><span>Commission — you keep</span><b>92%</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <p class="eyebrow">Guest stories</p>
+      <div class="section-head"><h2>Trusted by travellers and tenants alike</h2></div>
+      <div class="testimonial-grid">
+        <div class="testi">
+          <p>"Booked a guesthouse in Kumasi the night before a wedding. Owner met me at the gate himself — felt safer than any hotel app I've used."</p>
+          <div class="testi-who">
+            <img src="https://picsum.photos/seed/fiebnb-t1/80/80" alt="">
+            <div><b>Nana Ama O.</b><span>Guest, Kumasi</span></div>
+          </div>
+        </div>
+        <div class="testi">
+          <p>"Moved to Accra for work and found a 6-month furnished flat in two days. No agent fees, no drama."</p>
+          <div class="testi-who">
+            <img src="https://picsum.photos/seed/fiebnb-t2/80/80" alt="">
+            <div><b>Kwabena T.</b><span>Long-term tenant</span></div>
+          </div>
+        </div>
+        <div class="testi">
+          <p>"We list all 14 rooms of our guesthouse here. Fiebnb's payouts land faster than any other platform we've tried."</p>
+          <div class="testi-who">
+            <img src="https://picsum.photos/seed/fiebnb-t3/80/80" alt="">
+            <div><b>Abena Guesthouse</b><span>Host, Takoradi</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="logo" style="color:var(--white)">
+          <span class="mark"><span class="weave-strip"><span></span><span></span><span></span><span></span></span></span>
+          Fiebnb
+        </a>
+        <p>Ghana's marketplace for hotels, guesthouses and long-term rentals — built for how Ghanaians and visitors actually find a place to stay.</p>
+      </div>
+      <div>
+        <h4>Guests</h4>
+        <a href="browse.html">Browse stays</a>
+        <a href="how-booking-works.html">How booking works</a>
+        <a href="trust-safety.html">Trust & safety</a>
+        <a href="cancellation-options.html">Cancellation options</a>
+      </div>
+      <div>
+        <h4>Hosts</h4>
+        <a href="host-dashboard.html">List your property</a>
+        <a href="host-dashboard.html">Host dashboard</a>
+        <a href="#">Pricing & payouts</a>
+        <a href="host-protection.html">Host protection</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="about.html">About Fiebnb</a>
+        <a href="careers.html">Careers</a>
+        <a href="#">Support (WhatsApp)</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Fiebnb Ghana. All rights reserved.</span>
+      <span>Accra · Kumasi · Takoradi · Cape Coast · Tamale</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

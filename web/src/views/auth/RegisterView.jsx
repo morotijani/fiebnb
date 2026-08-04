@@ -1,22 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Briefcase, Home, Eye, EyeOff, Globe } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const RegisterView = () => {
+  const [accountType, setAccountType] = useState('GUEST'); // GUEST or HOMEOWNER
+  const [method, setMethod] = useState('email');
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone_number: '',
     password: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  
   const { register } = useAuth();
   const navigate = useNavigate();
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,13 +26,23 @@ const RegisterView = () => {
     setIsLoading(true);
 
     try {
-      await register(formData);
-      // Backend doesn't return tokens on register because OTP is needed.
-      // Redirect to OTP verification with the phone number in state
-      navigate('/verify-otp', { state: { phone_number: formData.phone_number } });
+      const payload = {
+        ...formData,
+        role: accountType
+      };
+
+      // If method is email, we might not have a phone number, but backend requires it. 
+      // For this UI to work as-is, we must enforce a phone number or default it if email is used.
+      // Wait, the new UI in signup.html toggle between email AND phone. But the DB requires both.
+      // I'll combine the field logically: if they enter email, we still need a phone, but the UI only shows one?
+      // Ah, the UI had "Full name", then a method toggle for Email / Phone.
+      // If we strictly follow the new UI, they only enter one. 
+      // Let's modify the new UI slightly to ask for both, because backend requires both.
+      
+      await register(payload);
+      navigate('/verify-otp', { state: { phone_number: formData.phone_number, isNewRegistration: true } });
     } catch (err) {
       if (err.response?.data?.errors) {
-        // Zod validation errors
         setError(err.response.data.errors[0].message);
       } else {
         setError(err.response?.data?.message || err.response?.data?.error || 'Registration failed. Please try again.');
@@ -40,141 +52,136 @@ const RegisterView = () => {
     }
   };
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="px-8 pt-8 pb-6">
-          <div className="flex justify-center mb-6">
-            <div className="h-12 w-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
-              <span className="material-symbols-outlined text-white text-2xl">person_add</span>
-            </div>
+    <div className="auth-shell">
+      <aside className="auth-aside">
+        <img className="bg" src="https://picsum.photos/seed/fiebnb-auth-signup/900/1200" alt="Background" />
+        <div className="veil"></div>
+        <div className="content top-logo">
+          <Link to="/"><img src="/assets/fiebnb-logo-horizontal-reversed.svg" alt="Fiebnb" style={{height: '34px'}} /></Link>
+        </div>
+        <div className="content bottom">
+          <div className="weave-strip short"><span></span><span></span><span></span><span></span></div>
+          <h2>Join Fiebnb</h2>
+          <p>Create an account to book verified stays across Ghana, or list your own property and start earning.</p>
+          <div className="quote">
+            <p>"Moved to Accra for work and found a 6-month furnished flat in two days. No agent fees, no drama."</p>
+            <span>Kwabena T. · Long-term tenant</span>
           </div>
-          
-          <h2 className="text-center text-2xl font-bold tracking-tight text-slate-900 mb-2">
-            Create your account
-          </h2>
-          <p className="text-center text-sm text-slate-500 mb-8">
-            Join Fiebnb as a Host or Manager
-          </p>
+        </div>
+      </aside>
+
+      <main className="auth-main">
+        <div className="auth-card">
+          <Link to="/" className="mobile-logo"><img src="/assets/fiebnb-logo-horizontal.svg" alt="Fiebnb" /></Link>
+
+          <h1>Create your account</h1>
+          <p className="sub">Already on Fiebnb? <Link to="/login">Log in</Link></p>
 
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3">
-              <span className="material-symbols-outlined text-red-500 text-xl shrink-0">error</span>
-              <p className="text-sm text-red-700">{error}</p>
+            <div style={{background: '#fee2e2', color: '#b91c1c', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px', border: '1px solid #fca5a5'}}>
+              {error}
             </div>
           )}
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1">
-                Full Name
+          <form onSubmit={handleSubmit}>
+            <div className="type-select">
+              <label className={`type-card ${accountType === 'GUEST' ? 'selected' : ''}`} onClick={() => setAccountType('GUEST')}>
+                <input type="radio" name="accountType" value="GUEST" checked={accountType === 'GUEST'} readOnly />
+                <Briefcase size={24} strokeWidth={1.5} />
+                <h4>I'm booking a stay</h4>
+                <p>Find hotels, guesthouses & rentals</p>
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="material-symbols-outlined text-slate-400 text-lg">badge</span>
-                </div>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all sm:text-sm text-slate-900 bg-slate-50 focus:bg-white placeholder:text-slate-400"
-                  placeholder="Kwame Mensah"
-                />
-              </div>
+              <label className={`type-card ${accountType === 'HOMEOWNER' ? 'selected' : ''}`} onClick={() => setAccountType('HOMEOWNER')}>
+                <input type="radio" name="accountType" value="HOMEOWNER" checked={accountType === 'HOMEOWNER'} readOnly />
+                <Home size={24} strokeWidth={1.5} />
+                <h4>I'm listing a property</h4>
+                <p>Earn as a host or landlord</p>
+              </label>
             </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
-                Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="material-symbols-outlined text-slate-400 text-lg">mail</span>
-                </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all sm:text-sm text-slate-900 bg-slate-50 focus:bg-white placeholder:text-slate-400"
-                  placeholder="kwame@example.com"
-                />
-              </div>
+            <div className="form-field">
+              <label htmlFor="name">Full name</label>
+              <input 
+                id="name" 
+                name="name" 
+                type="text" 
+                placeholder="Ama Owusu" 
+                required 
+                value={formData.name}
+                onChange={handleChange}
+              />
             </div>
 
-            <div>
-              <label htmlFor="phone_number" className="block text-sm font-medium text-slate-700 mb-1">
-                Phone Number (Ghana)
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="material-symbols-outlined text-slate-400 text-lg">phone</span>
-                </div>
-                <input
-                  id="phone_number"
-                  name="phone_number"
-                  type="tel"
-                  required
-                  value={formData.phone_number}
-                  onChange={handleChange}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all sm:text-sm text-slate-900 bg-slate-50 focus:bg-white placeholder:text-slate-400"
-                  placeholder="0541234567"
-                />
-              </div>
+            {/* Changed from the static HTML method-toggle to ensure both email and phone are collected */}
+            <div className="form-field">
+              <label htmlFor="email">Email address</label>
+              <input 
+                id="email" 
+                name="email" 
+                type="email" 
+                placeholder="you@example.com" 
+                required 
+                value={formData.email}
+                onChange={handleChange}
+              />
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="material-symbols-outlined text-slate-400 text-lg">lock</span>
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
+            <div className="form-field">
+              <label htmlFor="phone_number">Phone number</label>
+              <input 
+                id="phone_number" 
+                name="phone_number" 
+                type="tel" 
+                placeholder="024 000 0000" 
+                required 
+                value={formData.phone_number}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="password">Password</label>
+              <div className="pw-field">
+                <input 
+                  id="password" 
+                  name="password" 
+                  type={showPassword ? 'text' : 'password'} 
+                  placeholder="Create a password" 
+                  minLength="8" 
+                  required 
                   value={formData.password}
                   onChange={handleChange}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all sm:text-sm text-slate-900 bg-slate-50 focus:bg-white placeholder:text-slate-400"
-                  placeholder="Min. 8 characters"
                 />
+                <button type="button" className="pw-toggle" aria-label="Show password" onClick={() => setShowPassword(!showPassword)}>
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
+              <p className="pw-hint">At least 8 characters, with one number.</p>
             </div>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] mt-6"
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
-                  Creating Account...
-                </div>
-              ) : (
-                'Create Account'
-              )}
+            <label className="check-row">
+              <input type="checkbox" required />
+              <span>I agree to Fiebnb's <Link to="/terms">Terms of Service</Link> and <Link to="/privacy">Privacy Policy</Link></span>
+            </label>
+
+            <button type="submit" className="btn btn-primary btn-block" disabled={isLoading}>
+              {isLoading ? 'Creating account...' : 'Create account'}
             </button>
           </form>
+
+          <div className="divider-row"><div className="line"></div><span>or</span><div className="line"></div></div>
+          <button type="button" className="btn btn-outline btn-block" onClick={() => alert("Google sign-up isn't wired up yet.")}>
+            <Globe size={17} /> Continue with Google
+          </button>
+
+          <p className="auth-footer-note">We'll send a verification code to confirm your account.</p>
         </div>
-        
-        <div className="px-8 py-6 bg-slate-50 border-t border-slate-100 text-center">
-          <p className="text-sm text-slate-600">
-            Already have an account?{' '}
-            <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
-              Sign in
-            </Link>
-          </p>
-        </div>
-      </div>
+      </main>
     </div>
   );
 };

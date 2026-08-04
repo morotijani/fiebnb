@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import DashboardLayout from './components/layout/DashboardLayout';
 import DashboardOverview from './views/DashboardOverview';
@@ -7,6 +7,8 @@ import CalendarView from './views/CalendarView';
 import RoomsView from './views/RoomsView';
 import GuestsView from './views/GuestsView';
 import SettingsView from './views/SettingsView';
+import PropertiesView from './views/PropertiesView';
+import StaffView from './views/StaffView';
 
 // Admin Views
 import AdminDashboard from './views/admin/AdminDashboard';
@@ -14,12 +16,36 @@ import OnboardingRequests from './views/admin/OnboardingRequests';
 import AdminUsers from './views/admin/AdminUsers';
 import AdminProperties from './views/admin/AdminProperties';
 
+// Apartment Views
+import ApartmentBuildingsView from './views/apartment/ApartmentBuildingsView';
+import ApartmentUnitsView from './views/apartment/ApartmentUnitsView';
+import ApartmentTenantsView from './views/apartment/ApartmentTenantsView';
+
 // Auth Views
 import LoginView from './views/auth/LoginView';
 import RegisterView from './views/auth/RegisterView';
 import OtpVerificationView from './views/auth/OtpVerificationView';
+import ForgotPasswordView from './views/auth/ForgotPasswordView';
+import ResetPasswordView from './views/auth/ResetPasswordView';
+import ResendVerificationView from './views/auth/ResendVerificationView';
 import GuestComingSoon from './views/auth/GuestComingSoon';
 import OnboardingView from './views/auth/OnboardingView';
+import RegistrationSuccessView from './views/auth/RegistrationSuccessView';
+
+// Website views
+import WebsiteLayout from './components/website/WebsiteLayout';
+import LandingView from './views/website/LandingView';
+import AboutView from './views/website/AboutView';
+import ContactView from './views/website/ContactView';
+import BrowseView from './views/website/BrowseView';
+import ListingView from './views/website/ListingView';
+import CareersView from './views/website/CareersView';
+import TrustSafetyView from './views/website/TrustSafetyView';
+import CancellationOptionsView from './views/website/CancellationOptionsView';
+import HostProtectionView from './views/website/HostProtectionView';
+import HowBookingWorksView from './views/website/HowBookingWorksView';
+import PricingPayoutsView from './views/website/PricingPayoutsView';
+import SupportView from './views/website/SupportView';
 
 // Context
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -59,10 +85,14 @@ const ProtectedRoute = ({ allowedRoles }) => {
 // A component to prevent authenticated users from viewing login/register
 const PublicRoute = () => {
   const { user, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) return null;
 
   if (user) {
+    if (location.state?.isNewRegistration && user.role === 'HOMEOWNER') {
+      return <Navigate to="/onboarding" replace />;
+    }
     if (user.role === 'GUEST') return <Navigate to="/guest" replace />;
     if (user.role === 'ADMIN') return <Navigate to="/admin" replace />;
     return <Navigate to="/" replace />;
@@ -83,24 +113,60 @@ function App() {
               <Route path="/login" element={<LoginView />} />
               <Route path="/register" element={<RegisterView />} />
               <Route path="/verify-otp" element={<OtpVerificationView />} />
+              <Route path="/forgot-password" element={<ForgotPasswordView />} />
+              <Route path="/reset-password" element={<ResetPasswordView />} />
+              <Route path="/resend-verification" element={<ResendVerificationView />} />
             </Route>
 
-            {/* Guest Restricted Route / Onboarding */}
+            {/* Guest Restricted Route */}
             <Route path="/guest" element={
               <ProtectedRoute allowedRoles={['GUEST']} />
             }>
               <Route index element={<GuestComingSoon />} />
-              <Route path="onboarding" element={<OnboardingView />} />
+            </Route>
+
+            {/* Common Onboarding Route for GUESTs upgrading or new HOMEOWNERs */}
+            <Route path="/onboarding" element={
+              <ProtectedRoute allowedRoles={['GUEST', 'HOMEOWNER']} />
+            }>
+              <Route index element={<OnboardingView />} />
+            </Route>
+
+            <Route path="/success" element={
+              <ProtectedRoute allowedRoles={['HOMEOWNER', 'HOTEL_MANAGER', 'GUEST_HOUSE_ADMIN']} />
+            }>
+              <Route index element={<RegistrationSuccessView />} />
+            </Route>
+
+            {/* Public Website Routes */}
+            <Route element={<WebsiteLayout />}>
+              <Route path="/" element={<LandingView />} />
+              <Route path="/browse" element={<BrowseView />} />
+              <Route path="/about" element={<AboutView />} />
+              <Route path="/contact" element={<ContactView />} />
+              <Route path="/listing/:id" element={<ListingView />} />
+              <Route path="/careers" element={<CareersView />} />
+              <Route path="/trust-safety" element={<TrustSafetyView />} />
+              <Route path="/cancellation-options" element={<CancellationOptionsView />} />
+              <Route path="/host-protection" element={<HostProtectionView />} />
+              <Route path="/how-booking-works" element={<HowBookingWorksView />} />
+              <Route path="/pricing-payouts" element={<PricingPayoutsView />} />
+              <Route path="/support" element={<SupportView />} />
             </Route>
 
             {/* Protected Dashboard Routes (Hotel Managers, Admins, Homeowners, Receptionists) */}
-            <Route element={<ProtectedRoute allowedRoles={['HOTEL_MANAGER', 'HOMEOWNER', 'RECEPTIONIST', 'GUEST_HOUSE_ADMIN']} />}>
+            <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['HOTEL_MANAGER', 'HOMEOWNER', 'RECEPTIONIST', 'GUEST_HOUSE_ADMIN']} />}>
               <Route element={<DashboardLayout />}>
-                <Route path="/" element={<DashboardOverview />} />
-                <Route path="/calendar" element={<CalendarView />} />
-                <Route path="/rooms" element={<RoomsView />} />
-                <Route path="/guests" element={<GuestsView />} />
-                <Route path="/settings" element={<SettingsView />} />
+                <Route index element={<DashboardOverview />} />
+                <Route path="calendar" element={<CalendarView />} />
+                <Route path="rooms" element={<RoomsView />} />
+                <Route path="guests" element={<GuestsView />} />
+                <Route path="settings" element={<SettingsView />} />
+                <Route path="properties" element={<PropertiesView />} />
+                <Route path="staff" element={<StaffView />} />
+                <Route path="buildings" element={<ApartmentBuildingsView />} />
+                <Route path="units" element={<ApartmentUnitsView />} />
+                <Route path="tenants" element={<ApartmentTenantsView />} />
                 <Route path="*" element={
                   <div className="flex h-full items-center justify-center text-slate-500">
                     Page Under Construction

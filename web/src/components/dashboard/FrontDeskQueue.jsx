@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useDashboard } from '../../context/DashboardContext';
-
 import axiosClient from '../../api/axiosClient';
 
 const fetchTodayBookings = async () => {
@@ -18,64 +17,56 @@ export default function FrontDeskQueue() {
     queryFn: fetchTodayBookings
   });
 
-
-  if (isLoading) return <div className="p-6 text-slate-500 animate-pulse bg-white rounded-xl border border-slate-200">Loading front desk queue...</div>;
-  if (error) return <div className="p-6 text-red-500 bg-white rounded-xl border border-red-200">Error loading queue. Is the API running?</div>;
+  if (isLoading) return <div style={{padding:'24px', color:'var(--ink-soft)'}}>Loading front desk queue...</div>;
+  if (error) return <div style={{padding:'24px', color:'var(--brick-deep)'}}>Error loading queue. Is the API running?</div>;
 
   const bookings = data?.[activeTab] || [];
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[500px]">
+    <div className="queue-panel">
       {/* Tabs */}
-      <div className="flex border-b border-slate-200 bg-slate-50/50">
+      <div className="queue-tabs">
         {['arrivals', 'departures', 'inHouse'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-3 text-sm font-medium text-center capitalize transition-colors relative ${
-              activeTab === tab 
-                ? 'text-blue-600 bg-white' 
-                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
-            }`}
+            className={`queue-tab ${activeTab === tab ? 'active' : ''}`}
           >
             {tab.replace(/([A-Z])/g, ' $1').trim()}
-            <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${activeTab === tab ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-600'}`}>
+            <span className="queue-badge">
               {data?.[tab]?.length || 0}
             </span>
-            {activeTab === tab && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
-            )}
           </button>
         ))}
       </div>
 
       {/* List */}
-      <div className="p-4 flex-1 overflow-y-auto space-y-3">
+      <div className="queue-list">
         {bookings.length === 0 ? (
-          <div className="text-center py-12 text-slate-400">No {activeTab.replace(/([A-Z])/g, ' $1').trim().toLowerCase()} for today.</div>
+          <div style={{textAlign:'center', padding:'40px 0', color:'var(--ink-soft)', fontSize:'14px'}}>
+            No {activeTab.replace(/([A-Z])/g, ' $1').trim().toLowerCase()} for today.
+          </div>
         ) : (
           bookings.map((booking) => (
             <div 
               key={booking.id} 
               onClick={() => openBookingSidebar(booking.id)}
-              className="flex items-center justify-between p-4 rounded-lg border border-slate-100 bg-slate-50 hover:border-slate-200 hover:shadow-sm transition-all group cursor-pointer"
+              className="queue-card"
             >
               <div>
-                <h4 className="font-semibold text-slate-800">{booking.guest?.name || 'Walk-in Guest'}</h4>
-                <p className="text-sm text-slate-500 mt-0.5">Room <span className="font-medium text-slate-700">{booking.room?.room_number || 'TBD'}</span></p>
+                <b>{booking.guest?.name || 'Walk-in Guest'}</b>
+                <span className="room">Room {booking.room?.room_number || 'TBD'}</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide ${
-                  booking.status === 'CONFIRMED' || booking.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-700' :
-                  booking.status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
-                  'bg-slate-200 text-slate-700'
+              <div style={{display:'flex', alignItems:'center', gap:'12px'}}>
+                <span className={`status ${
+                  booking.status === 'CONFIRMED' || booking.status === 'COMPLETED' ? 'live' :
+                  booking.status === 'PENDING' ? 'pending' : 'paused'
                 }`}>
                   {booking.status}
                 </span>
-                
                 {activeTab === 'arrivals' && (
-                  <span className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-600 text-sm font-medium">
-                    View Details &rarr;
+                  <span style={{fontSize:'12px', fontWeight:'600', color:'var(--brand)', opacity:0.8}}>
+                    Details &rarr;
                   </span>
                 )}
               </div>
@@ -83,7 +74,6 @@ export default function FrontDeskQueue() {
           ))
         )}
       </div>
-
     </div>
   );
 }

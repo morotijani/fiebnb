@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Support — Fiebnb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .wa-band{
+    border-radius:28px; background:var(--forest-deep); color:var(--white); padding:44px 48px;
+    display:flex; justify-content:space-between; align-items:center; gap:24px; flex-wrap:wrap;
+    position:relative; overflow:hidden;
+  }
+  .wa-band::before{ content:""; position:absolute; inset:0; background:radial-gradient(500px 260px at 90% 10%, rgba(200,155,60,0.22), transparent 70%); }
+  .wa-band .left{ position:relative; display:flex; align-items:center; gap:18px; }
+  .wa-band .ic{ width:56px; height:56px; border-radius:50%; background:rgba(250,246,239,0.12); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .wa-band .ic svg{ width:26px; height:26px; stroke:var(--white); }
+  .wa-band h2{ color:var(--white); font-size:24px; }
+  .wa-band p{ color:rgba(250,246,239,0.75); font-size:14.5px; margin-top:4px; }
+  .wa-band .btn{ position:relative; background:#25D366; color:#0b3d24; font-weight:700; }
+  .wa-band .btn:hover{ background:#1fb959; }
+
+  .topic-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  .topic-card{ padding:24px; border:1px solid var(--line); border-radius:var(--r-lg); background:var(--white); }
+  .topic-card .ic{ width:40px; height:40px; border-radius:10px; background:var(--sand); display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
+  .topic-card .ic svg{ width:19px; height:19px; stroke:var(--brick-deep); }
+  .topic-card h3{ font-size:15.5px; margin-bottom:6px; }
+  .topic-card p{ font-size:13.5px; color:var(--ink-soft); line-height:1.55; }
+  .topic-card a.tlink{ display:inline-flex; align-items:center; gap:5px; margin-top:12px; font-size:13px; font-weight:700; color:var(--brick); }
+
+  .hours-strip{ display:flex; gap:44px; flex-wrap:wrap; margin-top:8px; }
+  @media (max-width:900px){ .topic-grid{ grid-template-columns:1fr; } .wa-band{ flex-direction:column; align-items:flex-start; } }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-row">
+    <a href="index.html" class="logo">
+      <span class="mark"><span class="weave-strip"><span></span><span></span><span></span><span></span></span></span>
+      Fiebnb
+    </a>
+    <div class="nav-links">
+      <a href="browse.html">Stays</a>
+      <a href="browse.html?type=Hotel">Hotels</a>
+      <a href="browse.html?term=long">Long-term rentals</a>
+      <a href="host-dashboard.html">Become a host</a>
+    </div>
+    <div class="nav-actions">
+      <a href="host-dashboard.html" class="btn btn-ghost btn-sm">List your property</a>
+      <button class="icon-btn" aria-label="Account"><i data-lucide="user" style="width:17px;height:17px"></i></button>
+    </div>
+  </div>
+</nav>
+
+<header class="page-hero">
+  <div class="wrap">
+    <div class="weave-strip short"><span></span><span></span><span></span><span></span></div>
+    <p class="eyebrow">Support</p>
+    <h1>Fastest help is a WhatsApp message away</h1>
+    <p class="lede">Our support team answers directly on WhatsApp — no ticket numbers, no waiting on hold.</p>
+  </div>
+</header>
+
+<main>
+  <section class="content-section">
+    <div class="wrap">
+      <div class="wa-band">
+        <div class="left">
+          <div class="ic"><i data-lucide="message-circle"></i></div>
+          <div>
+            <h2>Chat with Fiebnb support</h2>
+            <p>+233 20 000 0000 · Daily, 7am – 10pm GMT · Avg. reply time under 5 minutes</p>
+          </div>
+        </div>
+        <a class="btn" href="https://wa.me/233200000000?text=Hi%20Fiebnb%2C%20I%20need%20help%20with" target="_blank" rel="noopener">
+          <i data-lucide="message-circle" style="width:17px;height:17px"></i> Open WhatsApp
+        </a>
+      </div>
+      <div class="hours-strip">
+        <div class="stat"><b style="font-family:var(--font-display);font-size:26px;display:block">&lt;5 min</b><span style="font-size:13px;color:var(--ink-soft)">Average first response</span></div>
+        <div class="stat"><b style="font-family:var(--font-display);font-size:26px;display:block">7am–10pm</b><span style="font-size:13px;color:var(--ink-soft)">Daily, every day</span></div>
+        <div class="stat"><b style="font-family:var(--font-display);font-size:26px;display:block">GH · EN</b><span style="font-size:13px;color:var(--ink-soft)">Twi, Ga & English spoken</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="wrap">
+      <div class="section-head"><div><p class="eyebrow">Browse by topic</p><h2>What do you need help with?</h2></div></div>
+      <div class="topic-grid">
+        <div class="topic-card">
+          <div class="ic"><i data-lucide="calendar-search"></i></div>
+          <h3>A booking I made</h3>
+          <p>Changing dates, contacting your host, or an issue during your stay.</p>
+          <a class="tlink" href="how-booking-works.html">How booking works <i data-lucide="arrow-right" style="width:13px;height:13px"></i></a>
+        </div>
+        <div class="topic-card">
+          <div class="ic"><i data-lucide="banknote"></i></div>
+          <h3>Payments & refunds</h3>
+          <p>Failed payments, refund status, or questions about a charge.</p>
+          <a class="tlink" href="cancellation-options.html">Cancellation options <i data-lucide="arrow-right" style="width:13px;height:13px"></i></a>
+        </div>
+        <div class="topic-card">
+          <div class="ic"><i data-lucide="shield-alert"></i></div>
+          <h3>Report a problem</h3>
+          <p>Something felt unsafe, misleading, or didn't match the listing.</p>
+          <a class="tlink" href="trust-safety.html">Trust & safety <i data-lucide="arrow-right" style="width:13px;height:13px"></i></a>
+        </div>
+        <div class="topic-card">
+          <div class="ic"><i data-lucide="home"></i></div>
+          <h3>Listing my property</h3>
+          <p>Getting started as a host, verification, or editing a listing.</p>
+          <a class="tlink" href="host-dashboard.html">Host dashboard <i data-lucide="arrow-right" style="width:13px;height:13px"></i></a>
+        </div>
+        <div class="topic-card">
+          <div class="ic"><i data-lucide="wallet"></i></div>
+          <h3>Payouts as a host</h3>
+          <p>Payout schedules, fees, and adding a Mobile Money or bank account.</p>
+          <a class="tlink" href="pricing-payouts.html">Pricing & payouts <i data-lucide="arrow-right" style="width:13px;height:13px"></i></a>
+        </div>
+        <div class="topic-card">
+          <div class="ic"><i data-lucide="mail"></i></div>
+          <h3>Something else</h3>
+          <p>General questions, press, careers, or anything that doesn't fit above.</p>
+          <a class="tlink" href="contact.html">Contact form <i data-lucide="arrow-right" style="width:13px;height:13px"></i></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section" style="border-bottom:none">
+    <div class="wrap">
+      <div class="cta-band">
+        <h2>Still stuck?</h2>
+        <p>Send us a message on WhatsApp and we'll take it from there.</p>
+        <div class="actions">
+          <a class="btn" style="background:#25D366;color:#0b3d24" href="https://wa.me/233200000000" target="_blank" rel="noopener">Message us on WhatsApp</a>
+          <a href="contact.html" class="btn btn-outline" style="border-color:rgba(250,246,239,0.3);color:var(--paper)">Use the contact form</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="logo" style="color:var(--white)">
+          <span class="mark"><span class="weave-strip"><span></span><span></span><span></span><span></span></span></span>
+          Fiebnb
+        </a>
+        <p>Ghana's marketplace for hotels, guesthouses and long-term rentals — built for how Ghanaians and visitors actually find a place to stay.</p>
+      </div>
+      <div>
+        <h4>Guests</h4>
+        <a href="browse.html">Browse stays</a>
+        <a href="how-booking-works.html">How booking works</a>
+        <a href="trust-safety.html">Trust & safety</a>
+        <a href="cancellation-options.html">Cancellation options</a>
+      </div>
+      <div>
+        <h4>Hosts</h4>
+        <a href="host-dashboard.html">List your property</a>
+        <a href="host-dashboard.html">Host dashboard</a>
+        <a href="pricing-payouts.html">Pricing & payouts</a>
+        <a href="host-protection.html">Host protection</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="about.html">About Fiebnb</a>
+        <a href="careers.html">Careers</a>
+        <a href="support.html">Support (WhatsApp)</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Fiebnb Ghana. All rights reserved.</span>
+      <span>Accra · Kumasi · Takoradi · Cape Coast · Tamale</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

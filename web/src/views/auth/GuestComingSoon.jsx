@@ -34,7 +34,7 @@ const GuestComingSoon = () => {
         <div className="bg-blue-50 rounded-xl p-4 mb-8">
           <p className="text-sm text-blue-800 mb-3">Want to list your property on Fiebnb?</p>
           <button
-            onClick={() => navigate('/guest/onboarding')}
+            onClick={() => navigate('/onboarding')}
             className="w-full flex justify-center items-center gap-2 py-2 px-4 bg-blue-600 text-white rounded-lg shadow-sm text-sm font-medium hover:bg-blue-700 transition-colors"
           >
             <span className="material-symbols-outlined text-lg">add_home</span>

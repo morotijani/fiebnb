@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing & payouts — Fiebnb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .payout-method{ display:flex; align-items:center; gap:16px; padding:20px; border:1px solid var(--line); border-radius:var(--r-lg); background:var(--white); }
+  .payout-method .ic{ width:44px; height:44px; border-radius:12px; background:var(--sand); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .payout-method .ic svg{ width:21px; height:21px; stroke:var(--brick-deep); }
+  .payout-method h3{ font-size:15px; }
+  .payout-method p{ font-size:13px; color:var(--ink-soft); margin-top:2px; }
+  .payout-methods{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+  .fee-highlight{ display:flex; align-items:baseline; gap:10px; margin-top:6px; }
+  .fee-highlight b{ font-family:var(--font-display); font-size:44px; }
+  .fee-highlight span{ color:var(--ink-soft); font-size:14px; }
+  @media (max-width:900px){ .payout-methods{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-row">
+    <a href="index.html" class="logo">
+      <span class="mark"><span class="weave-strip"><span></span><span></span><span></span><span></span></span></span>
+      Fiebnb
+    </a>
+    <div class="nav-links">
+      <a href="browse.html">Stays</a>
+      <a href="browse.html?type=Hotel">Hotels</a>
+      <a href="browse.html?term=long">Long-term rentals</a>
+      <a href="host-dashboard.html">Become a host</a>
+    </div>
+    <div class="nav-actions">
+      <a href="host-dashboard.html" class="btn btn-ghost btn-sm">List your property</a>
+      <button class="icon-btn" aria-label="Account"><i data-lucide="user" style="width:17px;height:17px"></i></button>
+    </div>
+  </div>
+</nav>
+
+<header class="page-hero">
+  <div class="wrap">
+    <div class="weave-strip short"><span></span><span></span><span></span><span></span></div>
+    <p class="eyebrow">For property owners</p>
+    <h1>Simple pricing. Fast, reliable payouts.</h1>
+    <p class="lede">No listing fees, no hidden charges — Fiebnb takes one commission per completed booking, and the rest lands in your account.</p>
+  </div>
+</header>
+
+<main>
+  <section class="content-section">
+    <div class="wrap">
+      <div class="split-row">
+        <div>
+          <p class="eyebrow">What it costs</p>
+          <h2 style="font-size:28px;margin-top:10px">You keep 92% of every booking</h2>
+          <div class="fee-highlight"><b>8%</b><span>host service fee, deducted automatically<br>from each completed booking</span></div>
+          <p class="lede" style="margin-top:18px">There's no charge to create a listing, no monthly subscription, and no fee if a booking falls through before check-in. Guests separately pay a small service fee on top of your listed price — it never comes out of your payout.</p>
+        </div>
+        <img src="https://picsum.photos/seed/fiebnb-pricing1/700/560" alt="">
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="wrap">
+      <div class="section-head"><div><p class="eyebrow">Fee breakdown</p><h2>Where the money goes</h2></div></div>
+      <table class="policy-table">
+        <thead><tr><th>Booking type</th><th>Host service fee</th><th>Guest service fee</th><th>Payout timing</th></tr></thead>
+        <tbody>
+          <tr><td>Hotel / Guesthouse (short stay)</td><td>8%</td><td>~6–10%, shown at checkout</td><td>24 hrs after check-in</td></tr>
+          <tr><td>Apartment (short stay)</td><td>8%</td><td>~6–10%, shown at checkout</td><td>24 hrs after check-in</td></tr>
+          <tr><td>Long-term rental</td><td>6%</td><td>One-time 4% on first month</td><td>3 days after each monthly payment</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="wrap">
+      <div class="section-head"><div><p class="eyebrow">Getting paid</p><h2>Choose how your payouts arrive</h2></div></div>
+      <div class="payout-methods">
+        <div class="payout-method">
+          <div class="ic"><i data-lucide="smartphone"></i></div>
+          <div><h3>Mobile Money</h3><p>MTN, Telecel or AirtelTigo — most hosts' fastest option, usually same-day.</p></div>
+        </div>
+        <div class="payout-method">
+          <div class="ic"><i data-lucide="landmark"></i></div>
+          <div><h3>Bank transfer</h3><p>Direct to any Ghanaian bank account, typically within 1–2 business days.</p></div>
+        </div>
+        <div class="payout-method">
+          <div class="ic"><i data-lucide="wallet"></i></div>
+          <div><h3>Fiebnb Wallet</h3><p>Hold your balance in-app and withdraw on your own schedule, fee-free.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="wrap">
+      <div class="section-head"><div><p class="eyebrow">Common questions</p><h2>Pricing, answered</h2></div></div>
+      <div>
+        <details class="faq-item" open>
+          <summary>Is there a fee to list my property?<i data-lucide="chevron-down" class="chev" style="width:18px;height:18px"></i></summary>
+          <p>No. Creating and publishing a listing is free, for both short-stay and long-term properties. You're only charged once a booking is completed.</p>
+        </details>
+        <details class="faq-item">
+          <summary>When exactly do I get paid?<i data-lucide="chevron-down" class="chev" style="width:18px;height:18px"></i></summary>
+          <p>For short stays, payout is released 24 hours after the guest checks in. For long-term rentals, each month's rent is released 3 days after the guest's payment clears, giving time to resolve any issues.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I set my own prices?<i data-lucide="chevron-down" class="chev" style="width:18px;height:18px"></i></summary>
+          <p>Yes, fully. You control nightly or monthly rates, minimum stay lengths, and seasonal pricing from your host dashboard.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What if a guest cancels — do I still get paid?<i data-lucide="chevron-down" class="chev" style="width:18px;height:18px"></i></summary>
+          <p>It depends on your cancellation policy and how close to check-in the cancellation happens. See <a href="cancellation-options.html" style="color:var(--brick);font-weight:600">Cancellation options</a> for the exact breakdown.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section" style="border-bottom:none">
+    <div class="wrap">
+      <div class="cta-band">
+        <h2>Start earning from your property</h2>
+        <p>List for free — you only pay when you get booked.</p>
+        <div class="actions">
+          <a href="host-dashboard.html" class="btn" style="background:var(--gold);color:var(--ink)">Go to host dashboard</a>
+          <a href="host-protection.html" class="btn btn-outline" style="border-color:rgba(250,246,239,0.3);color:var(--paper)">See host protection</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="logo" style="color:var(--white)">
+          <span class="mark"><span class="weave-strip"><span></span><span></span><span></span><span></span></span></span>
+          Fiebnb
+        </a>
+        <p>Ghana's marketplace for hotels, guesthouses and long-term rentals — built for how Ghanaians and visitors actually find a place to stay.</p>
+      </div>
+      <div>
+        <h4>Guests</h4>
+        <a href="browse.html">Browse stays</a>
+        <a href="how-booking-works.html">How booking works</a>
+        <a href="trust-safety.html">Trust & safety</a>
+        <a href="cancellation-options.html">Cancellation options</a>
+      </div>
+      <div>
+        <h4>Hosts</h4>
+        <a href="host-dashboard.html">List your property</a>
+        <a href="host-dashboard.html">Host dashboard</a>
+        <a href="pricing-payouts.html">Pricing & payouts</a>
+        <a href="host-protection.html">Host protection</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="about.html">About Fiebnb</a>
+        <a href="careers.html">Careers</a>
+        <a href="support.html">Support (WhatsApp)</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Fiebnb Ghana. All rights reserved.</span>
+      <span>Accra · Kumasi · Takoradi · Cape Coast · Tamale</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

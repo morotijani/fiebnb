@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate, Navigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useLocation, useNavigate, Navigate, Link } from 'react-router-dom';
+import { MailCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const OtpVerificationView = () => {
@@ -8,14 +9,16 @@ const OtpVerificationView = () => {
   const { verifyOtp, resendOtp } = useAuth();
   
   const phone_number = location.state?.phone_number;
+  const isNewRegistration = location.state?.isNewRegistration;
 
-  const [otpCode, setOtpCode] = useState('');
+  const [otpCodes, setOtpCodes] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
+  
+  const inputRefs = useRef([]);
 
-  // Timer logic for Resend Cooldown
   useEffect(() => {
     if (timeLeft > 0) {
       const timerId = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
@@ -23,10 +26,44 @@ const OtpVerificationView = () => {
     }
   }, [timeLeft]);
 
-  // Prevent direct access to this page
   if (!phone_number) {
     return <Navigate to="/register" replace />;
   }
+
+  const handleInputChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return;
+    
+    const newOtpCodes = [...otpCodes];
+    newOtpCodes[index] = value;
+    setOtpCodes(newOtpCodes);
+
+    if (value !== '' && index < 5) {
+      inputRefs.current[index + 1].focus();
+    }
+  };
+
+  const handleKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && otpCodes[index] === '' && index > 0) {
+      inputRefs.current[index - 1].focus();
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (pastedData) {
+      const newOtpCodes = [...otpCodes];
+      for (let i = 0; i < pastedData.length; i++) {
+        newOtpCodes[i] = pastedData[i];
+      }
+      setOtpCodes(newOtpCodes);
+      if (pastedData.length < 6) {
+        inputRefs.current[pastedData.length].focus();
+      } else {
+        inputRefs.current[5].focus();
+      }
+    }
+  };
 
   const handleVerify = async (e) => {
     e.preventDefault();
@@ -34,6 +71,7 @@ const OtpVerificationView = () => {
     setSuccess('');
     setIsLoading(true);
 
+    const otpCode = otpCodes.join('');
     if (otpCode.length !== 6) {
       setError('OTP must be exactly 6 digits');
       setIsLoading(false);
@@ -42,14 +80,15 @@ const OtpVerificationView = () => {
 
     try {
       const user = await verifyOtp(phone_number, otpCode);
-      if (user.role === 'GUEST') {
+      if (isNewRegistration && user.role === 'HOMEOWNER') {
+        navigate('/onboarding');
+      } else if (user.role === 'GUEST') {
         navigate('/guest');
       } else {
-        navigate('/');
+        navigate('/dashboard');
       }
     } catch (err) {
       setError(err.response?.data?.message || err.response?.data?.error || 'Verification failed.');
-      // If 3 strikes are hit, we might want to redirect them to register or wait, but the message itself will inform them.
     } finally {
       setIsLoading(false);
     }
@@ -67,83 +106,88 @@ const OtpVerificationView = () => {
     }
   };
 
+  const maskPhone = (phone) => {
+    if (!phone || phone.length < 5) return phone;
+    return phone.slice(0, 3) + '***' + phone.slice(-2);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="px-8 pt-8 pb-6">
-          <div className="flex justify-center mb-6">
-            <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center shadow-inner">
-              <span className="material-symbols-outlined text-blue-600 text-2xl">sms</span>
-            </div>
+    <div className="auth-shell">
+      <aside className="auth-aside">
+        <img className="bg" src="https://picsum.photos/seed/fiebnb-auth-verify/900/1200" alt="Background" />
+        <div className="veil"></div>
+        <div className="content top-logo">
+          <Link to="/"><img src="/assets/fiebnb-logo-horizontal-reversed.svg" alt="Fiebnb" style={{height: '34px'}} /></Link>
+        </div>
+        <div className="content bottom">
+          <div className="weave-strip short"><span></span><span></span><span></span><span></span></div>
+          <h2>One last step</h2>
+          <p>Verifying your account helps keep every stay, host and guest on Fiebnb trustworthy.</p>
+        </div>
+      </aside>
+
+      <main className="auth-main">
+        <div className="auth-card">
+          <Link to="/" className="mobile-logo"><img src="/assets/fiebnb-logo-horizontal.svg" alt="Fiebnb" /></Link>
+
+          <h1>Verify your account</h1>
+          <p className="sub">Enter the 6-digit code we sent to activate your account.</p>
+
+          <div className="contact-target">
+            <MailCheck size={18} stroke="var(--brick-deep)" />
+            <span>Sent to <b>{maskPhone(phone_number)}</b> · <Link to="/register" style={{color: 'var(--brick)', fontWeight: '600'}}>not you?</Link></span>
           </div>
-          
-          <h2 className="text-center text-2xl font-bold tracking-tight text-slate-900 mb-2">
-            Verify your phone
-          </h2>
-          <p className="text-center text-sm text-slate-500 mb-8">
-            We've sent a 6-digit code to <span className="font-semibold text-slate-700">{phone_number}</span>
-          </p>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3 animate-pulse">
-              <span className="material-symbols-outlined text-red-500 text-xl shrink-0">error</span>
-              <p className="text-sm text-red-700">{error}</p>
+            <div style={{background: '#fee2e2', color: '#b91c1c', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px', border: '1px solid #fca5a5'}}>
+              {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-100 rounded-xl flex items-start gap-3">
-              <span className="material-symbols-outlined text-green-500 text-xl shrink-0">check_circle</span>
-              <p className="text-sm text-green-700">{success}</p>
+            <div style={{background: '#dcfce7', color: '#15803d', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px', border: '1px solid #86efac'}}>
+              {success}
             </div>
           )}
 
-          <form onSubmit={handleVerify} className="space-y-6">
-            <div>
-              <label htmlFor="otpCode" className="sr-only">OTP Code</label>
-              <input
-                type="text"
-                id="otpCode"
-                maxLength="6"
-                required
-                value={otpCode}
-                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))} // only allow numbers
-                className="block w-full text-center tracking-[0.5em] text-3xl font-mono py-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-slate-900 bg-slate-50 focus:bg-white placeholder:text-slate-300"
-                placeholder="------"
-              />
+          <form onSubmit={handleVerify}>
+            <div className="form-field">
+              <label>Verification code</label>
+              <div className="otp-row">
+                {otpCodes.map((digit, i) => (
+                  <input 
+                    key={i}
+                    ref={el => inputRefs.current[i] = el}
+                    type="text" 
+                    inputMode="numeric" 
+                    maxLength={1} 
+                    required 
+                    value={digit}
+                    onChange={e => handleInputChange(i, e.target.value)}
+                    onKeyDown={e => handleKeyDown(i, e)}
+                    onPaste={i === 0 ? handlePaste : undefined}
+                  />
+                ))}
+              </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={isLoading || otpCode.length !== 6}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
-                  Verifying...
-                </div>
+            <div className="resend-row" style={{marginBottom: '20px'}}>
+              <span>Didn't get a code?</span>
+              {timeLeft > 0 ? (
+                <span style={{color: 'var(--ink-soft)'}}>Resend in {timeLeft}s</span>
               ) : (
-                'Verify & Continue'
+                <button type="button" onClick={handleResend} style={{background: 'none', border: 'none', color: 'var(--brick)', fontWeight: '600', cursor: 'pointer', padding: 0}}>Resend it</button>
               )}
+            </div>
+
+            <button type="submit" className="btn btn-primary btn-block" disabled={isLoading}>
+              {isLoading ? 'Verifying...' : 'Verify account'}
             </button>
           </form>
+
+          <p className="auth-footer-note">Wrong email or phone? <Link to="/register">Go back and edit it</Link></p>
         </div>
-        
-        <div className="px-8 py-6 bg-slate-50 border-t border-slate-100 text-center flex flex-col items-center justify-center">
-          <p className="text-sm text-slate-600 mb-3">
-            Didn't receive the code?
-          </p>
-          <button
-            onClick={handleResend}
-            disabled={timeLeft > 0}
-            className="flex items-center gap-2 text-sm font-medium text-blue-600 disabled:text-slate-400 transition-colors"
-          >
-            <span className="material-symbols-outlined text-lg">refresh</span>
-            {timeLeft > 0 ? `Resend code in ${timeLeft}s` : 'Resend Code'}
-          </button>
-        </div>
-      </div>
+      </main>
     </div>
   );
 };

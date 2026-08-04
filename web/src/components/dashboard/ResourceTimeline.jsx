@@ -3,7 +3,6 @@ import { eachDayOfInterval, addDays, format, differenceInDays, startOfDay } from
 import { useDashboard } from '../../context/DashboardContext';
 import { useEffect } from 'react';
 import { io } from 'socket.io-client';
-
 import axiosClient from '../../api/axiosClient';
 
 const fetchTimelineData = async () => {
@@ -35,8 +34,8 @@ export default function ResourceTimeline() {
     queryFn: fetchTimelineData
   });
 
-  if (isLoading) return <div className="p-6 text-slate-500 animate-pulse bg-white rounded-xl border border-slate-200">Loading master timeline...</div>;
-  if (error) return <div className="p-6 text-red-500 bg-white rounded-xl border border-red-200">Error loading timeline.</div>;
+  if (isLoading) return <div className="panel" style={{padding:'24px', color:'var(--ink-soft)'}}>Loading master timeline...</div>;
+  if (error) return <div className="panel" style={{padding:'24px', color:'var(--brick-deep)'}}>Error loading timeline.</div>;
 
   const { rooms = [], bookings = [] } = data || {};
 
@@ -61,31 +60,30 @@ export default function ResourceTimeline() {
     let span = differenceInDays(effectiveEnd, effectiveStart);
     if (span === 0) span = 1; // Minimum 1 day block
     
-    let colorClass = 'bg-slate-400 border-slate-500 text-white';
+    let colorStyle = { background: 'var(--sand)', border: '1px solid var(--line-dark)', color: 'var(--ink)' };
     if (booking.status === 'CONFIRMED' || booking.status === 'COMPLETED') {
-      colorClass = 'bg-emerald-500 border-emerald-600 text-white shadow-emerald-200';
+      colorStyle = { background: '#E1EAE0', border: '1px solid #C5D4C3', color: 'var(--forest-deep)' };
     } else if (booking.status === 'PENDING') {
-      colorClass = 'bg-amber-300 border-amber-400 text-amber-900 shadow-amber-100';
+      colorStyle = { background: 'var(--gold-pale)', border: '1px solid #E5D0A1', color: 'var(--gold-deep)' };
+    } else if (booking.status === 'CANCELLED') {
+      colorStyle = { background: 'var(--brick-pale)', border: '1px solid #FBCFE8', color: 'var(--brick-deep)' };
     }
 
     return {
-      style: { gridColumnStart: startCol, gridColumnEnd: `span ${span}`, gridRow: rowIndex },
-      className: `relative mx-1 my-1 p-2 rounded border shadow-sm flex items-center overflow-hidden cursor-pointer hover:brightness-110 transition-all ${colorClass}`
+      style: { gridColumnStart: startCol, gridColumnEnd: `span ${span}`, gridRow: rowIndex, ...colorStyle, display: 'flex', alignItems: 'center', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.2s', padding: '0 12px', borderRadius: '8px', margin: '4px', zIndex: 10, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' },
     };
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col h-[600px]">
-      <div className="overflow-x-auto flex-1 custom-scrollbar relative">
+    <div className="panel" style={{height:'600px', display:'flex', flexDirection:'column', padding:0, overflow:'hidden', marginBottom: 0, width: '100%', minWidth: 0}}>
+      <div style={{overflowX:'auto', flex:1, position:'relative'}} className="custom-scrollbar">
         <div 
-          className="grid min-w-max" 
-          style={{ gridTemplateColumns: `200px repeat(${days.length}, minmax(48px, 1fr))` }}
+          style={{ display: 'grid', minWidth: 'max-content', gridTemplateColumns: `200px repeat(${days.length}, minmax(48px, 1fr))` }}
         >
           {/* --- HEADER ROW --- */}
           {/* Sticky Room Label Header */}
           <div 
-            className="sticky left-0 bg-slate-50 border-b border-r border-slate-200 z-30 flex items-center px-4 py-3 font-bold text-slate-700 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]"
-            style={{ gridColumn: 1, gridRow: 1 }}
+            style={{ gridColumn: 1, gridRow: 1, position: 'sticky', left: 0, background: 'var(--paper-dim)', borderBottom: '1px solid var(--line)', borderRight: '1px solid var(--line)', zIndex: 30, display: 'flex', alignItems: 'center', padding: '12px 16px', fontWeight: 700, color: 'var(--ink)', boxShadow: '2px 0 5px -2px rgba(0,0,0,0.05)' }}
           >
             Rooms
           </div>
@@ -94,11 +92,10 @@ export default function ResourceTimeline() {
           {days.map((day, idx) => (
             <div 
               key={`header-${idx}`} 
-              className="border-b border-r border-slate-100 bg-slate-50 text-center py-2 flex flex-col justify-center sticky top-0 z-20"
-              style={{ gridColumn: idx + 2, gridRow: 1 }}
+              style={{ gridColumn: idx + 2, gridRow: 1, borderBottom: '1px solid var(--line)', borderRight: '1px solid var(--line)', background: 'var(--paper-dim)', textAlign: 'center', padding: '8px 0', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'sticky', top: 0, zIndex: 20 }}
             >
-              <span className="text-xs font-semibold text-slate-500 uppercase">{format(day, 'EEE')}</span>
-              <span className={`text-sm font-bold ${idx === 0 ? 'text-blue-600' : 'text-slate-800'}`}>
+              <span style={{fontSize:'11px', fontWeight:600, color:'var(--ink-soft)', textTransform:'uppercase'}}>{format(day, 'EEE')}</span>
+              <span style={{fontSize:'14px', fontWeight:700, color: idx === 0 ? 'var(--brand)' : 'var(--ink)'}}>
                 {format(day, 'd')}
               </span>
             </div>
@@ -109,14 +106,14 @@ export default function ResourceTimeline() {
             const rowIndex = roomIdx + 2; // Row 1 is header
 
             return (
-              <div key={room.id} className="contents group">
+              <div key={room.id} style={{display:'contents'}} className="timeline-row">
                 {/* Sticky Left Room Name */}
                 <div 
-                  className="sticky left-0 bg-white group-hover:bg-slate-50 border-b border-r border-slate-200 z-10 flex flex-col justify-center px-4 py-2 text-sm shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors"
-                  style={{ gridColumn: 1, gridRow: rowIndex }}
+                  className="timeline-room-label"
+                  style={{ gridColumn: 1, gridRow: rowIndex, position: 'sticky', left: 0, background: 'var(--white)', borderBottom: '1px solid var(--line)', borderRight: '1px solid var(--line)', zIndex: 10, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '8px 16px', boxShadow: '2px 0 5px -2px rgba(0,0,0,0.05)', transition: 'background 0.2s' }}
                 >
-                  <span className="font-bold text-slate-800">{room.room_number}</span>
-                  <span className="text-xs text-slate-500 font-medium truncate w-full" title={room.category?.name || 'Uncategorized'}>
+                  <span style={{fontWeight:700, color:'var(--ink)', fontSize:'14px'}}>{room.room_number}</span>
+                  <span style={{fontSize:'12px', color:'var(--ink-soft)', fontWeight:500, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}} title={room.category?.name || 'Uncategorized'}>
                     {room.category?.name || 'Uncategorized'}
                   </span>
                 </div>
@@ -125,8 +122,8 @@ export default function ResourceTimeline() {
                 {days.map((day, dayIdx) => (
                   <div 
                     key={`cell-${room.id}-${dayIdx}`} 
-                    className="border-b border-r border-slate-100 bg-white group-hover:bg-slate-50 cursor-crosshair transition-colors hover:bg-blue-50"
-                    style={{ gridColumn: dayIdx + 2, gridRow: rowIndex }}
+                    className="timeline-cell"
+                    style={{ gridColumn: dayIdx + 2, gridRow: rowIndex, borderBottom: '1px solid var(--line)', borderRight: '1px solid var(--line)', background: 'var(--white)', cursor: 'crosshair', transition: 'background 0.2s' }}
                     onClick={() => openWalkInModal({ roomId: room.id, date: format(day, 'yyyy-MM-dd') })}
                   />
                 ))}
@@ -140,10 +137,12 @@ export default function ResourceTimeline() {
                     <div 
                       key={booking.id}
                       style={layout.style}
-                      className={`${layout.className} z-10`}
+                      className="timeline-booking"
                       onClick={() => openBookingSidebar(booking.id)}
+                      onMouseEnter={(e) => e.currentTarget.style.filter = 'brightness(1.05)'}
+                      onMouseLeave={(e) => e.currentTarget.style.filter = 'none'}
                     >
-                      <span className="truncate text-xs font-semibold">{booking.guest_name}</span>
+                      <span style={{whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', fontSize:'13px', fontWeight:500}}>{booking.guest_name}</span>
                     </div>
                   );
                 })}

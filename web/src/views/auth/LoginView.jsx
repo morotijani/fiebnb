@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Eye, EyeOff, Globe } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const LoginView = () => {
+  const [method, setMethod] = useState('email');
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -20,7 +24,7 @@ const LoginView = () => {
       if (user.role === 'GUEST') {
         navigate('/guest');
       } else {
-        navigate('/');
+        navigate('/dashboard');
       }
     } catch (err) {
       setError(err.response?.data?.message || err.response?.data?.error || 'Login failed. Please check your credentials.');
@@ -30,117 +34,102 @@ const LoginView = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="px-8 pt-8 pb-6">
-          <div className="flex justify-center mb-6">
-            <div className="h-12 w-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
-              <span className="material-symbols-outlined text-white text-2xl">home_work</span>
-            </div>
+    <div className="auth-shell">
+      <aside className="auth-aside">
+        <img className="bg" src="https://picsum.photos/seed/fiebnb-auth-login/900/1200" alt="Background" />
+        <div className="veil"></div>
+        <div className="content top-logo">
+          <Link to="/"><img src="/assets/fiebnb-logo-horizontal-reversed.svg" alt="Fiebnb" style={{height: '34px'}} /></Link>
+        </div>
+        <div className="content bottom">
+          <div className="weave-strip short"><span></span><span></span><span></span><span></span></div>
+          <h2>Welcome back to Fiebnb</h2>
+          <p>Pick up right where you left off — your saved stays, messages and upcoming bookings are all here.</p>
+          <div className="quote">
+            <p>"Booked a guesthouse in Kumasi the night before a wedding. Felt safer than any hotel app I've used."</p>
+            <span>Nana Ama O. · Guest, Kumasi</span>
           </div>
-          
-          <h2 className="text-center text-2xl font-bold tracking-tight text-slate-900 mb-2">
-            Welcome back
-          </h2>
-          <p className="text-center text-sm text-slate-500 mb-8">
-            Sign in to access your Fiebnb dashboard
-          </p>
+        </div>
+      </aside>
+
+      <main className="auth-main">
+        <div className="auth-card">
+          <Link to="/" className="mobile-logo"><img src="/assets/fiebnb-logo-horizontal.svg" alt="Fiebnb" /></Link>
+
+          <h1>Log in</h1>
+          <p className="sub">New to Fiebnb? <Link to="/register">Create an account</Link></p>
 
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3">
-              <span className="material-symbols-outlined text-red-500 text-xl shrink-0">error</span>
-              <p className="text-sm text-red-700">{error}</p>
+            <div style={{background: '#fee2e2', color: '#b91c1c', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px', border: '1px solid #fca5a5'}}>
+              {error}
             </div>
           )}
 
-          <form className="space-y-5" onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="identifier" className="block text-sm font-medium text-slate-700 mb-1">
-                Email or Phone Number
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="material-symbols-outlined text-slate-400 text-lg">person</span>
-                </div>
-                <input
-                  id="identifier"
-                  name="identifier"
-                  type="text"
-                  required
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all sm:text-sm text-slate-900 bg-slate-50 focus:bg-white placeholder:text-slate-400"
-                  placeholder="admin@fiebnb.com or 0541234567"
-                />
-              </div>
+          <form onSubmit={handleSubmit}>
+            <div className="method-toggle">
+              <button 
+                type="button" 
+                className={method === 'email' ? 'active' : ''} 
+                onClick={() => setMethod('email')}
+              >Email</button>
+              <button 
+                type="button" 
+                className={method === 'phone' ? 'active' : ''} 
+                onClick={() => setMethod('phone')}
+              >Phone number</button>
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="material-symbols-outlined text-slate-400 text-lg">lock</span>
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
+            <div className="form-field">
+              <label htmlFor="login-id">{method === 'email' ? 'Email address' : 'Phone number'}</label>
+              <input 
+                id="login-id" 
+                type={method === 'email' ? 'email' : 'tel'} 
+                placeholder={method === 'email' ? 'you@example.com' : '024 000 0000'} 
+                required 
+                value={identifier}
+                onChange={e => setIdentifier(e.target.value)}
+              />
+            </div>
+
+            <div className="form-field">
+              <div className="field-row-between">
+                <label htmlFor="login-pw">Password</label>
+                <Link to="/forgot-password">Forgot password?</Link>
+              </div>
+              <div className="pw-field">
+                <input 
+                  id="login-pw" 
+                  type={showPassword ? 'text' : 'password'} 
+                  placeholder="Enter your password" 
+                  required 
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all sm:text-sm text-slate-900 bg-slate-50 focus:bg-white placeholder:text-slate-400"
-                  placeholder="••••••••"
+                  onChange={e => setPassword(e.target.value)}
                 />
+                <button type="button" className="pw-toggle" aria-label="Show password" onClick={() => setShowPassword(!showPassword)}>
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 
-            <div className="flex items-center justify-between mt-4">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-700">
-                  Remember me
-                </label>
-              </div>
-              <div className="text-sm">
-                <a href="#" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
-                  Forgot password?
-                </a>
-              </div>
-            </div>
+            <label className="check-row" style={{marginTop: '2px'}}>
+              <input type="checkbox" defaultChecked />
+              <span>Keep me logged in on this device</span>
+            </label>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
-                  Signing in...
-                </div>
-              ) : (
-                'Sign In'
-              )}
+            <button type="submit" className="btn btn-primary btn-block" disabled={isLoading}>
+              {isLoading ? 'Logging in...' : 'Log in'}
             </button>
           </form>
+
+          <div className="divider-row"><div className="line"></div><span>or</span><div className="line"></div></div>
+          <button type="button" className="btn btn-outline btn-block" onClick={() => alert("Google sign-in isn't wired up yet.")}>
+            <Globe size={17} /> Continue with Google
+          </button>
+
+          <p className="switch">Just signed up? <Link to="/verify-otp">Verify your account</Link></p>
+          <p className="auth-footer-note">By continuing you agree to Fiebnb's <Link to="/terms">Terms of Service</Link> and <Link to="/privacy">Privacy Policy</Link>.</p>
         </div>
-        
-        <div className="px-8 py-6 bg-slate-50 border-t border-slate-100 text-center">
-          <p className="text-sm text-slate-600">
-            Don't have an account?{' '}
-            <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
-              Sign up now
-            </Link>
-          </p>
-        </div>
-      </div>
+      </main>
     </div>
   );
 };

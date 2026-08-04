@@ -1,7 +1,11 @@
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../api/axiosClient';
 
 export default function GuestsView() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+
   const { data: bookings, isLoading, error } = useQuery({
     queryKey: ['all-bookings'],
     queryFn: async () => {
@@ -12,93 +16,145 @@ export default function GuestsView() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 animate-pulse">
-        <div className="h-8 bg-slate-200 rounded w-1/4"></div>
-        <div className="h-64 bg-slate-200 rounded-xl"></div>
+      <div style={{padding: '40px'}}>
+        <p style={{color: 'var(--ink-soft)'}}>Loading guests...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-6 text-red-500 bg-white rounded-xl border border-red-200 shadow-sm">
-        Error loading guests list. Ensure the backend is running.
+      <div className="panel" style={{borderColor: 'var(--brick-deep)'}}>
+        <p style={{color: 'var(--brick-deep)'}}>Error loading guests list. Ensure the backend is running.</p>
       </div>
     );
   }
 
   const getStatusBadge = (status) => {
     switch(status) {
-      case 'CONFIRMED': return <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full">CONFIRMED</span>;
-      case 'PENDING': return <span className="px-2.5 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full">PENDING</span>;
-      case 'COMPLETED': return <span className="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-full">COMPLETED</span>;
-      case 'CANCELLED': return <span className="px-2.5 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full">CANCELLED</span>;
-      default: return <span className="px-2.5 py-1 bg-slate-100 text-slate-800 text-xs font-bold rounded-full">{status}</span>;
+      case 'CONFIRMED': 
+      case 'COMPLETED': 
+        return <span className="status live">{status}</span>;
+      case 'PENDING': 
+        return <span className="status pending">{status}</span>;
+      case 'CANCELLED': 
+        return <span className="status paused" style={{color: 'var(--brick-deep)'}}>{status}</span>;
+      default: 
+        return <span className="status paused">{status}</span>;
     }
   };
 
+  const filteredBookings = bookings?.filter(booking => {
+    // Search matching
+    const searchLower = searchQuery.toLowerCase();
+    const guestName = booking.guest?.name?.toLowerCase() || 'walk-in guest';
+    const guestPhone = booking.guest?.phone_number || '';
+    const propName = booking.property?.title?.toLowerCase() || '';
+    const roomName = booking.room?.room_number?.toLowerCase() || '';
+
+    const matchesSearch = 
+      guestName.includes(searchLower) || 
+      guestPhone.includes(searchLower) ||
+      propName.includes(searchLower) ||
+      roomName.includes(searchLower);
+
+    // Status matching
+    const matchesStatus = statusFilter === 'ALL' || booking.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <>
+      <div className="dash-topbar">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Guests & Bookings</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage all your incoming, current, and past guests.</p>
+          <h1>Guests & Bookings</h1>
+          <p>Manage all your incoming, current, and past guests.</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold">
-                <th className="p-4">Guest Info</th>
-                <th className="p-4">Property / Room</th>
-                <th className="p-4">Check In</th>
-                <th className="p-4">Check Out</th>
-                <th className="p-4">Status</th>
-                <th className="p-4 text-right">Amount</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {bookings?.length === 0 && (
-                <tr>
-                  <td colSpan="6" className="p-8 text-center text-slate-500">
-                    No bookings found.
-                  </td>
-                </tr>
-              )}
-              {bookings?.map(booking => (
-                <tr key={booking.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="p-4">
-                    <div className="font-medium text-slate-800">
-                      {booking.guest ? booking.guest.name : 'Walk-In Guest'}
-                    </div>
-                    <div className="text-xs text-slate-500 mt-0.5">
-                      {booking.guest ? booking.guest.phone_number : 'N/A'}
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <div className="text-slate-800 text-sm">{booking.property?.title || 'Unknown Property'}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">Room {booking.room?.room_number || 'Unassigned'}</div>
-                  </td>
-                  <td className="p-4 text-sm text-slate-600">
-                    {new Date(booking.check_in).toLocaleDateString()}
-                  </td>
-                  <td className="p-4 text-sm text-slate-600">
-                    {new Date(booking.check_out).toLocaleDateString()}
-                  </td>
-                  <td className="p-4">
-                    {getStatusBadge(booking.status)}
-                  </td>
-                  <td className="p-4 text-right font-medium text-slate-800">
-                    ₵{booking.total_amount}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div style={{display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap'}}>
+        <div style={{flex: '1 1 300px'}}>
+          <input 
+            type="text" 
+            placeholder="Search by guest name, phone, property or room..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="form-control"
+            style={{width: '100%'}}
+          />
+        </div>
+        <div style={{flex: '0 0 200px'}}>
+          <select 
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="form-control"
+            style={{width: '100%'}}
+          >
+            <option value="ALL">All Statuses</option>
+            <option value="PENDING">Pending</option>
+            <option value="CONFIRMED">Confirmed</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
         </div>
       </div>
-    </div>
+
+      <div className="panel" style={{padding: 0, overflowX: 'auto'}}>
+        <table>
+          <thead>
+            <tr>
+              <th style={{width: '40px'}}>#</th>
+              <th>Guest Info</th>
+              <th>Property / Room</th>
+              <th>Check In</th>
+              <th>Check Out</th>
+              <th>Status</th>
+              <th style={{textAlign: 'right'}}>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredBookings?.length === 0 && (
+              <tr>
+                <td colSpan="7" style={{textAlign: 'center', padding: '40px', color: 'var(--ink-soft)'}}>
+                  No bookings match your search.
+                </td>
+              </tr>
+            )}
+            {filteredBookings?.map((booking, index) => (
+              <tr key={booking.id}>
+                <td style={{color: 'var(--ink-soft)', fontSize: '13.5px', fontWeight: 500}}>
+                  {index + 1}
+                </td>
+                <td>
+                  <div style={{fontWeight: 600, color: 'var(--ink)', fontSize: '14px'}}>
+                    {booking.guest ? booking.guest.name : 'Walk-In Guest'}
+                  </div>
+                  <div style={{fontSize: '13px', color: 'var(--ink-soft)', marginTop: '2px'}}>
+                    {booking.guest ? booking.guest.phone_number : 'N/A'}
+                  </div>
+                </td>
+                <td>
+                  <div style={{fontWeight: 600, color: 'var(--ink)', fontSize: '14px'}}>{booking.property?.title || 'Unknown Property'}</div>
+                  <div style={{fontSize: '13px', color: 'var(--ink-soft)', marginTop: '2px'}}>Room {booking.room?.room_number || 'Unassigned'}</div>
+                </td>
+                <td style={{color: 'var(--ink-soft)', fontSize: '13.5px'}}>
+                  {new Date(booking.check_in).toLocaleDateString()}
+                </td>
+                <td style={{color: 'var(--ink-soft)', fontSize: '13.5px'}}>
+                  {new Date(booking.check_out).toLocaleDateString()}
+                </td>
+                <td>
+                  {getStatusBadge(booking.status)}
+                </td>
+                <td style={{textAlign: 'right', fontWeight: 700, color: 'var(--ink)', fontSize: '15px'}}>
+                  ₵{booking.total_amount}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }

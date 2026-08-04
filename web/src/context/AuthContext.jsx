@@ -57,6 +57,13 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const loginWithTokens = (access_token, refresh_token, userData) => {
+    localStorage.setItem('access_token', access_token);
+    localStorage.setItem('refresh_token', refresh_token);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+  };
+
   const logout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
@@ -65,7 +72,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, verifyOtp, resendOtp, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, verifyOtp, resendOtp, loginWithTokens, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { X } from 'lucide-react';
 import axiosClient from '../../api/axiosClient';
 
 const fetchAvailableRooms = async () => {
@@ -59,8 +58,6 @@ export default function WalkInModal({ isOpen, onClose, initialData }) {
     }
   });
 
-  if (!isOpen) return null;
-
   const minCheckOutDate = new Date();
   minCheckOutDate.setDate(minCheckOutDate.getDate() + 1);
   const minDateString = minCheckOutDate.toISOString().split('T')[0];
@@ -71,108 +68,112 @@ export default function WalkInModal({ isOpen, onClose, initialData }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 animate-in zoom-in-95 duration-200">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-slate-800">New Walk-In Booking</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
-            <X size={20} />
+    <div className={`modal-overlay ${isOpen ? 'open' : ''}`}>
+      <div className="modal">
+        <div className="modal-head">
+          <h2>New Walk-In Booking</h2>
+          <button type="button" onClick={onClose}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
-        {mutation.isError && (
-          <div className="mb-4 p-3 bg-red-50 text-red-600 border border-red-200 rounded-lg text-sm">
-            {mutation.error?.response?.data?.error || mutation.error.message || 'Failed to create booking.'}
-          </div>
-        )}
+        <form onSubmit={handleSubmit}>
+          <div className="modal-body">
+            {mutation.isError && (
+              <div style={{marginBottom:'16px', padding:'12px', background:'var(--brick-pale)', color:'var(--brick-deep)', borderRadius:'var(--r-md)', fontSize:'13.5px'}}>
+                {mutation.error?.response?.data?.error || mutation.error.message || 'Failed to create booking.'}
+              </div>
+            )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700">Guest Name</label>
-              <input 
-                type="text" 
-                required
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm"
-                placeholder="John Doe"
-                value={formData.guest_name}
-                onChange={(e) => setFormData({...formData, guest_name: e.target.value})}
-              />
+            <div className="grid-2">
+              <div className="form-group">
+                <label>Guest Name</label>
+                <input 
+                  type="text" 
+                  required
+                  className="form-control"
+                  placeholder="John Doe"
+                  value={formData.guest_name}
+                  onChange={(e) => setFormData({...formData, guest_name: e.target.value})}
+                />
+              </div>
+              <div className="form-group">
+                <label>Phone Number</label>
+                <input 
+                  type="tel" 
+                  required
+                  className="form-control"
+                  placeholder="+233..."
+                  value={formData.phone_number}
+                  onChange={(e) => setFormData({...formData, phone_number: e.target.value})}
+                />
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700">Phone Number</label>
-              <input 
-                type="tel" 
-                required
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm"
-                placeholder="+233..."
-                value={formData.phone_number}
-                onChange={(e) => setFormData({...formData, phone_number: e.target.value})}
-              />
-            </div>
-          </div>
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-700">Assign Room</label>
-            <select 
-              required
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm bg-white"
-              value={formData.room_id}
-              onChange={(e) => setFormData({...formData, room_id: e.target.value})}
-            >
-              <option value="" disabled>Select an available room</option>
-              {loadingRooms ? (
-                <option disabled>Loading...</option>
-              ) : (
-                rooms.map(room => (
-                  <option key={room.id} value={room.id}>
-                    Room {room.room_number} - ₵{room.category?.price_per_night}/night
-                  </option>
-                ))
-              )}
-            </select>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700">Check-Out Date</label>
-              <input 
-                type="date" 
-                required
-                min={minDateString}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm"
-                value={formData.check_out}
-                onChange={(e) => setFormData({...formData, check_out: e.target.value})}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700">Payment Method</label>
+            <div className="form-group">
+              <label>Assign Room</label>
               <select 
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm bg-white"
-                value={formData.payment_method}
-                onChange={(e) => setFormData({...formData, payment_method: e.target.value})}
+                required
+                className="form-control"
+                value={formData.room_id}
+                onChange={(e) => setFormData({...formData, room_id: e.target.value})}
               >
-                <option value="CASH">Cash</option>
-                <option value="POS">Card (POS)</option>
-                <option value="MOMO">Mobile Money</option>
+                <option value="" disabled>Select an available room</option>
+                {loadingRooms ? (
+                  <option disabled>Loading...</option>
+                ) : (
+                  rooms.map(room => (
+                    <option key={room.id} value={room.id}>
+                      Room {room.room_number} - ₵{room.category?.price_per_night}/night
+                    </option>
+                  ))
+                )}
               </select>
             </div>
+
+            <div className="grid-2">
+              <div className="form-group" style={{marginBottom:0}}>
+                <label>Check-Out Date</label>
+                <input 
+                  type="date" 
+                  required
+                  min={minDateString}
+                  className="form-control"
+                  value={formData.check_out}
+                  onChange={(e) => setFormData({...formData, check_out: e.target.value})}
+                />
+              </div>
+              <div className="form-group" style={{marginBottom:0}}>
+                <label>Payment Method</label>
+                <select 
+                  className="form-control"
+                  value={formData.payment_method}
+                  onChange={(e) => setFormData({...formData, payment_method: e.target.value})}
+                >
+                  <option value="CASH">Cash</option>
+                  <option value="CARD">Card / POS</option>
+                  <option value="MOMO">Mobile Money</option>
+                </select>
+              </div>
+            </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-100 flex justify-end space-x-3 mt-6">
+          <div className="modal-foot">
             <button 
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
+              type="button" 
+              onClick={onClose} 
+              className="btn btn-outline"
             >
               Cancel
             </button>
             <button 
-              type="submit"
+              type="submit" 
               disabled={mutation.isPending}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50"
+              className="btn btn-primary"
             >
-              {mutation.isPending ? 'Processing...' : 'Confirm Walk-In'}
+              {mutation.isPending ? 'Confirming...' : 'Confirm Walk-In'}
             </button>
           </div>
         </form>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guesthouse dashboard — Fiebnb</title>
+<link rel="icon" href="assets/fiebnb-icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body{ background:var(--paper-dim); }
+  .dash{ display:grid; grid-template-columns:250px 1fr; min-height:100vh; }
+  .dash-side{ background:var(--ink); color:var(--paper); padding:26px 18px; display:flex; flex-direction:column; }
+  .dash-side .logo{ color:var(--white); padding:0 10px; margin-bottom:22px; }
+  .dash-nav a{ display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:12px; font-size:14.5px; color:rgba(250,246,239,0.72); font-weight:500; margin-bottom:2px; }
+  .dash-nav a svg{ width:17px; height:17px; }
+  .dash-nav a:hover{ background:rgba(250,246,239,0.06); color:var(--white); }
+  .dash-nav a.active{ background:rgba(250,246,239,0.1); color:var(--white); }
+  .dash-nav .grp-label{ font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:rgba(250,246,239,0.4); padding:18px 14px 6px; }
+  .dash-side .bottom{ margin-top:auto; }
+  .switch-guest{ display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:12px; background:rgba(250,246,239,0.06); font-size:13px; color:rgba(250,246,239,0.75); }
+
+  .dash-main{ padding:32px 40px 80px; }
+  .dash-topbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; flex-wrap:wrap; gap:14px; }
+  .dash-topbar h1{ font-size:28px; }
+  .dash-topbar p{ color:var(--ink-soft); font-size:14.5px; margin-top:4px; }
+
+  .stat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-bottom:32px; }
+  .stat-card{ background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px; }
+  .stat-card .top{ display:flex; justify-content:space-between; align-items:flex-start; }
+  .stat-card .ic{ width:36px; height:36px; border-radius:10px; background:var(--sand); display:flex; align-items:center; justify-content:center; }
+  .stat-card .ic svg{ width:17px; height:17px; stroke:var(--brick-deep); }
+  .stat-card .delta{ font-size:12px; font-weight:700; color:var(--forest-deep); background:#E1EAE0; padding:3px 8px; border-radius:var(--r-pill); }
+  .stat-card b{ display:block; font-family:var(--font-display); font-size:28px; margin-top:14px; }
+  .stat-card span{ color:var(--ink-soft); font-size:13px; }
+
+  .panel{ background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px; margin-bottom:24px; }
+  .panel-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+  .panel-head h2{ font-size:18px; }
+  .legend{ display:flex; gap:14px; flex-wrap:wrap; }
+  .legend span{ display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-soft); }
+  .legend i{ width:10px; height:10px; border-radius:3px; display:inline-block; }
+
+  table{ width:100%; border-collapse:collapse; }
+  th{ text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); padding:10px 12px; border-bottom:1px solid var(--line); }
+  td{ padding:14px 12px; border-bottom:1px solid var(--line); font-size:14.5px; vertical-align:middle; }
+  tr:last-child td{ border-bottom:none; }
+  .li-row{ display:flex; align-items:center; gap:12px; }
+  .li-row img{ width:44px; height:44px; border-radius:50%; object-fit:cover; }
+  .li-row b{ display:block; font-size:14px; }
+  .li-row span{ color:var(--ink-soft); font-size:12.5px; }
+  .status{ font-size:12px; font-weight:700; padding:4px 10px; border-radius:var(--r-pill); }
+
+  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:flex-start; }
+
+  @media (max-width: 1100px){
+    .dash{ grid-template-columns:1fr; }
+    .dash-side{ display:none; }
+    .stat-grid{ grid-template-columns:1fr 1fr; }
+    .two-col{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="dash">
+  <aside class="dash-side">
+    <a href="index.html" class="logo">
+      <span class="mark"><img src="assets/fiebnb-icon-mark.svg" alt="Fiebnb" style="width:100%;height:100%;padding:6px;box-sizing:border-box"></span>
+      Fiebnb
+    </a>
+    <div class="role-switch">
+      <select onchange="window.location=this.value">
+        <option value="host-dashboard.html">Overview (all)</option>
+        <option value="dashboard-homeowner.html">Homeowner</option>
+        <option value="dashboard-guesthouse.html" selected>Guesthouse admin</option>
+        <option value="dashboard-apartment.html">Apartment admin</option>
+        <option value="dashboard-hotel.html">Hotel manager</option>
+      </select>
+    </div>
+    <nav class="dash-nav">
+      <div class="grp-label">Manage</div>
+      <a href="#" class="active"><i data-lucide="layout-dashboard"></i> Overview</a>
+      <a href="#"><i data-lucide="bed-double"></i> Rooms</a>
+      <a href="#"><i data-lucide="calendar-days"></i> Bookings</a>
+      <a href="#"><i data-lucide="users"></i> Guests</a>
+      <div class="grp-label">Operations</div>
+      <a href="#"><i data-lucide="sparkles"></i> Housekeeping</a>
+      <a href="#"><i data-lucide="wallet"></i> Payouts</a>
+      <div class="grp-label">Account</div>
+      <a href="#"><i data-lucide="message-circle"></i> Messages</a>
+      <a href="#"><i data-lucide="settings"></i> Settings</a>
+    </nav>
+    <div class="bottom">
+      <a href="index.html" class="switch-guest"><i data-lucide="repeat" style="width:15px;height:15px"></i> Switch to guest mode</a>
+    </div>
+  </aside>
+
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div>
+        <h1>Welcome back, Abena</h1>
+        <p>Here's how The Osu Palm Guesthouse is doing tonight.</p>
+      </div>
+      <button class="btn btn-primary"><i data-lucide="plus" style="width:16px;height:16px"></i> New booking</button>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="top"><div class="ic"><i data-lucide="bed-double"></i></div><span class="delta">10 / 12</span></div>
+        <b>83%</b><span>Occupancy tonight</span>
+      </div>
+      <div class="stat-card">
+        <div class="top"><div class="ic"><i data-lucide="banknote"></i></div><span class="delta">+12%</span></div>
+        <b>₵2,600</b><span>Revenue today</span>
+      </div>
+      <div class="stat-card">
+        <div class="top"><div class="ic"><i data-lucide="log-in"></i></div></div>
+        <b>4</b><span>Check-ins today</span>
+      </div>
+      <div class="stat-card">
+        <div class="top"><div class="ic"><i data-lucide="log-out"></i></div></div>
+        <b>3</b><span>Check-outs today</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Room status</h2>
+        <div class="legend">
+          <span><i style="background:#CFE0D0"></i> Occupied</span>
+          <span><i style="background:var(--paper-dim);border:1px solid var(--line)"></i> Vacant</span>
+          <span><i style="background:var(--gold-pale)"></i> Cleaning</span>
+          <span><i style="background:#F7E4E0"></i> Maintenance</span>
+        </div>
+      </div>
+      <div class="room-grid">
+        <div class="room-tile occupied"><b>01</b><span>Occupied</span></div>
+        <div class="room-tile occupied"><b>02</b><span>Occupied</span></div>
+        <div class="room-tile cleaning"><b>03</b><span>Cleaning</span></div>
+        <div class="room-tile occupied"><b>04</b><span>Occupied</span></div>
+        <div class="room-tile vacant"><b>05</b><span>Vacant</span></div>
+        <div class="room-tile occupied"><b>06</b><span>Occupied</span></div>
+        <div class="room-tile occupied"><b>07</b><span>Occupied</span></div>
+        <div class="room-tile maintenance"><b>08</b><span>Maintenance</span></div>
+        <div class="room-tile occupied"><b>09</b><span>Occupied</span></div>
+        <div class="room-tile occupied"><b>10</b><span>Occupied</span></div>
+        <div class="room-tile occupied"><b>11</b><span>Occupied</span></div>
+        <div class="room-tile occupied"><b>12</b><span>Occupied</span></div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-head"><h2>Today's arrivals</h2></div>
+        <table>
+          <tbody>
+            <tr><td><div class="li-row"><img src="https://picsum.photos/seed/fiebnb-gh1/100/100" alt=""><div><b>Yaw Mensah</b><span>Room 05 · 3 nights</span></div></div></td><td><span class="status due">2:00 PM</span></td></tr>
+            <tr><td><div class="li-row"><img src="https://picsum.photos/seed/fiebnb-gh2/100/100" alt=""><div><b>Adjoa Frimpong</b><span>Room 03 · 1 night</span></div></div></td><td><span class="status due">3:30 PM</span></td></tr>
+            <tr><td><div class="li-row"><img src="https://picsum.photos/seed/fiebnb-gh3/100/100" alt=""><div><b>Kojo Asante</b><span>Room 08 · 2 nights</span></div></div></td><td><span class="status due">5:00 PM</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Today's departures</h2></div>
+        <table>
+          <tbody>
+            <tr><td><div class="li-row"><img src="https://picsum.photos/seed/fiebnb-gh4/100/100" alt=""><div><b>Nana Ama O.</b><span>Room 02</span></div></div></td><td><span class="status paid">Checked out</span></td></tr>
+            <tr><td><div class="li-row"><img src="https://picsum.photos/seed/fiebnb-gh5/100/100" alt=""><div><b>Bright Owusu</b><span>Room 06</span></div></div></td><td><span class="status vacant">11:00 AM</span></td></tr>
+            <tr><td><div class="li-row"><img src="https://picsum.photos/seed/fiebnb-gh6/100/100" alt=""><div><b>Esi Mensah</b><span>Room 09</span></div></div></td><td><span class="status vacant">12:00 PM</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Recent bookings</h2>
+        <a href="#" class="btn btn-outline btn-sm">View all</a>
+      </div>
+      <table>
+        <thead><tr><th>Guest</th><th>Room</th><th>Dates</th><th>Total</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Yaw Mensah</td><td>Room 05</td><td>Jul 13 – Jul 16</td><td>₵780</td><td><span class="status paid">Confirmed</span></td></tr>
+          <tr><td>Adjoa Frimpong</td><td>Room 03</td><td>Jul 13 – Jul 14</td><td>₵260</td><td><span class="status paid">Confirmed</span></td></tr>
+          <tr><td>Kojo Asante</td><td>Room 08</td><td>Jul 13 – Jul 15</td><td>₵520</td><td><span class="status due">Pending</span></td></tr>
+          <tr><td>Sena Kudjoe</td><td>Room 11</td><td>Jul 18 – Jul 21</td><td>₵780</td><td><span class="status paid">Confirmed</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>

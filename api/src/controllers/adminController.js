@@ -74,7 +74,8 @@ exports.approveRequest = async (req, res) => {
           property_type: request.property_type || 'HOTEL',
           is_multi_room,
           base_price,
-          status: 'AVAILABLE'
+          status: 'AVAILABLE',
+          images: []
         }
       })
     ]);

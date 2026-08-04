@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Listing — Fiebnb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .crumb{ padding:20px 0 0; font-size:13.5px; color:var(--ink-soft); display:flex; gap:8px; align-items:center; }
+  .crumb a:hover{ color:var(--ink); }
+
+  .l-head{ padding:14px 0 20px; display:flex; justify-content:space-between; align-items:flex-start; gap:20px; flex-wrap:wrap; }
+  .l-head h1{ font-size:32px; max-width:640px; }
+  .l-meta{ display:flex; gap:14px; align-items:center; margin-top:10px; color:var(--ink-soft); font-size:14.5px; flex-wrap:wrap; }
+  .l-meta .rating{ display:flex; align-items:center; gap:5px; color:var(--ink); font-weight:600; }
+  .l-meta svg{ width:14px; height:14px; fill:var(--gold-deep); }
+  .l-head-actions{ display:flex; gap:10px; }
+
+  .gallery{ display:grid; grid-template-columns:1.4fr 1fr 1fr; grid-template-rows:1fr 1fr; gap:10px; border-radius:var(--r-lg); overflow:hidden; height:440px; }
+  .gallery img{ width:100%; height:100%; object-fit:cover; }
+  .gallery > *:nth-child(1){ grid-row:1/3; }
+
+  .l-layout{ display:grid; grid-template-columns:1fr 380px; gap:56px; padding:40px 0 100px; align-items:flex-start; }
+  .l-section{ padding:32px 0; border-bottom:1px solid var(--line); }
+  .l-section:first-child{ padding-top:0; }
+  .host-row{ display:flex; align-items:center; gap:16px; }
+  .host-row img{ width:56px; height:56px; border-radius:50%; object-fit:cover; }
+  .host-row h3{ font-size:17px; }
+  .host-row p{ color:var(--ink-soft); font-size:13.5px; margin-top:2px; }
+
+  .amenity-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px 20px; margin-top:8px; }
+  .amenity-item{ display:flex; align-items:center; gap:12px; font-size:14.5px; }
+  .amenity-item svg{ width:19px; height:19px; stroke:var(--ink-soft); }
+
+  .review-card{ padding:18px 0; }
+  .review-who{ display:flex; align-items:center; gap:12px; }
+  .review-who img{ width:38px; height:38px; border-radius:50%; object-fit:cover; }
+  .review-who b{ font-size:14px; display:block; }
+  .review-who span{ font-size:12.5px; color:var(--ink-soft); }
+  .review-card p{ margin-top:10px; font-size:14.5px; color:var(--ink-soft); line-height:1.6; }
+  .review-grid{ display:grid; grid-template-columns:1fr 1fr; gap:0 32px; }
+
+  .booking-card{ position:sticky; top:88px; padding:24px; box-shadow:var(--shadow-card); border-radius:var(--r-lg); }
+  .booking-price{ display:flex; align-items:baseline; gap:6px; }
+  .booking-price b{ font-family:var(--font-display); font-size:26px; }
+  .booking-price span{ color:var(--ink-soft); font-size:14px; }
+  .booking-fields{ border:1px solid var(--line); border-radius:12px; margin-top:18px; overflow:hidden; }
+  .bf-row{ display:grid; grid-template-columns:1fr 1fr; border-bottom:1px solid var(--line); }
+  .bf{ padding:10px 14px; border-right:1px solid var(--line); }
+  .bf:last-child{ border-right:none; }
+  .bf label{ display:block; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); }
+  .bf input, .bf select{ border:none; outline:none; width:100%; font-size:14px; padding:2px 0; background:transparent; }
+  .bf.full{ padding:10px 14px; }
+  .price-breakdown{ margin-top:18px; font-size:14px; }
+  .pb-row{ display:flex; justify-content:space-between; padding:8px 0; color:var(--ink-soft); }
+  .pb-row.total{ border-top:1px solid var(--line); margin-top:6px; padding-top:14px; color:var(--ink); font-weight:700; }
+  .trust-note{ display:flex; gap:8px; align-items:flex-start; margin-top:16px; font-size:12.5px; color:var(--ink-soft); }
+  .trust-note svg{ width:15px; height:15px; flex-shrink:0; margin-top:1px; stroke:var(--forest); }
+
+  @media (max-width: 980px){
+    .l-layout{ grid-template-columns:1fr; }
+    .booking-card{ position:static; }
+    .gallery{ grid-template-columns:1fr 1fr; height:auto; }
+    .gallery > *:nth-child(1){ grid-column:1/3; height:260px; grid-row:auto; }
+    .gallery > *:not(:first-child){ height:160px; }
+    .amenity-grid, .review-grid{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-row">
+    <a href="index.html" class="logo">
+      <span class="mark"><span class="weave-strip"><span></span><span></span><span></span><span></span></span></span>
+      Fiebnb
+    </a>
+    <div class="nav-links">
+      <a href="browse.html">Stays</a>
+      <a href="browse.html?type=Hotel">Hotels</a>
+      <a href="browse.html?term=long">Long-term rentals</a>
+      <a href="host-dashboard.html">Become a host</a>
+    </div>
+    <div class="nav-actions">
+      <a href="host-dashboard.html" class="btn btn-ghost btn-sm">List your property</a>
+      <button class="icon-btn" aria-label="Account"><i data-lucide="user" style="width:17px;height:17px"></i></button>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="crumb"><a href="index.html">Home</a> <i data-lucide="chevron-right" style="width:13px;height:13px"></i> <a href="browse.html">Stays</a> <i data-lucide="chevron-right" style="width:13px;height:13px"></i> <span id="crumb-title">Listing</span></div>
+
+  <div class="l-head" id="l-head"></div>
+
+  <div class="gallery" id="gallery"></div>
+
+  <div class="l-layout">
+    <div>
+      <div class="l-section">
+        <div class="host-row">
+          <img id="host-avatar" src="" alt="">
+          <div>
+            <h3 id="host-line">Hosted by owner</h3>
+            <p id="host-sub"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="l-section">
+        <h3 style="font-size:18px;margin-bottom:10px">About this place</h3>
+        <p style="color:var(--ink-soft);line-height:1.7;font-size:14.5px" id="l-desc"></p>
+      </div>
+
+      <div class="l-section">
+        <h3 style="font-size:18px;margin-bottom:6px">What this place offers</h3>
+        <div class="amenity-grid" id="amenity-grid"></div>
+      </div>
+
+      <div class="l-section">
+        <h3 style="font-size:18px;margin-bottom:16px">
+          <span class="rating-inline" id="review-heading"></span>
+        </h3>
+        <div class="review-grid" id="review-grid"></div>
+      </div>
+    </div>
+
+    <div class="card booking-card">
+      <div class="booking-price">
+        <b id="bp-price">₵0</b><span id="bp-unit">/ night</span>
+      </div>
+      <div class="booking-fields">
+        <div class="bf-row">
+          <div class="bf"><label>Check-in</label><input type="text" placeholder="Add date"></div>
+          <div class="bf"><label>Check-out</label><input type="text" placeholder="Add date"></div>
+        </div>
+        <div class="bf full">
+          <label>Guests</label>
+          <select id="bf-guests">
+            <option>1 guest</option><option selected>2 guests</option><option>3 guests</option><option>4+ guests</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="alert('This is a front-end prototype — booking flow and payments are not wired up yet.')">Reserve</button>
+      <p style="text-align:center;font-size:12.5px;color:var(--ink-soft);margin-top:10px">You won't be charged yet</p>
+      <div class="price-breakdown" id="price-breakdown"></div>
+      <div class="trust-note"><i data-lucide="shield-check"></i><span>Payments are held securely and only released to the host after check-in.</span></div>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-bottom" style="border-top:none;padding-top:0">
+      <span>© 2026 Fiebnb Ghana. All rights reserved.</span>
+      <span>Accra · Kumasi · Takoradi · Cape Coast · Tamale</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+  const AMENITY_ICONS = ["wifi","snowflake","utensils","car","droplets","zap","tv","shirt","waves","dumbbell","shield-check","door-open"];
+
+  function getListing(){
+    const id = parseInt(new URLSearchParams(window.location.search).get("id")) || 1;
+    return FIEBNB_LISTINGS.find(l => l.id === id) || FIEBNB_LISTINGS[0];
+  }
+
+  function renderListing(){
+    const l = getListing();
+    document.title = l.title + " — Fiebnb";
+    document.getElementById("crumb-title").textContent = l.title;
+
+    document.getElementById("l-head").innerHTML = `
+      <div>
+        <h1>${l.title}</h1>
+        <div class="l-meta">
+          <span class="rating">${starIcon()} ${l.rating} · ${l.reviews} reviews</span>
+          <span>·</span><span>${l.area}, ${l.city}</span>
+          <span>·</span><span class="pill-tag ${l.term==='long'?'forest':'gold'}">${l.term === 'long' ? 'Long-term rental' : 'Short stay'}</span>
+        </div>
+      </div>
+      <div class="l-head-actions">
+        <button class="icon-btn"><i data-lucide="share-2" style="width:16px;height:16px"></i></button>
+        <button class="icon-btn"><i data-lucide="heart" style="width:16px;height:16px"></i></button>
+      </div>`;
+
+    const imgs = [1,2,3,4,5].map(n => `https://picsum.photos/seed/${l.seed}-${n}/700/620`);
+    document.getElementById("gallery").innerHTML = imgs.map(src => `<img src="${src}" alt="${l.title}">`).join("");
+
+    document.getElementById("host-avatar").src = `https://picsum.photos/seed/${l.seed}-host/120/120`;
+    document.getElementById("host-line").textContent = `${l.type} hosted by ${l.city === "Accra" ? "Kofi" : "the property"} owner`;
+    document.getElementById("host-sub").textContent = `${l.guests} guests · ${l.beds} bed${l.beds>1?'s':''} · ${l.baths} bath${l.baths>1?'s':''} · Usually responds within an hour`;
+
+    document.getElementById("l-desc").textContent = `A ${l.type.toLowerCase()} in ${l.area}, ${l.city}, well suited to ${l.term === 'long' ? 'tenants settling in for months at a time' : 'travellers who want a comfortable, well-located base'}. Close to major roads, restaurants and everyday essentials, with a host who keeps the place genuinely ready for guests — not just photographed to look that way.`;
+
+    document.getElementById("amenity-grid").innerHTML = l.tags.concat(["Backup power","24hr security"]).map((t,i)=>`
+      <div class="amenity-item"><i data-lucide="${AMENITY_ICONS[i % AMENITY_ICONS.length]}"></i> ${t}</div>`).join("");
+
+    document.getElementById("review-heading").innerHTML = `${starIcon()} ${l.rating} · ${l.reviews} reviews`;
+    const reviewers = [
+      ["Ama","Accra"], ["Yaw","Kumasi"], ["Esi","Cape Coast"], ["Kojo","Takoradi"]
+    ];
+    document.getElementById("review-grid").innerHTML = reviewers.map((r,i)=>`
+      <div class="review-card">
+        <div class="review-who">
+          <img src="https://picsum.photos/seed/${l.seed}-r${i}/100/100" alt="">
+          <div><b>${r[0]}</b><span>${r[1]} · 2 weeks ago</span></div>
+        </div>
+        <p>"${["Exactly as described, and the host was quick to respond the whole stay.","Clean, quiet, and close to everything we needed. Would book again.","Great value — small touches like backup power made a real difference.","Smooth check-in and a genuinely comfortable place to stay."][i]}"</p>
+      </div>`).join("");
+
+    document.getElementById("bp-price").textContent = `₵${l.price.toLocaleString()}`;
+    document.getElementById("bp-unit").textContent = `/ ${l.unit}`;
+
+    const nights = l.term === "long" ? 1 : 3;
+    const sub = l.price * nights;
+    const fee = Math.round(sub * 0.08);
+    document.getElementById("price-breakdown").innerHTML = `
+      <div class="pb-row"><span>₵${l.price.toLocaleString()} × ${nights} ${l.unit}${nights>1?'s':''}</span><span>₵${sub.toLocaleString()}</span></div>
+      <div class="pb-row"><span>Fiebnb service fee</span><span>₵${fee.toLocaleString()}</span></div>
+      <div class="pb-row total"><span>Total</span><span>₵${(sub+fee).toLocaleString()}</span></div>`;
+
+    if(window.lucide) lucide.createIcons();
+  }
+
+  document.addEventListener("DOMContentLoaded", renderListing);
+</script>
+</body>
+</html>

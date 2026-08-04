@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Careers — Fiebnb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .dept-filter{ display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
+  .dept-filter button{ border:1px solid var(--line); background:var(--white); padding:8px 16px; border-radius:var(--r-pill); font-size:13.5px; font-weight:600; color:var(--ink-soft); }
+  .dept-filter button.active{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-row">
+    <a href="index.html" class="logo">
+      <span class="mark"><span class="weave-strip"><span></span><span></span><span></span><span></span></span></span>
+      Fiebnb
+    </a>
+    <div class="nav-links">
+      <a href="browse.html">Stays</a>
+      <a href="browse.html?type=Hotel">Hotels</a>
+      <a href="browse.html?term=long">Long-term rentals</a>
+      <a href="host-dashboard.html">Become a host</a>
+    </div>
+    <div class="nav-actions">
+      <a href="host-dashboard.html" class="btn btn-ghost btn-sm">List your property</a>
+      <button class="icon-btn" aria-label="Account"><i data-lucide="user" style="width:17px;height:17px"></i></button>
+    </div>
+  </div>
+</nav>
+
+<header class="page-hero">
+  <div class="wrap">
+    <div class="weave-strip short"><span></span><span></span><span></span><span></span></div>
+    <p class="eyebrow">Careers</p>
+    <h1>Help more of Ghana find home for the night, or the year</h1>
+    <p class="lede">We're a small, Accra-based team building for a market most global platforms have never taken seriously. Come build it properly.</p>
+  </div>
+</header>
+
+<main>
+  <section class="content-section">
+    <div class="wrap">
+      <div class="section-head"><div><p class="eyebrow">How we work</p><h2>Culture, in a few honest lines</h2></div></div>
+      <div class="value-grid">
+        <div class="value-card">
+          <span class="tag">◆</span>
+          <h3>Small team, real ownership</h3>
+          <p>Under 40 people. You'll ship things that thousands of hosts and guests touch within your first month.</p>
+        </div>
+        <div class="value-card">
+          <span class="tag">◆</span>
+          <h3>Accra-first, not Accra-only</h3>
+          <p>HQ is in Accra, but half the team works from Kumasi, Takoradi and Tamale to stay close to hosts outside the capital.</p>
+        </div>
+        <div class="value-card">
+          <span class="tag">◆</span>
+          <h3>Talk to real hosts and guests</h3>
+          <p>Everyone, including engineers, does a guesthouse visit or a support shift in their first two weeks.</p>
+        </div>
+        <div class="value-card">
+          <span class="tag">◆</span>
+          <h3>Move at Ghana's pace, not Silicon Valley's</h3>
+          <p>We build for spotty connectivity and Mobile Money, not for assumptions imported from bigger markets.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section" style="border-bottom:none">
+    <div class="wrap">
+      <div class="section-head"><div><p class="eyebrow">Open roles</p><h2>7 positions across 4 teams</h2></div></div>
+
+      <div class="dept-filter" id="dept-filter">
+        <button class="active" data-dept="all">All</button>
+        <button data-dept="Engineering">Engineering</button>
+        <button data-dept="Design">Design</button>
+        <button data-dept="Trust & Safety">Trust & Safety</button>
+        <button data-dept="Host Success">Host Success</button>
+      </div>
+
+      <div class="role-list" id="role-list"></div>
+    </div>
+  </section>
+
+  <section class="content-section" style="border-bottom:none">
+    <div class="wrap">
+      <div class="cta-band">
+        <h2>Don't see the right role?</h2>
+        <p>Send us a note anyway — we're growing quickly.</p>
+        <div class="actions">
+          <a href="contact.html" class="btn" style="background:var(--gold);color:var(--ink)">Get in touch</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="logo" style="color:var(--white)">
+          <span class="mark"><span class="weave-strip"><span></span><span></span><span></span><span></span></span></span>
+          Fiebnb
+        </a>
+        <p>Ghana's marketplace for hotels, guesthouses and long-term rentals — built for how Ghanaians and visitors actually find a place to stay.</p>
+      </div>
+      <div>
+        <h4>Guests</h4>
+        <a href="browse.html">Browse stays</a>
+        <a href="how-booking-works.html">How booking works</a>
+        <a href="trust-safety.html">Trust & safety</a>
+        <a href="cancellation-options.html">Cancellation options</a>
+      </div>
+      <div>
+        <h4>Hosts</h4>
+        <a href="host-dashboard.html">List your property</a>
+        <a href="host-dashboard.html">Host dashboard</a>
+        <a href="#">Pricing & payouts</a>
+        <a href="host-protection.html">Host protection</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="about.html">About Fiebnb</a>
+        <a href="careers.html">Careers</a>
+        <a href="#">Support (WhatsApp)</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Fiebnb Ghana. All rights reserved.</span>
+      <span>Accra · Kumasi · Takoradi · Cape Coast · Tamale</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+  const ROLES = [
+    { title:"Senior Backend Engineer", dept:"Engineering", loc:"Accra", type:"Full-time" },
+    { title:"Product Designer, Host Tools", dept:"Design", loc:"Accra", type:"Full-time" },
+    { title:"Mobile Engineer (React Native)", dept:"Engineering", loc:"Remote, Ghana", type:"Full-time" },
+    { title:"Trust & Safety Lead", dept:"Trust & Safety", loc:"Accra", type:"Full-time" },
+    { title:"Host Success Manager", dept:"Host Success", loc:"Kumasi", type:"Full-time" },
+    { title:"Regional Growth Lead", dept:"Host Success", loc:"Takoradi", type:"Full-time" },
+    { title:"Verification Associate", dept:"Trust & Safety", loc:"Accra", type:"Contract" },
+  ];
+
+  function renderRoles(dept){
+    const list = dept === "all" ? ROLES : ROLES.filter(r => r.dept === dept);
+    document.getElementById("role-list").innerHTML = list.map(r => `
+      <div class="role-row">
+        <div>
+          <h3>${r.title}</h3>
+          <div class="meta"><span>${r.dept}</span><span>${r.loc}</span><span>${r.type}</span></div>
+        </div>
+        <a href="contact.html" class="btn btn-outline btn-sm">Apply</a>
+      </div>`).join("");
+  }
+
+  document.querySelectorAll("#dept-filter button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#dept-filter button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderRoles(btn.dataset.dept);
+    });
+  });
+
+  document.addEventListener("DOMContentLoaded", () => renderRoles("all"));
+</script>
+</body>
+</html>

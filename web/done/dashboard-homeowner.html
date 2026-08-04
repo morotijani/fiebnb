@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homeowner dashboard — Fiebnb</title>
+<link rel="icon" href="assets/fiebnb-icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body{ background:var(--paper-dim); }
+  .dash{ display:grid; grid-template-columns:250px 1fr; min-height:100vh; }
+  .dash-side{ background:var(--ink); color:var(--paper); padding:26px 18px; display:flex; flex-direction:column; }
+  .dash-side .logo{ color:var(--white); padding:0 10px; margin-bottom:22px; }
+  .dash-nav a{ display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:12px; font-size:14.5px; color:rgba(250,246,239,0.72); font-weight:500; margin-bottom:2px; }
+  .dash-nav a svg{ width:17px; height:17px; }
+  .dash-nav a:hover{ background:rgba(250,246,239,0.06); color:var(--white); }
+  .dash-nav a.active{ background:rgba(250,246,239,0.1); color:var(--white); }
+  .dash-nav .grp-label{ font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:rgba(250,246,239,0.4); padding:18px 14px 6px; }
+  .dash-side .bottom{ margin-top:auto; }
+  .switch-guest{ display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:12px; background:rgba(250,246,239,0.06); font-size:13px; color:rgba(250,246,239,0.75); }
+
+  .dash-main{ padding:32px 40px 80px; }
+  .dash-topbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; flex-wrap:wrap; gap:14px; }
+  .dash-topbar h1{ font-size:28px; }
+  .dash-topbar p{ color:var(--ink-soft); font-size:14.5px; margin-top:4px; }
+
+  .stat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-bottom:32px; }
+  .stat-card{ background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px; }
+  .stat-card .top{ display:flex; justify-content:space-between; align-items:flex-start; }
+  .stat-card .ic{ width:36px; height:36px; border-radius:10px; background:var(--sand); display:flex; align-items:center; justify-content:center; }
+  .stat-card .ic svg{ width:17px; height:17px; stroke:var(--brick-deep); }
+  .stat-card .delta{ font-size:12px; font-weight:700; color:var(--forest-deep); background:#E1EAE0; padding:3px 8px; border-radius:var(--r-pill); }
+  .stat-card b{ display:block; font-family:var(--font-display); font-size:28px; margin-top:14px; }
+  .stat-card span{ color:var(--ink-soft); font-size:13px; }
+
+  .panel{ background:var(--white); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px; margin-bottom:24px; }
+  .panel-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+  .panel-head h2{ font-size:18px; }
+
+  table{ width:100%; border-collapse:collapse; }
+  th{ text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); padding:10px 12px; border-bottom:1px solid var(--line); }
+  td{ padding:14px 12px; border-bottom:1px solid var(--line); font-size:14.5px; vertical-align:middle; }
+  tr:last-child td{ border-bottom:none; }
+  .li-row{ display:flex; align-items:center; gap:12px; }
+  .li-row img{ width:52px; height:44px; border-radius:8px; object-fit:cover; }
+  .li-row b{ display:block; font-size:14px; }
+  .li-row span{ color:var(--ink-soft); font-size:12.5px; }
+  .status{ font-size:12px; font-weight:700; padding:4px 10px; border-radius:var(--r-pill); }
+
+  .two-col{ display:grid; grid-template-columns:1.4fr 1fr; gap:24px; align-items:flex-start; }
+
+  @media (max-width: 1100px){
+    .dash{ grid-template-columns:1fr; }
+    .dash-side{ display:none; }
+    .stat-grid{ grid-template-columns:1fr 1fr; }
+    .two-col{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="dash">
+  <aside class="dash-side">
+    <a href="index.html" class="logo">
+      <span class="mark"><img src="assets/fiebnb-icon-mark.svg" alt="Fiebnb" style="width:100%;height:100%;padding:6px;box-sizing:border-box"></span>
+      Fiebnb
+    </a>
+    <div class="role-switch">
+      <select onchange="window.location=this.value">
+        <option value="host-dashboard.html">Overview (all)</option>
+        <option value="dashboard-homeowner.html" selected>Homeowner</option>
+        <option value="dashboard-guesthouse.html">Guesthouse admin</option>
+        <option value="dashboard-apartment.html">Apartment admin</option>
+        <option value="dashboard-hotel.html">Hotel manager</option>
+      </select>
+    </div>
+    <nav class="dash-nav">
+      <div class="grp-label">Manage</div>
+      <a href="#" class="active"><i data-lucide="layout-dashboard"></i> Overview</a>
+      <a href="#"><i data-lucide="home"></i> My properties</a>
+      <a href="#"><i data-lucide="users"></i> Tenants</a>
+      <a href="#"><i data-lucide="file-text"></i> Lease agreements</a>
+      <div class="grp-label">Money</div>
+      <a href="#"><i data-lucide="banknote"></i> Rent collection</a>
+      <a href="#"><i data-lucide="wrench"></i> Maintenance</a>
+      <div class="grp-label">Account</div>
+      <a href="#"><i data-lucide="message-circle"></i> Messages</a>
+      <a href="#"><i data-lucide="settings"></i> Settings</a>
+    </nav>
+    <div class="bottom">
+      <a href="index.html" class="switch-guest"><i data-lucide="repeat" style="width:15px;height:15px"></i> Switch to guest mode</a>
+    </div>
+  </aside>
+
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div>
+        <h1>Welcome back, Kofi</h1>
+        <p>Here's how your rental properties are performing.</p>
+      </div>
+      <button class="btn btn-primary"><i data-lucide="plus" style="width:16px;height:16px"></i> Add a property</button>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="top"><div class="ic"><i data-lucide="banknote"></i></div><span class="delta">+₵4,800</span></div>
+        <b>₵15,800</b><span>Rent collected this month</span>
+      </div>
+      <div class="stat-card">
+        <div class="top"><div class="ic"><i data-lucide="key-round"></i></div><span class="delta">92%</span></div>
+        <b>11 / 12</b><span>Units occupied</span>
+      </div>
+      <div class="stat-card">
+        <div class="top"><div class="ic"><i data-lucide="calendar-clock"></i></div><span class="delta">Next 60 days</span></div>
+        <b>3</b><span>Lease renewals coming up</span>
+      </div>
+      <div class="stat-card">
+        <div class="top"><div class="ic"><i data-lucide="wrench"></i></div><span class="delta">1 urgent</span></div>
+        <b>4</b><span>Open maintenance requests</span>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Your properties</h2>
+          <a href="#" class="btn btn-outline btn-sm">Manage all</a>
+        </div>
+        <table>
+          <thead><tr><th>Property</th><th>Tenant</th><th>Rent</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><div class="li-row"><img src="https://picsum.photos/seed/fiebnb-l4/120/100" alt=""><div><b>Furnished 2-Bed, East Legon</b><span>East Legon, Accra</span></div></div></td>
+              <td>Efua Boateng</td>
+              <td>₵4,800/mo</td>
+              <td><span class="status paid">Paid</span></td>
+            </tr>
+            <tr>
+              <td><div class="li-row"><img src="https://picsum.photos/seed/fiebnb-l8/120/100" alt=""><div><b>3-Bed Family House, Spintex</b><span>Spintex, Accra</span></div></div></td>
+              <td>Nii Armah</td>
+              <td>₵6,200/mo</td>
+              <td><span class="status due">Due in 3 days</span></td>
+            </tr>
+            <tr>
+              <td><div class="li-row"><img src="https://picsum.photos/seed/fiebnb-l10/120/100" alt=""><div><b>Airport City Corporate Studio</b><span>Airport City, Accra</span></div></div></td>
+              <td>Grace Amponsah</td>
+              <td>₵3,900/mo</td>
+              <td><span class="status overdue">5 days overdue</span></td>
+            </tr>
+            <tr>
+              <td><div class="li-row"><img src="https://picsum.photos/seed/fiebnb-l12/120/100" alt=""><div><b>Trasacco Valley — Room B</b><span>Trasacco Valley, Accra</span></div></div></td>
+              <td>Vacant</td>
+              <td>₵5,400/mo</td>
+              <td><span class="status vacant">Listed</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Lease renewals</h2></div>
+        <div class="timeline-list">
+          <div class="timeline-row">
+            <div class="timeline-date"><b>28</b><span>Jul</span></div>
+            <div class="timeline-body"><b>Efua Boateng</b><p>East Legon · 12-month lease ending, renewal pending</p></div>
+          </div>
+          <div class="timeline-row">
+            <div class="timeline-date"><b>14</b><span>Aug</span></div>
+            <div class="timeline-body"><b>Nii Armah</b><p>Spintex · Tenant confirmed renewal</p></div>
+          </div>
+          <div class="timeline-row">
+            <div class="timeline-date"><b>02</b><span>Sep</span></div>
+            <div class="timeline-body"><b>Grace Amponsah</b><p>Airport City · Awaiting tenant response</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Maintenance requests</h2>
+        <a href="#" class="btn btn-outline btn-sm">View all</a>
+      </div>
+      <div class="ticket-row">
+        <div class="ic"><i data-lucide="droplet"></i></div>
+        <div class="info"><b>Leaking kitchen tap</b><span>East Legon · Reported by Efua Boateng · 2 days ago</span></div>
+        <span class="status urgent">Urgent</span>
+      </div>
+      <div class="ticket-row">
+        <div class="ic"><i data-lucide="zap"></i></div>
+        <div class="info"><b>Generator not starting</b><span>Spintex · Reported by Nii Armah · 4 days ago</span></div>
+        <span class="status due">In progress</span>
+      </div>
+      <div class="ticket-row">
+        <div class="ic"><i data-lucide="wind"></i></div>
+        <div class="info"><b>AC unit servicing due</b><span>Airport City · Scheduled maintenance</span></div>
+        <span class="status vacant">Scheduled</span>
+      </div>
+      <div class="ticket-row">
+        <div class="ic"><i data-lucide="door-closed"></i></div>
+        <div class="info"><b>Gate lock replacement</b><span>Trasacco Valley · Reported by caretaker · 1 week ago</span></div>
+        <span class="status due">In progress</span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>

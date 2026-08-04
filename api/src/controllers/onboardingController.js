@@ -99,7 +99,8 @@ exports.submitOnboarding = async (req, res) => {
             address: address || '',
             digital_address: digital_address || '',
             base_price: parseFloat(base_price),
-            status: 'AVAILABLE'
+            status: 'AVAILABLE',
+            images: []
           }
         })
       ]);
@@ -141,6 +142,6 @@ exports.submitOnboarding = async (req, res) => {
     }
   } catch (error) {
     console.error('Submit onboarding error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: error.message || 'Internal server error' });
   }
 };

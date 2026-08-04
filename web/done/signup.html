@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign up — Fiebnb</title>
+<link rel="icon" href="assets/fiebnb-icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="auth-shell">
+  <aside class="auth-aside">
+    <img class="bg" src="https://picsum.photos/seed/fiebnb-auth-signup/900/1200" alt="">
+    <div class="veil"></div>
+    <div class="content top-logo">
+      <a href="index.html"><img src="assets/fiebnb-logo-horizontal-reversed.svg" alt="Fiebnb" style="height:34px"></a>
+    </div>
+    <div class="content bottom">
+      <div class="weave-strip short"><span></span><span></span><span></span><span></span></div>
+      <h2>Join Fiebnb</h2>
+      <p>Create an account to book verified stays across Ghana, or list your own property and start earning.</p>
+      <div class="quote">
+        <p>"Moved to Accra for work and found a 6-month furnished flat in two days. No agent fees, no drama."</p>
+        <span>Kwabena T. · Long-term tenant</span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="auth-main">
+    <div class="auth-card">
+      <a href="index.html" class="mobile-logo"><img src="assets/fiebnb-logo-horizontal.svg" alt="Fiebnb"></a>
+
+      <h1>Create your account</h1>
+      <p class="sub">Already on Fiebnb? <a href="login.html">Log in</a></p>
+
+      <form onsubmit="event.preventDefault(); window.location='verify-account.html';">
+        <div class="type-select" id="type-select">
+          <label class="type-card selected" data-type="guest">
+            <input type="radio" name="accountType" value="guest" checked>
+            <i data-lucide="briefcase"></i>
+            <h4>I'm booking a stay</h4>
+            <p>Find hotels, guesthouses & rentals</p>
+          </label>
+          <label class="type-card" data-type="host">
+            <input type="radio" name="accountType" value="host">
+            <i data-lucide="home"></i>
+            <h4>I'm listing a property</h4>
+            <p>Earn as a host or landlord</p>
+          </label>
+        </div>
+
+        <div class="form-field">
+          <label for="su-name">Full name</label>
+          <input id="su-name" type="text" placeholder="Ama Owusu" required>
+        </div>
+
+        <div class="method-toggle" id="method-toggle">
+          <button type="button" class="active" data-method="email">Email</button>
+          <button type="button" data-method="phone">Phone number</button>
+        </div>
+
+        <div class="form-field">
+          <label for="su-id" id="su-id-label">Email address</label>
+          <input id="su-id" type="email" placeholder="you@example.com" required>
+        </div>
+
+        <div class="form-field">
+          <label for="su-pw">Password</label>
+          <div class="pw-field">
+            <input id="su-pw" type="password" placeholder="Create a password" minlength="8" required>
+            <button type="button" class="pw-toggle" data-target="su-pw" aria-label="Show password"><i data-lucide="eye" style="width:18px;height:18px"></i></button>
+          </div>
+          <p class="pw-hint">At least 8 characters, with one number.</p>
+        </div>
+
+        <label class="check-row">
+          <input type="checkbox" required>
+          <span>I agree to Fiebnb's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></span>
+        </label>
+
+        <button type="submit" class="btn btn-primary btn-block">Create account</button>
+      </form>
+
+      <div class="divider-row"><div class="line"></div><span>or</span><div class="line"></div></div>
+      <button type="button" class="btn btn-outline btn-block" onclick="alert('This is a front-end prototype — Google sign-up isn\'t wired up yet.')">
+        <i data-lucide="chrome" style="width:17px;height:17px"></i> Continue with Google
+      </button>
+
+      <p class="auth-footer-note">We'll send a verification code to confirm your account.</p>
+    </div>
+  </main>
+</div>
+
+<script src="js/main.js"></script>
+<script>
+  initPasswordToggles();
+  initMethodToggle("method-toggle", (method) => {
+    const input = document.getElementById("su-id");
+    const label = document.getElementById("su-id-label");
+    if(method === "phone"){
+      input.type = "tel"; input.placeholder = "024 000 0000"; label.textContent = "Phone number";
+    } else {
+      input.type = "email"; input.placeholder = "you@example.com"; label.textContent = "Email address";
+    }
+  });
+  document.querySelectorAll("#type-select .type-card").forEach(card => {
+    card.addEventListener("click", () => {
+      document.querySelectorAll("#type-select .type-card").forEach(c => c.classList.remove("selected"));
+      card.classList.add("selected");
+      card.querySelector("input").checked = true;
+    });
+  });
+</script>
+</body>
+</html>

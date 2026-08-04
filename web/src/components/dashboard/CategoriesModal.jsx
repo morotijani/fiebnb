@@ -106,52 +106,50 @@ export default function CategoriesModal({ propertyId, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
-      
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden z-10 flex flex-col max-h-[90vh]">
-        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-          <h2 className="text-xl font-bold text-slate-800">Manage Room Categories</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div className="modal-overlay open">
+      <div className="modal" style={{maxWidth: '600px'}}>
+        <div className="modal-head">
+          <h2>Manage Room Categories</h2>
+          <button type="button" onClick={onClose}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="modal-body">
           {error && (
-            <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
+            <div style={{marginBottom:'16px', padding:'12px', background:'var(--brick-pale)', color:'var(--brick-deep)', borderRadius:'var(--r-md)', fontSize:'13.5px'}}>
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="flex gap-4 items-end bg-slate-50 p-4 rounded-lg border border-slate-200">
-            <div className="flex-1">
-              <label className="block text-xs font-medium text-slate-700 mb-1">Category Name</label>
+          <form onSubmit={handleSubmit} style={{display:'flex', gap:'12px', alignItems:'flex-end', background:'var(--paper-dim)', padding:'16px', borderRadius:'var(--r-md)', border:'1px solid var(--line)', marginBottom:'24px'}}>
+            <div className="form-group" style={{flex: 1, marginBottom: 0}}>
+              <label>Category Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Deluxe Suite"
-                className="block w-full rounded-lg border-slate-300 border focus:ring-blue-500 focus:border-blue-500 text-sm px-3 py-2"
+                className="form-control"
               />
             </div>
-            <div className="flex-1">
-              <label className="block text-xs font-medium text-slate-700 mb-1">Nightly Rate (₵)</label>
+            <div className="form-group" style={{flex: 1, marginBottom: 0}}>
+              <label>Nightly Rate (₵)</label>
               <input
                 type="number"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="150"
-                className="block w-full rounded-lg border-slate-300 border focus:ring-blue-500 focus:border-blue-500 text-sm px-3 py-2"
+                className="form-control"
               />
             </div>
-            <div className="flex gap-2">
+            <div style={{display:'flex', gap:'8px'}}>
               <button
                 type="submit"
                 disabled={addMutation.isPending || updateMutation.isPending}
-                className="px-4 py-2 bg-blue-600 text-white font-medium text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                className="btn btn-primary"
               >
                 {editingId ? 'Save' : 'Add'}
               </button>
@@ -159,7 +157,7 @@ export default function CategoriesModal({ propertyId, onClose }) {
                 <button
                   type="button"
                   onClick={handleCancelEdit}
-                  className="px-4 py-2 bg-slate-200 text-slate-700 font-medium text-sm rounded-lg hover:bg-slate-300 transition-colors"
+                  className="btn btn-outline"
                 >
                   Cancel
                 </button>
@@ -168,30 +166,30 @@ export default function CategoriesModal({ propertyId, onClose }) {
           </form>
 
           <div>
-            <h3 className="font-semibold text-slate-800 mb-3">Existing Categories</h3>
+            <h3 style={{fontSize:'16px', fontWeight:700, margin:'0 0 16px 0', color:'var(--ink)'}}>Existing Categories</h3>
             {isLoading ? (
-              <p className="text-sm text-slate-500">Loading...</p>
+              <p style={{color:'var(--ink-soft)'}}>Loading...</p>
             ) : categories?.length === 0 ? (
-              <p className="text-sm text-slate-500">No categories found.</p>
+              <p style={{color:'var(--ink-soft)'}}>No categories found.</p>
             ) : (
-              <div className="space-y-3">
+              <div style={{display:'flex', flexDirection:'column', gap:'12px'}}>
                 {categories.map(cat => (
-                  <div key={cat.id} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                  <div key={cat.id} style={{display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px', border:'1px solid var(--line)', borderRadius:'var(--r-md)'}}>
                     <div>
-                      <div className="font-medium text-slate-800">{cat.name}</div>
-                      <div className="text-sm text-slate-500">₵{cat.price_per_night} / night</div>
+                      <div style={{fontWeight:600, color:'var(--ink)'}}>{cat.name}</div>
+                      <div style={{fontSize:'13px', color:'var(--ink-soft)'}}>₵{cat.price_per_night} / night</div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div style={{display:'flex', gap:'8px'}}>
                       <button
                         onClick={() => handleEdit(cat)}
-                        className="text-sm text-blue-600 hover:text-blue-800 font-medium px-2 py-1"
+                        className="btn btn-outline" style={{padding:'6px 12px', fontSize:'13px'}}
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => deleteMutation.mutate(cat.id)}
                         disabled={deleteMutation.isPending}
-                        className="text-sm text-red-600 hover:text-red-800 font-medium px-2 py-1"
+                        className="btn btn-outline" style={{padding:'6px 12px', fontSize:'13px', color:'var(--brick-deep)', borderColor:'var(--brick-pale)'}}
                       >
                         Delete
                       </button>

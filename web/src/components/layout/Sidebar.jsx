@@ -1,76 +1,90 @@
-import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, Settings, Users, LogOut, X, ClipboardList, Home } from 'lucide-react';
+import React from 'react';
+import { NavLink, Link } from 'react-router-dom';
+import { LayoutDashboard, Home, CalendarDays, Inbox, Wallet, BarChart3, MessageCircle, Settings, CircleHelp, Repeat, LogOut, Building, Building2, DoorOpen, Users } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
-export default function Sidebar({ isOpen, setIsOpen }) {
+export default function Sidebar() {
   const { user, logout } = useAuth();
+  const isApartment = user?.role === 'HOMEOWNER';
   
-  const navItems = user?.role === 'ADMIN' ? [
-    { name: 'Overview', path: '/admin', icon: LayoutDashboard },
-    { name: 'Requests', path: '/admin/requests', icon: ClipboardList },
-    { name: 'Users', path: '/admin/users', icon: Users },
-    { name: 'Properties', path: '/admin/properties', icon: Home },
-    { name: 'Settings', path: '/settings', icon: Settings },
-  ] : [
-    { name: 'Overview', path: '/', icon: LayoutDashboard },
-    { name: 'Calendar', path: '/calendar', icon: CalendarDays },
-    { name: 'Rooms & Rates', path: '/rooms', icon: LayoutDashboard },
-    { name: 'Guests', path: '/guests', icon: Users },
-    { name: 'Settings', path: '/settings', icon: Settings },
-  ];
-
+  // You can adjust these items based on roles (ADMIN, HOMEOWNER, etc)
+  // The provided design uses 'Manage', 'Grow', 'Account'
   return (
-    <>
-      {/* Mobile Backdrop */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 z-20 bg-slate-900/50 md:hidden"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+    <aside className="dash-side">
+      <Link to="/" className="logo">
+        <span className="mark"><span className="weave-strip"><span></span><span></span><span></span><span></span></span></span>
+        Fiebnb
+      </Link>
+      
+      <nav className="dash-nav">
+        <div className="grp-label">Manage</div>
+        <NavLink to="/dashboard" end className={({isActive}) => isActive ? "active" : ""}>
+          <LayoutDashboard /> Overview
+        </NavLink>
+        {isApartment ? (
+          <>
+            <NavLink to="/dashboard/buildings" className={({isActive}) => isActive ? "active" : ""}>
+              <Building2 /> Buildings
+            </NavLink>
+            <NavLink to="/dashboard/units" className={({isActive}) => isActive ? "active" : ""}>
+              <DoorOpen /> Units
+            </NavLink>
+            <NavLink to="/dashboard/tenants" className={({isActive}) => isActive ? "active" : ""}>
+              <Users /> Tenants
+            </NavLink>
+          </>
+        ) : (
+          <>
+            <NavLink to="/dashboard/rooms" className={({isActive}) => isActive ? "active" : ""}>
+              <Home /> My listings
+            </NavLink>
+            <NavLink to="/dashboard/calendar" className={({isActive}) => isActive ? "active" : ""}>
+              <CalendarDays /> Calendar
+            </NavLink>
+            <NavLink to="/dashboard/guests" className={({isActive}) => isActive ? "active" : ""}>
+              <Inbox /> Booking requests
+            </NavLink>
+          </>
+        )}
 
-      {/* Sidebar Content */}
-      <aside 
-        className={`fixed inset-y-0 left-0 z-30 w-64 bg-slate-900 text-slate-300 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
-      >
-        <div className="flex items-center justify-between h-16 px-6 bg-slate-950/50 border-b border-slate-800">
-          <span className="text-xl font-bold text-white tracking-tight">Fiebnb <span className="text-blue-500">PMS</span></span>
-          <button className="md:hidden text-slate-400 hover:text-white" onClick={() => setIsOpen(false)}>
-            <X size={20} />
-          </button>
-        </div>
+        <div className="grp-label">Operations</div>
+        <NavLink to="/dashboard/payouts" className={({isActive}) => isActive ? "active" : ""}>
+          <Wallet /> Payouts
+        </NavLink>
+        <NavLink to="/dashboard/insights" className={({isActive}) => isActive ? "active" : ""}>
+          <BarChart3 /> Insights
+        </NavLink>
+        {!isApartment && (
+          <NavLink to="/dashboard/properties" className={({isActive}) => isActive ? "active" : ""}>
+            <Building /> Properties
+          </NavLink>
+        )}
+        <NavLink to="/dashboard/staff" className={({isActive}) => isActive ? "active" : ""}>
+          <Users /> Staff
+        </NavLink>
+        <NavLink to="/dashboard/messages" className={({isActive}) => isActive ? "active" : ""}>
+          <MessageCircle /> Messages
+        </NavLink>
 
-        <div className="flex flex-col h-[calc(100%-4rem)] justify-between py-6">
-          <nav className="space-y-1 px-3">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.name}
-                to={item.path}
-                className={({ isActive }) => 
-                  `flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                    isActive 
-                      ? 'bg-blue-600 text-white' 
-                      : 'hover:bg-slate-800 hover:text-white'
-                  }`
-                }
-              >
-                <item.icon className="mr-3 h-5 w-5" />
-                {item.name}
-              </NavLink>
-            ))}
-          </nav>
-
-          <div className="px-3">
-            <button 
-              onClick={logout}
-              className="flex w-full items-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
-            >
-              <LogOut className="mr-3 h-5 w-5" />
-              Sign Out
-            </button>
+        <div className="grp-label">Account</div>
+        <NavLink to="/dashboard/settings" className={({isActive}) => isActive ? "active" : ""}>
+          <Settings /> Settings
+        </NavLink>
+        <NavLink to="/dashboard/support" className={({isActive}) => isActive ? "active" : ""}>
+          <CircleHelp /> Support
+        </NavLink>
+        <button onClick={logout} style={{background:'none', border:'none', cursor:'pointer', textAlign:'left', width:'100%', fontFamily:'inherit'}} className="dash-nav-btn">
+          <div style={{display:'flex', alignItems:'center', gap:'12px', padding:'11px 14px', borderRadius:'12px', fontSize:'14.5px', color:'rgba(250,246,239,0.72)', fontWeight:'500', marginBottom:'2px'}}>
+            <LogOut size={17} /> Sign out
           </div>
-        </div>
-      </aside>
-    </>
+        </button>
+      </nav>
+      
+      <div className="bottom">
+        <Link to="/guest" className="switch-guest">
+          <Repeat style={{width:'15px',height:'15px'}} /> Switch to guest mode
+        </Link>
+      </div>
+    </aside>
   );
 }
