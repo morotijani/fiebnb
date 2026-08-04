@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { LayoutDashboard, Home, CalendarDays, Inbox, Wallet, BarChart3, MessageCircle, Settings, CircleHelp, Repeat, LogOut, Building, Building2, DoorOpen, Users } from 'lucide-react';
+import { LayoutDashboard, Home, CalendarDays, Inbox, Wallet, BarChart3, MessageCircle, Settings, CircleHelp, Repeat, LogOut, Building, Building2, DoorOpen, Users, Wrench } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export default function Sidebar() {
@@ -29,6 +29,7 @@ export default function Sidebar() {
             <NavLink to="/dashboard/units" className={({isActive}) => isActive ? "active" : ""}>
               <DoorOpen /> Units
             </NavLink>
+
             <NavLink to="/dashboard/tenants" className={({isActive}) => isActive ? "active" : ""}>
               <Users /> Tenants
             </NavLink>
@@ -54,6 +55,11 @@ export default function Sidebar() {
         <NavLink to="/dashboard/insights" className={({isActive}) => isActive ? "active" : ""}>
           <BarChart3 /> Insights
         </NavLink>
+        {isApartment && (
+          <NavLink to="/dashboard/maintenance" className={location.pathname === '/dashboard/maintenance' ? "active" : ""}>
+            <Wrench /> Maintenance
+          </NavLink>
+        )}
         {!isApartment && (
           <NavLink to="/dashboard/properties" className={({isActive}) => isActive ? "active" : ""}>
             <Building /> Properties

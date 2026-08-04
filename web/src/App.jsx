@@ -20,6 +20,7 @@ import AdminProperties from './views/admin/AdminProperties';
 import ApartmentBuildingsView from './views/apartment/ApartmentBuildingsView';
 import ApartmentUnitsView from './views/apartment/ApartmentUnitsView';
 import ApartmentTenantsView from './views/apartment/ApartmentTenantsView';
+import MaintenanceView from './views/apartment/MaintenanceView';
 
 // Auth Views
 import LoginView from './views/auth/LoginView';
@@ -166,7 +167,8 @@ function App() {
                 <Route path="staff" element={<StaffView />} />
                 <Route path="buildings" element={<ApartmentBuildingsView />} />
                 <Route path="units" element={<ApartmentUnitsView />} />
-                <Route path="tenants" element={<ApartmentTenantsView />} />
+                <Route path="apartment-tenants" element={<ApartmentTenantsView />} />
+                <Route path="maintenance" element={<MaintenanceView />} />
                 <Route path="*" element={
                   <div className="flex h-full items-center justify-center text-slate-500">
                     Page Under Construction

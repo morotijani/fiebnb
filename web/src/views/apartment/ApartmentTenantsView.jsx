@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import axiosClient from '../../api/axiosClient';
-import { Users, Plus, Edit2, Trash2 } from 'lucide-react';
-import { format } from 'date-fns';
+import { Users, Plus, Edit2, Trash2, AlertTriangle } from 'lucide-react';
+import { format, differenceInDays } from 'date-fns';
 import EditTenantModal from '../../components/dashboard/EditTenantModal';
 
 export default function ApartmentTenantsView() {
@@ -80,6 +80,7 @@ export default function ApartmentTenantsView() {
           <table>
             <thead>
               <tr>
+                <th style={{width: '40px'}}>#</th>
                 <th>Tenant</th>
                 <th>Unit & Building</th>
                 <th>Lease Term</th>
@@ -91,13 +92,19 @@ export default function ApartmentTenantsView() {
             <tbody>
               {tenants?.length === 0 && (
                 <tr>
-                  <td colSpan="6" style={{textAlign: 'center', padding: '40px', color: 'var(--ink-soft)'}}>
+                  <td colSpan="7" style={{textAlign: 'center', padding: '40px', color: 'var(--ink-soft)'}}>
                     No tenants found. Click "Add Tenant" to onboard someone.
                   </td>
                 </tr>
               )}
-              {tenants?.map(lease => (
+              {tenants?.map((lease, index) => {
+                const daysUntilExpiry = differenceInDays(new Date(lease.end_date), new Date());
+                const isExpiringSoon = daysUntilExpiry <= 30 && daysUntilExpiry >= 0 && lease.status === 'ACTIVE';
+                const isExpired = daysUntilExpiry < 0 && lease.status === 'ACTIVE';
+
+                return (
                 <tr key={lease.id}>
+                  <td style={{color: 'var(--ink-soft)', fontWeight: '500'}}>{index + 1}</td>
                   <td>
                     <div style={{fontWeight: '600'}}>{lease.tenant_name || lease.tenant?.name || 'Unknown'}</div>
                     {lease.tenant?.email && <div style={{fontSize: '12px', color: 'var(--ink-soft)'}}>{lease.tenant.email}</div>}
@@ -111,6 +118,18 @@ export default function ApartmentTenantsView() {
                     <div style={{fontSize: '14px'}}>
                       {format(new Date(lease.start_date), 'MMM d, yyyy')} - {format(new Date(lease.end_date), 'MMM d, yyyy')}
                     </div>
+                    {isExpiringSoon && (
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#b45309', background: '#fef3c7', padding: '2px 6px', borderRadius: '4px', marginTop: '4px', fontWeight: '500' }}>
+                        <AlertTriangle size={12} />
+                        Expires in {daysUntilExpiry} {daysUntilExpiry === 1 ? 'day' : 'days'}
+                      </div>
+                    )}
+                    {isExpired && (
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#991b1b', background: '#fee2e2', padding: '2px 6px', borderRadius: '4px', marginTop: '4px', fontWeight: '500' }}>
+                        <AlertTriangle size={12} />
+                        Expired
+                      </div>
+                    )}
                   </td>
                   <td>₵{lease.rent_amount?.toLocaleString()}/mo</td>
                   <td>
@@ -144,7 +163,8 @@ export default function ApartmentTenantsView() {
                     </div>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
