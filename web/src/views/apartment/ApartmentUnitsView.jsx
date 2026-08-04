@@ -4,6 +4,8 @@ import axiosClient from '../../api/axiosClient';
 import { Plus, Edit2 } from 'lucide-react';
 import EditUnitModal from '../../components/dashboard/EditUnitModal';
 
+import CategoriesModal from '../../components/dashboard/CategoriesModal';
+
 const getImageUrl = (url) => {
   if (!url) return '';
   if (url.startsWith('http') || url.startsWith('blob:')) return url;
@@ -13,6 +15,7 @@ const getImageUrl = (url) => {
 
 export default function ApartmentUnitsView() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
   const [editingUnit, setEditingUnit] = useState(null);
 
   const { data: units, isLoading, error } = useQuery({
@@ -55,9 +58,14 @@ export default function ApartmentUnitsView() {
           <h1>Units</h1>
           <p>Manage individual apartment units across your portfolio.</p>
         </div>
-        <button className="btn btn-primary" onClick={handleAddUnit}>
-          <Plus size={16} /> Add Unit
-        </button>
+        <div style={{display:'flex', gap:'12px'}}>
+          <button className="btn btn-outline" onClick={() => setIsCategoriesModalOpen(true)}>
+            Manage Categories
+          </button>
+          <button className="btn btn-primary" onClick={handleAddUnit}>
+            <Plus size={16} /> Add Unit
+          </button>
+        </div>
       </div>
 
       <div className="panel">
@@ -136,6 +144,11 @@ export default function ApartmentUnitsView() {
         <EditUnitModal 
           unit={editingUnit}
           onClose={() => setIsModalOpen(false)}
+        />
+      )}
+      {isCategoriesModalOpen && (
+        <CategoriesModal 
+          onClose={() => setIsCategoriesModalOpen(false)}
         />
       )}
     </>
