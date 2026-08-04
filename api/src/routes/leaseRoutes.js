@@ -1,0 +1,13 @@
+const express = require('express');
+const router = express.Router();
+const leaseController = require('../controllers/leaseController');
+const { requireAuth, requireRole } = require('../middleware/auth.middleware');
+
+router.use(requireAuth);
+router.use(requireRole(['HOMEOWNER', 'ADMIN']));
+
+router.post('/', leaseController.createLease);
+router.put('/:id', leaseController.updateLease);
+router.delete('/:id', leaseController.deleteLease);
+
+module.exports = router;
