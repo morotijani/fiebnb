@@ -131,7 +131,7 @@ export default function ApartmentTenantsView() {
                       </div>
                     )}
                   </td>
-                  <td>₵{lease.rent_amount?.toLocaleString()}/mo</td>
+                  <td>GH₵{lease.rent_amount?.toLocaleString()}/mo</td>
                   <td>
                     <span style={{
                       display: 'inline-block', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: '500',

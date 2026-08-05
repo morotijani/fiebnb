@@ -16,6 +16,7 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const leaseRoutes = require('./routes/leaseRoutes');
 const maintenanceRoutes = require('./routes/maintenanceRoutes');
+const rentRollRoutes = require('./routes/rentRollRoutes');
 const errorHandler = require('./middleware/error.middleware');
 const socket = require('./socket');
 
@@ -47,6 +48,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/leases', leaseRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
+app.use('/api/rent-roll', rentRollRoutes);
 
 // Socket.io connection handling
 io.on('connection', (client) => {

@@ -56,9 +56,14 @@ export default function Sidebar() {
           <BarChart3 /> Insights
         </NavLink>
         {isApartment && (
-          <NavLink to="/dashboard/maintenance" className={location.pathname === '/dashboard/maintenance' ? "active" : ""}>
-            <Wrench /> Maintenance
-          </NavLink>
+          <>
+            <NavLink to="/dashboard/maintenance" className={location.pathname === '/dashboard/maintenance' ? "active" : ""}>
+              <Wrench /> Maintenance
+            </NavLink>
+            <NavLink to="/dashboard/rent-roll" className={location.pathname === '/dashboard/rent-roll' ? "active" : ""}>
+              <Wallet /> Rent roll
+            </NavLink>
+          </>
         )}
         {!isApartment && (
           <NavLink to="/dashboard/properties" className={({isActive}) => isActive ? "active" : ""}>
