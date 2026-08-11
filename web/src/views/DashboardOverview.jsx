@@ -5,13 +5,18 @@ import { useAuth } from '../context/AuthContext';
 import { useDashboard } from '../context/DashboardContext';
 import FrontDeskQueue from '../components/dashboard/FrontDeskQueue';
 import ApartmentOverview from '../components/dashboard/ApartmentOverview';
+import HomeownerOverview from '../components/dashboard/HomeownerOverview';
 
 export default function DashboardOverview() {
   const { user } = useAuth();
   const { openBookingSidebar, openWalkInModal } = useDashboard();
 
-  if (user?.role === 'HOMEOWNER') {
+  if (user?.role === 'APARTMENT_ADMIN') {
     return <ApartmentOverview />;
+  }
+
+  if (user?.role === 'HOMEOWNER') {
+    return <HomeownerOverview />;
   }
 
   const { data: summary, isLoading, error } = useQuery({

@@ -5,7 +5,7 @@ const { requireAuth, requireRole } = require('../middleware/auth.middleware');
 
 router.use(requireAuth);
 // Assuming HOMEOWNER handles these for their properties
-router.use(requireRole(['HOMEOWNER', 'ADMIN', 'GUEST'])); // GUEST added for future tenant access
+router.use(requireRole(['HOMEOWNER', 'APARTMENT_ADMIN', 'ADMIN', 'GUEST'])); // GUEST added for future tenant access
 
 router.get('/', maintenanceController.getTickets);
 router.post('/', maintenanceController.createTicket);

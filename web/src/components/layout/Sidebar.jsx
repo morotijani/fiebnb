@@ -5,7 +5,8 @@ import { useAuth } from '../../context/AuthContext';
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
-  const isApartment = user?.role === 'HOMEOWNER';
+  const isApartment = user?.role === 'APARTMENT_ADMIN';
+  const isHomeowner = user?.role === 'HOMEOWNER';
   
   // You can adjust these items based on roles (ADMIN, HOMEOWNER, etc)
   // The provided design uses 'Manage', 'Grow', 'Account'
@@ -21,7 +22,7 @@ export default function Sidebar() {
         <NavLink to="/dashboard" end className={({isActive}) => isActive ? "active" : ""}>
           <LayoutDashboard /> Overview
         </NavLink>
-        {isApartment ? (
+        {isApartment && (
           <>
             <NavLink to="/dashboard/buildings" className={({isActive}) => isActive ? "active" : ""}>
               <Building2 /> Buildings
@@ -34,7 +35,21 @@ export default function Sidebar() {
               <Users /> Tenants
             </NavLink>
           </>
-        ) : (
+        )}
+        {isHomeowner && (
+          <>
+            <NavLink to="/dashboard/my-properties" className={({isActive}) => isActive ? "active" : ""}>
+              <Home /> My properties
+            </NavLink>
+            <NavLink to="/dashboard/tenants" className={({isActive}) => isActive ? "active" : ""}>
+              <Users /> Tenants
+            </NavLink>
+            <NavLink to="/dashboard/leases" className={({isActive}) => isActive ? "active" : ""}>
+              <Wallet /> Lease agreements
+            </NavLink>
+          </>
+        )}
+        {(!isApartment && !isHomeowner) && (
           <>
             <NavLink to="/dashboard/rooms" className={({isActive}) => isActive ? "active" : ""}>
               <Home /> My listings
@@ -65,7 +80,17 @@ export default function Sidebar() {
             </NavLink>
           </>
         )}
-        {!isApartment && (
+        {isHomeowner && (
+          <>
+            <NavLink to="/dashboard/rent-collection" className={location.pathname === '/dashboard/rent-collection' ? "active" : ""}>
+              <Wallet /> Rent collection
+            </NavLink>
+            <NavLink to="/dashboard/maintenance" className={location.pathname === '/dashboard/maintenance' ? "active" : ""}>
+              <Wrench /> Maintenance
+            </NavLink>
+          </>
+        )}
+        {(!isApartment && !isHomeowner) && (
           <NavLink to="/dashboard/properties" className={({isActive}) => isActive ? "active" : ""}>
             <Building /> Properties
           </NavLink>

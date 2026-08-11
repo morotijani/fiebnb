@@ -4,7 +4,7 @@ const leaseController = require('../controllers/leaseController');
 const { requireAuth, requireRole } = require('../middleware/auth.middleware');
 
 router.use(requireAuth);
-router.use(requireRole(['HOMEOWNER', 'ADMIN']));
+router.use(requireRole(['HOMEOWNER', 'APARTMENT_ADMIN', 'ADMIN']));
 
 router.post('/', leaseController.createLease);
 router.put('/:id', leaseController.updateLease);

@@ -20,8 +20,11 @@ import AdminProperties from './views/admin/AdminProperties';
 import ApartmentBuildingsView from './views/apartment/ApartmentBuildingsView';
 import ApartmentUnitsView from './views/apartment/ApartmentUnitsView';
 import ApartmentTenantsView from './views/apartment/ApartmentTenantsView';
-import MaintenanceView from './views/apartment/MaintenanceView';
 import RentRollView from './views/apartment/RentRollView';
+import MaintenanceView from './views/apartment/MaintenanceView';
+import HomeownerMyPropertiesView from './views/homeowner/MyPropertiesView';
+import HomeownerRentCollectionView from './views/homeowner/RentCollectionView';
+import HomeownerLeasesView from './views/homeowner/LeasesView';
 
 // Auth Views
 import LoginView from './views/auth/LoginView';
@@ -157,7 +160,7 @@ function App() {
             </Route>
 
             {/* Protected Dashboard Routes (Hotel Managers, Admins, Homeowners, Receptionists) */}
-            <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['HOTEL_MANAGER', 'HOMEOWNER', 'RECEPTIONIST', 'GUEST_HOUSE_ADMIN']} />}>
+            <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['HOTEL_MANAGER', 'HOMEOWNER', 'APARTMENT_ADMIN', 'RECEPTIONIST', 'GUEST_HOUSE_ADMIN']} />}>
               <Route element={<DashboardLayout />}>
                 <Route index element={<DashboardOverview />} />
                 <Route path="calendar" element={<CalendarView />} />
@@ -171,6 +174,11 @@ function App() {
                 <Route path="tenants" element={<ApartmentTenantsView />} />
                 <Route path="maintenance" element={<MaintenanceView />} />
                 <Route path="rent-roll" element={<RentRollView />} />
+                
+                {/* Homeowner Routes */}
+                <Route path="my-properties" element={<HomeownerMyPropertiesView />} />
+                <Route path="rent-collection" element={<HomeownerRentCollectionView />} />
+                <Route path="leases" element={<HomeownerLeasesView />} />
                 <Route path="*" element={
                   <div className="flex h-full items-center justify-center text-slate-500">
                     Page Under Construction

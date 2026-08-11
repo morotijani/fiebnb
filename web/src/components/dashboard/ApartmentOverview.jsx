@@ -79,7 +79,7 @@ export default function ApartmentOverview() {
             <div className="ic"><Banknote size={17} stroke="var(--brick-deep)" /></div>
             <span className="delta">This month</span>
           </div>
-          <b>₵{(summary?.rentCollected || 0).toLocaleString()}</b>
+          <b>GH₵{(summary?.rentCollected || 0).toLocaleString()}</b>
           <span>Rent collected</span>
         </div>
         <div className="stat-card">
@@ -109,7 +109,7 @@ export default function ApartmentOverview() {
                   <p>{bldg.location} &middot; {bldg.units} units</p>
                   <div className="portfolio-meta">
                     <span>Occupancy<b>{bldg.occupancy}%</b></span>
-                    <span>Monthly rent<b>₵{bldg.monthlyRent.toLocaleString()}</b></span>
+                    <span>Monthly rent<b>GH₵{bldg.monthlyRent.toLocaleString()}</b></span>
                   </div>
                   <div className="occ-bar"><span style={{width: `${bldg.occupancy}%`}}></span></div>
                 </div>

@@ -4,7 +4,7 @@ const rentRollController = require('../controllers/rentRollController');
 const { requireAuth, requireRole } = require('../middleware/auth.middleware');
 
 router.use(requireAuth);
-router.use(requireRole(['HOMEOWNER', 'ADMIN']));
+router.use(requireRole(['HOMEOWNER', 'APARTMENT_ADMIN', 'ADMIN']));
 
 router.get('/', rentRollController.getRentRoll);
 router.get('/:lease_id/payments', rentRollController.getLeasePayments);

@@ -208,11 +208,23 @@ exports.getApartmentSummary = async (req, res) => {
     });
     const rentCollected = revenueAgg._sum.amount || 0;
 
+    const activeLeases = await prisma.lease.findMany({
+      where: {
+        property: propertyFilter.property || {},
+        status: 'ACTIVE',
+        start_date: { lte: today },
+        end_date: { gte: today }
+      }
+    });
+
     const portfolioList = properties.map(p => {
       const units = p.rooms.length;
-      // Just mock occupancy for now based on units
-      const occupancy = units > 0 ? Math.floor(Math.random() * 40 + 60) : 0;
-      const monthlyRent = p.base_price * units * 0.8; 
+      const occupiedUnitsForProperty = activeLeases.filter(l => l.property_id === p.id).length;
+      const occupancy = units > 0 ? Math.round((occupiedUnitsForProperty / units) * 100) : 0;
+      const monthlyRent = activeLeases
+        .filter(l => l.property_id === p.id)
+        .reduce((sum, lease) => sum + lease.rent_amount, 0);
+
       return {
         id: p.id,
         title: p.title,
@@ -293,7 +305,7 @@ exports.getApartmentSummary = async (req, res) => {
       unit: p.lease.room.room_number,
       building: p.lease.property.title,
       tenant: p.lease.tenant_name || p.lease.tenant?.name || 'Unknown',
-      rent: `₵${p.amount.toLocaleString()}/mo`,
+      rent: `GH₵${p.amount.toLocaleString()}/mo`,
       status: p.status.toLowerCase()
     }));
 
