@@ -7,7 +7,16 @@ exports.getMyProperties = async (req, res) => {
     let properties;
 
     if (req.user.role === 'ADMIN') {
-      properties = await prisma.property.findMany();
+      properties = await prisma.property.findMany({
+        include: {
+          rooms: true,
+          leases: {
+            where: { status: 'ACTIVE' },
+            include: { tenant: true }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      });
     } else {
       properties = await prisma.property.findMany({
         where: {
@@ -15,7 +24,15 @@ exports.getMyProperties = async (req, res) => {
             { owner_id: userId },
             { staff: { some: { user_id: userId } } }
           ]
-        }
+        },
+        include: {
+          rooms: true,
+          leases: {
+            where: { status: 'ACTIVE' },
+            include: { tenant: true }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
       });
     }
     
@@ -26,9 +43,95 @@ exports.getMyProperties = async (req, res) => {
   }
 };
 
+exports.getPublicProperties = async (req, res) => {
+  try {
+    const { type, term, city, search } = req.query;
+
+    const where = {
+      status: 'AVAILABLE'
+    };
+
+    if (type) {
+      where.property_type = type.toUpperCase();
+    }
+
+    if (city) {
+      where.OR = [
+        { address: { contains: city, mode: 'insensitive' } },
+        { title: { contains: city, mode: 'insensitive' } }
+      ];
+    }
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { address: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } }
+      ];
+    }
+
+    const properties = await prisma.property.findMany({
+      where,
+      include: {
+        owner: { select: { id: true, name: true, phone_number: true } },
+        rooms: true,
+        leases: {
+          where: { status: 'ACTIVE' }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    res.status(200).json(properties);
+  } catch (error) {
+    console.error('Error fetching public properties:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.getPropertyById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const property = await prisma.property.findUnique({
+      where: { id },
+      include: {
+        owner: { select: { id: true, name: true, phone_number: true } },
+        rooms: true,
+        leases: {
+          where: { status: 'ACTIVE' },
+          include: { tenant: true }
+        }
+      }
+    });
+
+    if (!property) {
+      return res.status(404).json({ error: 'Property not found' });
+    }
+
+    res.status(200).json(property);
+  } catch (error) {
+    console.error('Error fetching property by id:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 exports.createProperty = async (req, res) => {
   try {
-    const { title, description, base_price, property_type, address, digital_address, latitude, longitude, images } = req.body;
+    const {
+      title,
+      description,
+      base_price,
+      property_type,
+      address,
+      digital_address,
+      latitude,
+      longitude,
+      images,
+      bedrooms,
+      bathrooms,
+      amenities,
+      advance_years
+    } = req.body;
     const is_multi_room = property_type === 'HOTEL' || property_type === 'GUESTHOUSE';
     const owner_id = req.user.id;
 
@@ -41,7 +144,7 @@ exports.createProperty = async (req, res) => {
         title,
         ...(description && { description }),
         base_price: parseFloat(base_price),
-        property_type: property_type || 'HOTEL',
+        property_type: property_type || (req.user.role === 'HOMEOWNER' ? 'HOMEOWNER' : 'HOTEL'),
         is_multi_room,
         owner_id,
         status: 'AVAILABLE',
@@ -49,7 +152,11 @@ exports.createProperty = async (req, res) => {
         ...(digital_address && { digital_address }),
         ...(latitude !== undefined && { latitude: parseFloat(latitude) }),
         ...(longitude !== undefined && { longitude: parseFloat(longitude) }),
-        ...(images && { images })
+        images: Array.isArray(images) ? images : [],
+        bedrooms: bedrooms !== undefined ? parseInt(bedrooms) : 1,
+        bathrooms: bathrooms !== undefined ? parseInt(bathrooms) : 1,
+        amenities: Array.isArray(amenities) ? amenities : [],
+        advance_years: Array.isArray(advance_years) ? advance_years.map(y => parseInt(y)) : [1, 2]
       }
     });
 
@@ -63,7 +170,29 @@ exports.createProperty = async (req, res) => {
 exports.updateProperty = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, base_price, property_type, status, address, digital_address, latitude, longitude, images } = req.body;
+    const {
+      title,
+      description,
+      base_price,
+      property_type,
+      status,
+      address,
+      digital_address,
+      latitude,
+      longitude,
+      images,
+      bedrooms,
+      bathrooms,
+      amenities,
+      advance_years
+    } = req.body;
+
+    if (req.user.role !== 'ADMIN') {
+      const existing = await prisma.property.findUnique({ where: { id } });
+      if (!existing || existing.owner_id !== req.user.id) {
+        return res.status(403).json({ error: 'Unauthorized to modify this property' });
+      }
+    }
 
     const updatedProperty = await prisma.property.update({
       where: { id },
@@ -80,13 +209,39 @@ exports.updateProperty = async (req, res) => {
         ...(digital_address !== undefined && { digital_address }),
         ...(latitude !== undefined && { latitude: parseFloat(latitude) }),
         ...(longitude !== undefined && { longitude: parseFloat(longitude) }),
-        ...(images !== undefined && { images })
+        ...(images !== undefined && { images: Array.isArray(images) ? images : [] }),
+        ...(bedrooms !== undefined && { bedrooms: parseInt(bedrooms) }),
+        ...(bathrooms !== undefined && { bathrooms: parseInt(bathrooms) }),
+        ...(amenities !== undefined && { amenities: Array.isArray(amenities) ? amenities : [] }),
+        ...(advance_years !== undefined && { advance_years: Array.isArray(advance_years) ? advance_years.map(y => parseInt(y)) : [1, 2] })
       }
     });
 
     res.status(200).json({ message: 'Property updated successfully', property: updatedProperty });
   } catch (error) {
     console.error('Error updating property:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.deleteProperty = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (req.user.role !== 'ADMIN') {
+      const existing = await prisma.property.findUnique({ where: { id } });
+      if (!existing || existing.owner_id !== req.user.id) {
+        return res.status(403).json({ error: 'Unauthorized to delete this property' });
+      }
+    }
+
+    await prisma.property.delete({
+      where: { id }
+    });
+
+    res.status(200).json({ message: 'Property deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting property:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

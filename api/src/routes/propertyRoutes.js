@@ -1,12 +1,29 @@
 const express = require('express');
-const { getMyProperties, createProperty, updateProperty, getStaff, addStaff, removeStaff } = require('../controllers/propertyController');
-const { requireRole } = require('../middleware/auth.middleware');
+const {
+  getMyProperties,
+  getPublicProperties,
+  getPropertyById,
+  createProperty,
+  updateProperty,
+  deleteProperty,
+  getStaff,
+  addStaff,
+  removeStaff
+} = require('../controllers/propertyController');
+const { requireRole, requireAuth } = require('../middleware/auth.middleware');
 
 const router = express.Router();
 
+// Public routes for website guests
+router.get('/public', getPublicProperties);
+router.get('/public/:id', getPropertyById);
+
+// Protected property management
 router.get('/', requireRole(['GUEST_HOUSE_ADMIN', 'HOMEOWNER', 'HOTEL_MANAGER', 'RECEPTIONIST', 'ADMIN']), getMyProperties);
 router.post('/', requireRole(['GUEST_HOUSE_ADMIN', 'HOMEOWNER', 'HOTEL_MANAGER', 'ADMIN']), createProperty);
+router.get('/:id', getPropertyById);
 router.put('/:id', requireRole(['GUEST_HOUSE_ADMIN', 'HOMEOWNER', 'HOTEL_MANAGER', 'ADMIN']), updateProperty);
+router.delete('/:id', requireRole(['GUEST_HOUSE_ADMIN', 'HOMEOWNER', 'HOTEL_MANAGER', 'ADMIN']), deleteProperty);
 
 // Staff management routes
 const adminRoles = ['GUEST_HOUSE_ADMIN', 'HOMEOWNER', 'HOTEL_MANAGER', 'ADMIN'];

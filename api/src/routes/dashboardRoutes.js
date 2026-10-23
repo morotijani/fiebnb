@@ -10,8 +10,11 @@ router.get('/summary', requireRole(['GUEST_HOUSE_ADMIN', 'HOMEOWNER', 'HOTEL_MAN
 // Get Apartment Dashboard Summary
 router.get('/apartment-summary', requireRole(['GUEST_HOUSE_ADMIN', 'HOMEOWNER', 'APARTMENT_ADMIN', 'HOTEL_MANAGER', 'RECEPTIONIST', 'ADMIN']), require('../controllers/dashboardController').getApartmentSummary);
 
+// Get Homeowner Dashboard Summary
+router.get('/homeowner-summary', requireRole(['HOMEOWNER', 'ADMIN']), require('../controllers/dashboardController').getHomeownerSummary);
+
 router.get('/apartment-buildings', requireRole(['APARTMENT_ADMIN', 'ADMIN']), require('../controllers/dashboardController').getApartmentBuildings);
 router.get('/apartment-units', requireRole(['APARTMENT_ADMIN', 'ADMIN']), require('../controllers/dashboardController').getApartmentUnits);
-router.get('/apartment-tenants', requireRole(['APARTMENT_ADMIN', 'ADMIN']), require('../controllers/dashboardController').getApartmentTenants);
+router.get('/apartment-tenants', requireRole(['APARTMENT_ADMIN', 'HOMEOWNER', 'ADMIN']), require('../controllers/dashboardController').getApartmentTenants);
 
 module.exports = router;

@@ -145,3 +145,79 @@ exports.deleteLease = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+exports.applyForLease = async (req, res) => {
+  try {
+    const { property_id, start_date, duration_months = 12, guest_name, guest_phone } = req.body;
+    const guestId = req.user.id;
+
+    const property = await prisma.property.findUnique({
+      where: { id: property_id },
+      include: { owner: true }
+    });
+
+    if (!property) {
+      return res.status(404).json({ error: 'Property not found' });
+    }
+
+    const startDate = new Date(start_date || Date.now());
+    const endDate = new Date(startDate);
+    const months = parseInt(duration_months) || 12;
+    endDate.setMonth(endDate.getMonth() + months);
+
+    const rentAmount = property.base_price;
+    const advancePayment = rentAmount * months;
+
+    const lease = await prisma.lease.create({
+      data: {
+        property_id: property.id,
+        tenant_id: guestId,
+        tenant_name: guest_name || req.user.name || 'Tenant',
+        start_date: startDate,
+        end_date: endDate,
+        rent_amount: rentAmount,
+        duration_months: months,
+        advance_payment: advancePayment,
+        status: 'PENDING'
+      },
+      include: {
+        property: true,
+        tenant: true
+      }
+    });
+
+    // Create the upfront payment due
+    await prisma.tenantPayment.create({
+      data: {
+        lease_id: lease.id,
+        amount: advancePayment,
+        due_date: startDate,
+        status: 'DUE'
+      }
+    });
+
+    // Also create booking entry for calendar sync and management queue
+    await prisma.booking.create({
+      data: {
+        guest_id: guestId,
+        property_id: property.id,
+        check_in: startDate,
+        check_out: endDate,
+        total_amount: advancePayment,
+        booking_source: 'APP',
+        status: 'PENDING'
+      }
+    });
+
+    res.status(201).json({
+      message: 'Rental application submitted successfully',
+      lease,
+      advance_payment: advancePayment,
+      monthly_rent: rentAmount,
+      duration_months: months
+    });
+  } catch (error) {
+    console.error('Error applying for lease:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

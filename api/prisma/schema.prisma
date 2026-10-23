@@ -133,6 +133,10 @@ model Property {
   is_multi_room   Boolean        @default(false)
   status          PropertyStatus @default(AVAILABLE)
   images          String[]
+  bedrooms        Int?           @default(1)
+  bathrooms       Int?           @default(1)
+  amenities       String[]       @default([])
+  advance_years   Int[]          @default([1, 2])
 
   // Relations
   owner    User            @relation("PropertyOwner", fields: [owner_id], references: [id])
@@ -283,20 +287,22 @@ model OtpVerification {
 }
 
 model Lease {
-  id             String      @id @default(uuid())
-  tenant_id      String?     
-  tenant_name    String?     
-  property_id    String
-  room_id        String
-  start_date     DateTime
-  end_date       DateTime
-  rent_amount    Float
-  status         LeaseStatus @default(ACTIVE)
+  id              String      @id @default(uuid())
+  tenant_id       String?     
+  tenant_name     String?     
+  property_id     String
+  room_id         String?
+  start_date      DateTime
+  end_date        DateTime
+  rent_amount     Float
+  duration_months Int?        @default(12)
+  advance_payment Float?
+  status          LeaseStatus @default(ACTIVE)
 
   // Relations
   tenant         User?       @relation("TenantLeases", fields: [tenant_id], references: [id])
   property       Property    @relation(fields: [property_id], references: [id])
-  room           Room        @relation(fields: [room_id], references: [id])
+  room           Room?       @relation(fields: [room_id], references: [id])
   payments       TenantPayment[]
 
   createdAt      DateTime    @default(now())

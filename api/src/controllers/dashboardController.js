@@ -357,14 +357,194 @@ exports.getApartmentUnits = async (req, res) => {
 exports.getApartmentTenants = async (req, res) => {
   try {
     const userId = req.user.id;
+    const userRole = req.user.role;
     const tenants = await prisma.lease.findMany({
-      where: { property: { owner_id: userId, property_type: 'APARTMENT' } },
+      where: userRole === 'ADMIN'
+        ? { property: { property_type: { in: ['APARTMENT', 'HOMEOWNER'] } } }
+        : { property: { owner_id: userId, property_type: { in: ['APARTMENT', 'HOMEOWNER'] } } },
       include: { property: true, room: true, tenant: true },
       orderBy: { start_date: 'desc' }
     });
     res.status(200).json(tenants);
   } catch (error) {
     console.error('Error fetching apartment tenants:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.getHomeownerSummary = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userRole = req.user.role;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const propertyFilter = userRole === 'ADMIN'
+      ? { property_type: { in: ['HOMEOWNER', 'APARTMENT'] } }
+      : { owner_id: userId, property_type: { in: ['HOMEOWNER', 'APARTMENT'] } };
+
+    // Rent Collected this month
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
+    const revenueAgg = await prisma.tenantPayment.aggregate({
+      _sum: { amount: true },
+      where: {
+        status: 'PAID',
+        paid_date: { gte: startOfMonth, lte: endOfMonth },
+        lease: { property: propertyFilter }
+      }
+    });
+    const rentCollected = revenueAgg._sum.amount || 0;
+
+    // Properties
+    const properties = await prisma.property.findMany({
+      where: propertyFilter,
+      include: { rooms: true }
+    });
+
+    const activeLeases = await prisma.lease.findMany({
+      where: {
+        property: propertyFilter,
+        status: 'ACTIVE'
+      },
+      include: {
+        room: true,
+        tenant: true,
+        payments: {
+          orderBy: { due_date: 'desc' },
+          take: 1
+        }
+      }
+    });
+
+    const totalUnits = properties.reduce((sum, p) => sum + (p.rooms && p.rooms.length > 0 ? p.rooms.length : 1), 0);
+    const occupiedUnits = activeLeases.length;
+    const occupancyRate = totalUnits > 0 ? Math.min(100, Math.round((occupiedUnits / totalUnits) * 100)) : 0;
+
+    // Upcoming Lease Renewals (next 60 days)
+    const next60Days = new Date(today);
+    next60Days.setDate(next60Days.getDate() + 60);
+    const upcomingLeases = await prisma.lease.findMany({
+      where: {
+        property: propertyFilter,
+        status: 'ACTIVE',
+        end_date: { lte: next60Days }
+      },
+      orderBy: { end_date: 'asc' },
+      include: { property: true, room: true, tenant: true },
+      take: 5
+    });
+
+    // Maintenance requests
+    const openTickets = await prisma.maintenanceTicket.findMany({
+      where: {
+        property: propertyFilter,
+        status: { in: ['URGENT', 'IN_PROGRESS', 'SCHEDULED'] }
+      },
+      orderBy: { createdAt: 'desc' },
+      include: { property: true, room: true, reported_by: true },
+      take: 5
+    });
+    const urgentTicketsCount = openTickets.filter(t => t.status === 'URGENT').length;
+
+    // Format Portfolio List
+    const portfolioList = [];
+    for (const p of properties) {
+      const imageUrl = p.images && p.images.length > 0 
+        ? (p.images[0].startsWith('http') 
+            ? p.images[0] 
+            : `http://localhost:3000/uploads/${p.images[0].replace(/^(\/?uploads\/|\/)/, '')}`)
+        : `https://picsum.photos/seed/bldg${p.id}/120/100`;
+
+      if (p.rooms && p.rooms.length > 0) {
+        for (const room of p.rooms) {
+          const lease = activeLeases.find(l => l.room_id === room.id);
+          let status = 'vacant';
+          let statusLabel = 'Listed';
+          if (lease) {
+            const latestPayment = lease.payments && lease.payments[0];
+            if (latestPayment?.status === 'PAID') {
+              status = 'paid';
+              statusLabel = 'Paid';
+            } else if (latestPayment?.status === 'OVERDUE') {
+              status = 'overdue';
+              statusLabel = 'Overdue';
+            } else {
+              status = 'due';
+              statusLabel = 'Due';
+            }
+          }
+          portfolioList.push({
+            id: room.id,
+            title: p.rooms.length > 1 ? `${p.title} — Room ${room.room_number}` : p.title,
+            location: p.address || p.digital_address || 'Accra',
+            tenant: lease ? (lease.tenant_name || lease.tenant?.name || 'Tenant') : 'Vacant',
+            rent: `GH₵${(lease ? lease.rent_amount : (room.custom_price || p.base_price)).toLocaleString()}/mo`,
+            status,
+            statusLabel,
+            image: imageUrl
+          });
+        }
+      } else {
+        const lease = activeLeases.find(l => l.property_id === p.id);
+        let status = 'vacant';
+        let statusLabel = 'Listed';
+        if (lease) {
+          const latestPayment = lease.payments && lease.payments[0];
+          if (latestPayment?.status === 'PAID') {
+            status = 'paid';
+            statusLabel = 'Paid';
+          } else if (latestPayment?.status === 'OVERDUE') {
+            status = 'overdue';
+            statusLabel = 'Overdue';
+          } else {
+            status = 'due';
+            statusLabel = 'Due';
+          }
+        }
+        portfolioList.push({
+          id: p.id,
+          title: p.title,
+          location: p.address || p.digital_address || 'Accra',
+          tenant: lease ? (lease.tenant_name || lease.tenant?.name || 'Tenant') : 'Vacant',
+          rent: `GH₵${(lease ? lease.rent_amount : p.base_price).toLocaleString()}/mo`,
+          status,
+          statusLabel,
+          image: imageUrl
+        });
+      }
+    }
+
+    res.status(200).json({
+      rentCollected,
+      totalUnits,
+      occupiedUnits,
+      occupancyRate,
+      leaseRenewalsCount: upcomingLeases.length,
+      openMaintenanceCount: openTickets.length,
+      urgentMaintenanceCount: urgentTicketsCount,
+      portfolioList,
+      leaseExpirations: upcomingLeases.map(l => {
+        const d = new Date(l.end_date);
+        return {
+          id: l.id,
+          date: d.getDate().toString().padStart(2, '0'),
+          month: d.toLocaleString('default', { month: 'short' }),
+          tenant: l.tenant_name || l.tenant?.name || 'Tenant',
+          description: `${l.property.title}${l.room ? ` · Unit ${l.room.room_number}` : ''} · Lease ending, renewal pending`
+        };
+      }),
+      maintenanceQueue: openTickets.map(t => ({
+        id: t.id,
+        title: t.title,
+        location: `${t.property.title}${t.room ? ' · Unit ' + t.room.room_number : ''} · ${t.reported_by?.name ? 'Reported by ' + t.reported_by.name : (t.description || 'Maintenance request')}`,
+        status: t.status === 'URGENT' ? 'urgent' : t.status === 'IN_PROGRESS' ? 'due' : 'vacant',
+        type: t.type?.toLowerCase() || 'general'
+      }))
+    });
+
+  } catch (error) {
+    console.error('Error fetching homeowner summary:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

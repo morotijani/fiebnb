@@ -4,6 +4,11 @@ const leaseController = require('../controllers/leaseController');
 const { requireAuth, requireRole } = require('../middleware/auth.middleware');
 
 router.use(requireAuth);
+
+// Guest-facing lease application
+router.post('/apply', leaseController.applyForLease);
+
+// Host / Admin lease management
 router.use(requireRole(['HOMEOWNER', 'APARTMENT_ADMIN', 'ADMIN']));
 
 router.post('/', leaseController.createLease);

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Search, Heart } from 'lucide-react';
+import axiosClient from '../../api/axiosClient';
 import { FIEBNB_LISTINGS } from '../../data/mockListings';
 import './BrowseView.css';
 
@@ -22,9 +24,50 @@ const BrowseView = () => {
   const [city, setCity] = useState('');
   const [sort, setSort] = useState('rec');
 
+  // Fetch real properties from database
+  const { data: dbProperties = [] } = useQuery({
+    queryKey: ['publicProperties'],
+    queryFn: async () => {
+      try {
+        const res = await axiosClient.get('/properties/public');
+        return res.data;
+      } catch (e) {
+        return [];
+      }
+    }
+  });
+
+  // Combine DB listings with Mock listings
+  const allListings = useMemo(() => {
+    const formattedDb = dbProperties.map(p => {
+      const isHomeowner = p.property_type === 'HOMEOWNER';
+      return {
+        id: p.id,
+        title: p.title,
+        city: p.address?.split(',')[1]?.trim() || 'Accra',
+        area: p.address?.split(',')[0]?.trim() || p.address || 'Greater Accra',
+        type: isHomeowner ? 'House' : (p.property_type === 'APARTMENT' ? 'Apartment' : 'Hotel'),
+        term: isHomeowner || p.property_type === 'APARTMENT' ? 'long' : 'short',
+        price: p.base_price,
+        unit: isHomeowner || p.property_type === 'APARTMENT' ? 'month' : 'night',
+        rating: 4.9,
+        reviews: 18,
+        guests: (p.bedrooms || 1) * 2,
+        beds: p.bedrooms || 1,
+        baths: p.bathrooms || 1,
+        seed: `fiebnb-${p.id.slice(0, 5)}`,
+        tags: p.amenities && p.amenities.length > 0 ? p.amenities : ['Water reservoir', 'Gated compound', 'Parking'],
+        imageUrl: p.images && p.images.length > 0
+          ? (p.images[0].startsWith('http') ? p.images[0] : `http://localhost:3000${p.images[0]}`)
+          : null
+      };
+    });
+    return [...formattedDb, ...FIEBNB_LISTINGS];
+  }, [dbProperties]);
+
   // Computed listings
   const filteredListings = useMemo(() => {
-    let list = [...FIEBNB_LISTINGS];
+    let list = [...allListings];
 
     if (qLoc) {
       const q = qLoc.toLowerCase();
@@ -176,8 +219,10 @@ const BrowseView = () => {
                 filteredListings.map(l => (
                   <Link key={l.id} className="card listing-card" to={`/listing/${l.id}`}>
                     <div className="thumb">
-                      <img src={`https://picsum.photos/seed/${l.seed}/500/440`} alt={l.title} />
-                      <span className="badge pill-tag gold">{l.type}</span>
+                      <img src={l.imageUrl || `https://picsum.photos/seed/${l.seed}/500/440`} alt={l.title} />
+                      <span className={`badge pill-tag ${l.term === 'long' ? 'forest' : 'gold'}`}>
+                        {l.term === 'long' ? 'Long-term' : l.type}
+                      </span>
                       <span className="fav"><Heart size={17} /></span>
                     </div>
                     <div style={{padding: '0 2px 16px'}}>
@@ -186,7 +231,7 @@ const BrowseView = () => {
                         <span className="listing-rating"><StarIcon /> {l.rating}</span>
                       </div>
                       <p className="listing-loc">{l.area}, {l.city} · {l.term === "long" ? "Long-term" : "Short stay"}</p>
-                      <p className="listing-price"><b>₵{l.price.toLocaleString()}</b> / {l.unit}</p>
+                      <p className="listing-price"><b>GH₵{l.price.toLocaleString()}</b> / {l.unit}</p>
                     </div>
                   </Link>
                 ))

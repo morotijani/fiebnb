@@ -9,6 +9,7 @@ import GuestsView from './views/GuestsView';
 import SettingsView from './views/SettingsView';
 import PropertiesView from './views/PropertiesView';
 import StaffView from './views/StaffView';
+import MessagesView from './views/MessagesView';
 
 // Admin Views
 import AdminDashboard from './views/admin/AdminDashboard';
@@ -16,10 +17,10 @@ import OnboardingRequests from './views/admin/OnboardingRequests';
 import AdminUsers from './views/admin/AdminUsers';
 import AdminProperties from './views/admin/AdminProperties';
 
-// Apartment Views
+// Apartment & Tenant Views
 import ApartmentBuildingsView from './views/apartment/ApartmentBuildingsView';
 import ApartmentUnitsView from './views/apartment/ApartmentUnitsView';
-import ApartmentTenantsView from './views/apartment/ApartmentTenantsView';
+import TenantsView from './views/TenantsView';
 import RentRollView from './views/apartment/RentRollView';
 import MaintenanceView from './views/apartment/MaintenanceView';
 import HomeownerMyPropertiesView from './views/homeowner/MyPropertiesView';
@@ -169,9 +170,10 @@ function App() {
                 <Route path="settings" element={<SettingsView />} />
                 <Route path="properties" element={<PropertiesView />} />
                 <Route path="staff" element={<StaffView />} />
+                <Route path="messages" element={<MessagesView />} />
                 <Route path="buildings" element={<ApartmentBuildingsView />} />
                 <Route path="units" element={<ApartmentUnitsView />} />
-                <Route path="tenants" element={<ApartmentTenantsView />} />
+                <Route path="tenants" element={<TenantsView />} />
                 <Route path="maintenance" element={<MaintenanceView />} />
                 <Route path="rent-roll" element={<RentRollView />} />
                 
