@@ -148,7 +148,7 @@ export default function GuestsView() {
                   {getStatusBadge(booking.status)}
                 </td>
                 <td style={{textAlign: 'right', fontWeight: 700, color: 'var(--ink)', fontSize: '15px'}}>
-                  ₵{booking.total_amount}
+                  GH₵ {Number(booking.total_amount || 0).toLocaleString()}
                 </td>
               </tr>
             ))}

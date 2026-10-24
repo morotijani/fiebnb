@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import axiosClient from '../../api/axiosClient';
+import MatIcon from '../common/MatIcon';
 
 export default function GeneratePaymentsModal({ lease, onClose }) {
   const queryClient = useQueryClient();
@@ -32,10 +33,8 @@ export default function GeneratePaymentsModal({ lease, onClose }) {
       <div className="modal" style={{ maxWidth: '450px' }}>
         <div className="modal-head">
           <h2>Generate Invoices</h2>
-          <button type="button" onClick={onClose}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+          <button type="button" onClick={onClose} aria-label="Close">
+            <MatIcon name="close" size={20} />
           </button>
         </div>
 

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosClient from '../api/axiosClient';
-import { Plus, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
+import MatIcon from '../components/common/MatIcon';
 
 export default function StaffView() {
   const queryClient = useQueryClient();
@@ -102,8 +102,10 @@ export default function StaffView() {
             <button 
               onClick={() => setIsAdding(true)}
               className="btn btn-primary"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              <Plus size={16} /> Add Staff
+              <MatIcon name="person_add" size={18} />
+              <span>Add Staff</span>
             </button>
           )}
         </div>
@@ -217,7 +219,7 @@ export default function StaffView() {
                         }}
                         title="Remove Staff"
                       >
-                        <Trash2 size={18} />
+                        <MatIcon name="delete" size={18} />
                       </button>
                     </td>
                   </tr>

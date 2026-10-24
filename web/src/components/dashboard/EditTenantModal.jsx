@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import axiosClient from '../../api/axiosClient';
 import { format } from 'date-fns';
+import MatIcon from '../common/MatIcon';
 
 export default function EditTenantModal({ tenant, onClose }) {
   const queryClient = useQueryClient();
@@ -109,10 +110,8 @@ export default function EditTenantModal({ tenant, onClose }) {
       <div className="modal" style={{ maxWidth: '600px' }}>
         <div className="modal-head">
           <h2>{isEditing ? 'Edit Tenant Lease' : 'Add New Tenant'}</h2>
-          <button type="button" onClick={onClose}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+          <button type="button" onClick={onClose} aria-label="Close">
+            <MatIcon name="close" size={20} />
           </button>
         </div>
 
@@ -194,7 +193,7 @@ export default function EditTenantModal({ tenant, onClose }) {
               </div>
               <div style={{ display: 'flex', gap: '16px' }}>
                 <div className="form-group" style={{ flex: 1 }}>
-                  <label>Rent Amount (₵ / mo) *</label>
+                  <label>Rent Amount (GH₵ / mo) *</label>
                   <input type="number" name="rent_amount" value={formData.rent_amount} onChange={handleChange} className="form-control" required />
                 </div>
                 {isEditing && (

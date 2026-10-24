@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosClient from '../../api/axiosClient';
 import toast from 'react-hot-toast';
 import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from '@react-google-maps/api';
+import MatIcon from '../common/MatIcon';
 
 const libraries = ['places'];
 const mapContainerStyle = { width: '100%', height: '300px', borderRadius: '0.5rem' };
@@ -162,8 +163,8 @@ export default function EditPropertyModal({ property = {}, onClose, defaultPrope
               ? (defaultPropertyType === 'APARTMENT' ? 'Add New Building' : 'Add New Property') 
               : (defaultPropertyType === 'APARTMENT' ? 'Edit Building Settings' : 'Edit Property Settings')}
           </h2>
-          <button onClick={onClose} style={{background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink-soft)'}}>
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          <button onClick={onClose} style={{background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink-soft)'}} aria-label="Close">
+            <MatIcon name="close" size={20} />
           </button>
         </div>
 

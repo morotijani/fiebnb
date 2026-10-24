@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import axiosClient from '../../api/axiosClient';
-import { Plus, Edit2 } from 'lucide-react';
+import MatIcon from '../../components/common/MatIcon';
 import EditUnitModal from '../../components/dashboard/EditUnitModal';
-
 import CategoriesModal from '../../components/dashboard/CategoriesModal';
 
 const getImageUrl = (url) => {
@@ -28,17 +27,14 @@ export default function ApartmentUnitsView() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 animate-pulse">
-        <div className="dash-topbar">
-          <div><div className="h-8 bg-slate-200 rounded w-1/4"></div></div>
-        </div>
-        <div className="panel h-64 bg-slate-200"></div>
+      <div className="panel" style={{ textAlign: 'center', padding: '40px', color: 'var(--fb-text-secondary)' }}>
+        Loading units data...
       </div>
     );
   }
 
   if (error) {
-    return <div className="text-red-500 p-8">Failed to load units data.</div>;
+    return <div className="panel" style={{ color: '#E41E3F', padding: '24px' }}>Failed to load units data.</div>;
   }
 
   const handleAddUnit = () => {
@@ -58,18 +54,18 @@ export default function ApartmentUnitsView() {
           <h1>Units</h1>
           <p>Manage individual apartment units across your portfolio.</p>
         </div>
-        <div style={{display:'flex', gap:'12px'}}>
+        <div style={{ display: 'flex', gap: '10px' }}>
           <button className="btn btn-outline" onClick={() => setIsCategoriesModalOpen(true)}>
-            Manage Categories
+            <MatIcon name="category" size={16} /> Manage Categories
           </button>
           <button className="btn btn-primary" onClick={handleAddUnit}>
-            <Plus size={16} /> Add Unit
+            <MatIcon name="add" size={18} /> Add Unit
           </button>
         </div>
       </div>
 
-      <div className="panel">
-        <div style={{overflowX: 'auto'}}>
+      <div className="panel" style={{ padding: 0, overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
           <table>
             <thead>
               <tr>
@@ -78,13 +74,13 @@ export default function ApartmentUnitsView() {
                 <th>Category</th>
                 <th>Price / Month</th>
                 <th>Status</th>
-                <th>Actions</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {units?.length === 0 && (
                 <tr>
-                  <td colSpan="6" style={{textAlign: 'center', padding: '40px', color: 'var(--ink-soft)'}}>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: 'var(--fb-text-secondary)' }}>
                     No units found. Click "Add Unit" to create one.
                   </td>
                 </tr>
@@ -96,40 +92,35 @@ export default function ApartmentUnitsView() {
                 return (
                   <tr key={unit.id}>
                     <td>
-                      <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         {unit.images && unit.images[0] ? (
                           <img 
                             src={getImageUrl(unit.images[0])} 
-                            style={{width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover'}} 
+                            style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover', border: '1px solid var(--fb-border)' }} 
                             alt={unit.room_number}
                           />
                         ) : (
-                          <div style={{width: '40px', height: '40px', borderRadius: '4px', background: 'var(--paper-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink-soft)', fontSize: '10px'}}>
-                            No Img
+                          <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'var(--fb-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--fb-primary)' }}>
+                            <MatIcon name="meeting_room" size={20} />
                           </div>
                         )}
-                        <div style={{fontWeight: '600'}}>{unit.room_number}</div>
+                        <div style={{ fontWeight: 600, color: 'var(--fb-text)' }}>Unit {unit.room_number}</div>
                       </div>
                     </td>
                     <td>{unit.property?.title || 'Unknown'}</td>
                     <td>{unit.category?.name || 'Unspecified'}</td>
-                    <td>₵{price.toLocaleString()}</td>
+                    <td style={{ fontWeight: 600 }}>GH₵{price.toLocaleString()}</td>
                     <td>
-                      <span style={{
-                        display: 'inline-block', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: '500',
-                        background: isOccupied ? '#e6f7ec' : '#f1f3f5',
-                        color: isOccupied ? '#0f7b40' : '#495057'
-                      }}>
+                      <span className={`status ${isOccupied ? 'paid' : 'vacant'}`}>
                         {isOccupied ? 'Occupied' : 'Vacant'}
                       </span>
                     </td>
-                    <td>
+                    <td style={{ textAlign: 'right' }}>
                       <button 
-                        className="btn btn-outline" 
-                        style={{padding: '4px 8px', fontSize: '12px'}}
+                        className="btn btn-outline btn-sm" 
                         onClick={() => handleEditUnit(unit)}
                       >
-                        <Edit2 size={12} style={{marginRight: '4px'}} /> Edit
+                        <MatIcon name="edit" size={15} /> Edit
                       </button>
                     </td>
                   </tr>
@@ -142,13 +133,14 @@ export default function ApartmentUnitsView() {
 
       {isModalOpen && (
         <EditUnitModal 
-          unit={editingUnit}
-          onClose={() => setIsModalOpen(false)}
+          unit={editingUnit} 
+          onClose={() => setIsModalOpen(false)} 
         />
       )}
+
       {isCategoriesModalOpen && (
         <CategoriesModal 
-          onClose={() => setIsCategoriesModalOpen(false)}
+          onClose={() => setIsCategoriesModalOpen(false)} 
         />
       )}
     </>

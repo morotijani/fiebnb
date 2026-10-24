@@ -1,16 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
-import {
-  Banknote,
-  Search,
-  CheckCircle2,
-  Clock,
-  AlertTriangle,
-  Calendar,
-  X
-} from 'lucide-react';
+import MatIcon from '../../components/common/MatIcon';
 import axiosClient from '../../api/axiosClient';
 
 export default function RentCollectionView() {
@@ -30,11 +22,11 @@ export default function RentCollectionView() {
   });
 
   // Flatten payments with lease context
-  const allPayments = React.useMemo(() => {
+  const allPayments = useMemo(() => {
     const list = [];
-    leases.forEach(lease => {
+    leases.forEach((lease) => {
       if (lease.payments && lease.payments.length > 0) {
-        lease.payments.forEach(p => {
+        lease.payments.forEach((p) => {
           list.push({
             ...p,
             lease,
@@ -44,14 +36,13 @@ export default function RentCollectionView() {
           });
         });
       } else {
-        // If lease has no generated payment records yet, present the upfront lease payment
         list.push({
           id: `lease-advance-${lease.id}`,
           isVirtual: true,
           lease_id: lease.id,
           amount: lease.advance_payment || (lease.rent_amount * (lease.duration_months || 12)),
           due_date: lease.start_date,
-          status: 'PAID', // Upfront paid at lease start
+          status: 'PAID',
           paid_date: lease.start_date,
           lease,
           property: lease.property,
@@ -94,25 +85,26 @@ export default function RentCollectionView() {
   };
 
   // Metrics
-  const paidPayments = allPayments.filter(p => p.status === 'PAID');
-  const duePayments = allPayments.filter(p => p.status === 'DUE');
-  const overduePayments = allPayments.filter(p => p.status === 'OVERDUE');
+  const paidPayments = allPayments.filter((p) => p.status === 'PAID');
+  const duePayments = allPayments.filter((p) => p.status === 'DUE');
+  const overduePayments = allPayments.filter((p) => p.status === 'OVERDUE');
 
   const totalCollected = paidPayments.reduce((sum, p) => sum + p.amount, 0);
   const totalDue = duePayments.reduce((sum, p) => sum + p.amount, 0);
   const totalOverdue = overduePayments.reduce((sum, p) => sum + p.amount, 0);
 
   // Filtered
-  const filtered = allPayments.filter(p => {
+  const filtered = allPayments.filter((p) => {
     const q = searchTerm.toLowerCase();
-    const matchesSearch = (p.tenant || '').toLowerCase().includes(q) || (p.property?.title || '').toLowerCase().includes(q);
+    const matchesSearch =
+      (p.tenant || '').toLowerCase().includes(q) || (p.property?.title || '').toLowerCase().includes(q);
     if (!matchesSearch) return false;
     if (filterStatus === 'ALL') return true;
     return p.status === filterStatus;
   });
 
   return (
-    <div className="dash-main">
+    <div>
       <div className="dash-topbar">
         <div>
           <h1>Rent collection</h1>
@@ -121,35 +113,52 @@ export default function RentCollectionView() {
       </div>
 
       {/* Metrics Row */}
-      <div className="stat-grid" style={{ marginBottom: '24px' }}>
+      <div className="stat-grid">
         <div className="stat-card">
           <div className="top">
-            <div className="ic"><Banknote size={17} stroke="var(--forest-deep)" /></div>
-            <span className="delta" style={{ background: '#E1EAE0', color: 'var(--forest-deep)' }}>Collected</span>
+            <div className="ic">
+              <MatIcon name="payments" size={22} />
+            </div>
+            <span className="delta">Collected</span>
           </div>
           <b>GH₵{totalCollected.toLocaleString()}</b>
           <span>Total rent collected</span>
         </div>
+
         <div className="stat-card">
           <div className="top">
-            <div className="ic"><Clock size={17} stroke="var(--gold-deep)" /></div>
-            <span className="delta" style={{ background: 'var(--gold-pale)', color: 'var(--gold-deep)' }}>Pending</span>
+            <div className="ic" style={{ background: '#FFF4E5', color: '#B25E00' }}>
+              <MatIcon name="schedule" size={22} />
+            </div>
+            <span className="delta" style={{ background: '#FFF4E5', color: '#B25E00' }}>
+              Pending
+            </span>
           </div>
           <b>GH₵{totalDue.toLocaleString()}</b>
           <span>Rent payments due</span>
         </div>
+
         <div className="stat-card">
           <div className="top">
-            <div className="ic"><AlertTriangle size={17} stroke="#DC2626" /></div>
-            <span className="delta" style={{ background: '#FEE2E2', color: '#DC2626' }}>Attention</span>
+            <div className="ic" style={{ background: '#FFEBEA', color: '#E41E3F' }}>
+              <MatIcon name="warning" size={22} />
+            </div>
+            <span className="delta" style={{ background: '#FFEBEA', color: '#E41E3F' }}>
+              Attention
+            </span>
           </div>
           <b>GH₵{totalOverdue.toLocaleString()}</b>
           <span>Overdue payments ({overduePayments.length})</span>
         </div>
+
         <div className="stat-card">
           <div className="top">
-            <div className="ic"><Calendar size={17} stroke="var(--brick-deep)" /></div>
-            <span className="delta">Transactions</span>
+            <div className="ic" style={{ background: 'var(--fb-hover)', color: 'var(--fb-primary)' }}>
+              <MatIcon name="receipt_long" size={22} />
+            </div>
+            <span className="delta" style={{ background: 'var(--fb-hover)', color: 'var(--fb-text)' }}>
+              Transactions
+            </span>
           </div>
           <b>{allPayments.length}</b>
           <span>Total payment records</span>
@@ -157,39 +166,38 @@ export default function RentCollectionView() {
       </div>
 
       {/* Filter and Search */}
-      <div className="panel" style={{ padding: '16px 20px', marginBottom: '24px' }}>
+      <div className="panel" style={{ padding: '16px 20px', marginBottom: '20px' }}>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: '220px', position: 'relative' }}>
-            <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-soft)' }} />
+            <MatIcon
+              name="search"
+              size={18}
+              style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--fb-text-secondary)' }}
+            />
             <input
               type="text"
               placeholder="Search by tenant name or property..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '9px 12px 9px 36px',
-                border: '1px solid var(--line)',
-                borderRadius: '8px',
-                fontSize: '14px',
-                outline: 'none'
-              }}
+              className="form-control"
+              style={{ paddingLeft: '38px', borderRadius: '20px', height: '40px' }}
             />
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            {['ALL', 'PAID', 'DUE', 'OVERDUE'].map(st => (
+            {['ALL', 'PAID', 'DUE', 'OVERDUE'].map((st) => (
               <button
                 key={st}
                 onClick={() => setFilterStatus(st)}
                 style={{
-                  padding: '8px 14px',
+                  padding: '7px 14px',
                   borderRadius: '20px',
-                  border: filterStatus === st ? '1px solid var(--ink)' : '1px solid var(--line)',
-                  background: filterStatus === st ? 'var(--ink)' : 'var(--white)',
-                  color: filterStatus === st ? 'var(--white)' : 'var(--ink)',
-                  fontSize: '13px',
+                  border: filterStatus === st ? '1px solid var(--fb-primary)' : '1px solid var(--fb-border)',
+                  background: filterStatus === st ? 'var(--fb-primary-tint)' : '#FFFFFF',
+                  color: filterStatus === st ? 'var(--fb-primary)' : 'var(--fb-text)',
+                  fontSize: '12.5px',
                   fontWeight: 600,
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
                 }}
               >
                 {st === 'ALL' ? 'All Payments' : st.charAt(0) + st.slice(1).toLowerCase()}
@@ -202,87 +210,88 @@ export default function RentCollectionView() {
       {/* Payments Table */}
       <div className="panel" style={{ padding: 0, overflow: 'hidden' }}>
         {isLoading ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--ink-soft)' }}>
+          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--fb-text-secondary)' }}>
             Loading payments...
           </div>
         ) : error ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: 'red' }}>
+          <div style={{ padding: '40px', textAlign: 'center', color: '#E41E3F' }}>
             Failed to load payment records.
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ padding: '50px 20px', textAlign: 'center' }}>
-            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--sand)', margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Banknote size={28} stroke="var(--brick-deep)" />
+            <div
+              style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '50%',
+                background: 'var(--fb-hover)',
+                margin: '0 auto 16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--fb-primary)'
+              }}
+            >
+              <MatIcon name="payments" size={28} />
             </div>
-            <h2 style={{ fontSize: '18px', marginBottom: '8px' }}>No payments found</h2>
-            <p style={{ color: 'var(--ink-soft)', maxWidth: '420px', margin: '0 auto', fontSize: '14px' }}>
+            <h2 style={{ fontSize: '18px', marginBottom: '8px', color: 'var(--fb-text)' }}>No payments found</h2>
+            <p style={{ color: 'var(--fb-text-secondary)', maxWidth: '420px', margin: '0 auto', fontSize: '14px' }}>
               {searchTerm ? 'No payments match your search filter.' : 'No payment records found for your properties yet.'}
             </p>
           </div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <table>
               <thead>
-                <tr style={{ background: 'var(--paper-dim)' }}>
-                  <th style={{ width: '40px', padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--ink-soft)' }}>#</th>
-                  <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--ink-soft)' }}>Tenant</th>
-                  <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--ink-soft)' }}>Property</th>
-                  <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--ink-soft)' }}>Amount</th>
-                  <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--ink-soft)' }}>Due Date</th>
-                  <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--ink-soft)' }}>Paid Date</th>
-                  <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--ink-soft)' }}>Status</th>
-                  <th style={{ padding: '14px 16px', textAlign: 'right', fontSize: '12px', color: 'var(--ink-soft)' }}>Action</th>
+                <tr>
+                  <th style={{ width: '40px' }}>#</th>
+                  <th>Tenant</th>
+                  <th>Property</th>
+                  <th>Amount</th>
+                  <th>Due Date</th>
+                  <th>Paid Date</th>
+                  <th>Status</th>
+                  <th style={{ textAlign: 'right' }}>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((p, idx) => (
-                  <tr key={p.id} style={{ borderBottom: '1px solid var(--line)' }}>
-                    <td style={{ padding: '16px', color: 'var(--ink-soft)', fontWeight: '600' }}>{idx + 1}</td>
-                    <td style={{ padding: '16px' }}>
-                      <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--ink)' }}>{p.tenant}</div>
-                      {p.tenant_phone && <div style={{ fontSize: '12px', color: 'var(--ink-soft)' }}>{p.tenant_phone}</div>}
+                  <tr key={p.id}>
+                    <td style={{ color: 'var(--fb-text-secondary)', fontWeight: '600' }}>{idx + 1}</td>
+                    <td>
+                      <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--fb-text)' }}>{p.tenant}</div>
+                      {p.tenant_phone && <div style={{ fontSize: '12px', color: 'var(--fb-text-secondary)' }}>{p.tenant_phone}</div>}
                     </td>
-                    <td style={{ padding: '16px' }}>
-                      <div style={{ fontWeight: 600, fontSize: '13.5px' }}>{p.property?.title}</div>
-                      <div style={{ fontSize: '12px', color: 'var(--ink-soft)' }}>{p.property?.address || 'Accra'}</div>
+                    <td>
+                      <div style={{ fontWeight: 600, fontSize: '13.5px', color: 'var(--fb-text)' }}>{p.property?.title}</div>
+                      <div style={{ fontSize: '12px', color: 'var(--fb-text-secondary)' }}>{p.property?.address || 'Accra'}</div>
                     </td>
-                    <td style={{ padding: '16px', fontWeight: 800, fontSize: '15px', color: 'var(--ink)' }}>
+                    <td style={{ fontWeight: 800, fontSize: '14.5px', color: 'var(--fb-text)' }}>
                       GH₵{p.amount?.toLocaleString()}
                     </td>
-                    <td style={{ padding: '16px', fontSize: '13.5px' }}>
+                    <td style={{ fontSize: '13.5px' }}>
                       {p.due_date ? format(new Date(p.due_date), 'MMM d, yyyy') : '—'}
                     </td>
-                    <td style={{ padding: '16px', fontSize: '13.5px', color: 'var(--ink-soft)' }}>
+                    <td style={{ fontSize: '13.5px', color: 'var(--fb-text-secondary)' }}>
                       {p.paid_date ? format(new Date(p.paid_date), 'MMM d, yyyy') : '—'}
                     </td>
-                    <td style={{ padding: '16px' }}>
-                      <span
-                        style={{
-                          display: 'inline-block',
-                          padding: '4px 10px',
-                          borderRadius: '20px',
-                          fontSize: '11.5px',
-                          fontWeight: 700,
-                          background: p.status === 'PAID' ? '#E1EAE0' : (p.status === 'OVERDUE' ? '#FEE2E2' : 'var(--gold-pale)'),
-                          color: p.status === 'PAID' ? 'var(--forest-deep)' : (p.status === 'OVERDUE' ? '#DC2626' : 'var(--gold-deep)')
-                        }}
-                      >
+                    <td>
+                      <span className={`status ${p.status === 'PAID' ? 'paid' : (p.status === 'OVERDUE' ? 'overdue' : 'due')}`}>
                         {p.status}
                       </span>
                     </td>
-                    <td style={{ padding: '16px', textAlign: 'right' }}>
+                    <td style={{ textAlign: 'right' }}>
                       {p.status !== 'PAID' && !p.isVirtual && (
                         <button
                           onClick={() => handleRecordPayment(p)}
                           className="btn btn-primary btn-sm"
-                          style={{ padding: '6px 12px', fontSize: '12px' }}
                         >
                           Record Paid
                         </button>
                       )}
                       {p.status === 'PAID' && (
-                        <span style={{ fontSize: '12px', color: 'var(--forest-deep)', fontWeight: 600 }}>
-                          ✓ Settled
+                        <span style={{ fontSize: '12.5px', color: 'var(--fb-success-text)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <MatIcon name="check_circle" size={16} /> Settled
                         </span>
                       )}
                     </td>
@@ -296,68 +305,40 @@ export default function RentCollectionView() {
 
       {/* Record Payment Modal */}
       {recordingPayment && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '20px'
-          }}
-        >
-          <div
-            style={{
-              background: 'var(--white)',
-              borderRadius: '16px',
-              maxWidth: '440px',
-              width: '100%',
-              padding: '24px',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>
-                Record Received Payment
-              </h2>
-              <button onClick={() => setRecordingPayment(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink-soft)' }}>
-                <X size={20} />
+        <div className="modal-overlay open">
+          <div className="modal" style={{ maxWidth: '460px' }}>
+            <div className="modal-head">
+              <h2>Record Received Payment</h2>
+              <button onClick={() => setRecordingPayment(null)}>
+                <MatIcon name="close" size={20} />
               </button>
             </div>
 
             <form onSubmit={submitRecordPayment}>
-              <div style={{ background: 'var(--paper-dim)', padding: '14px', borderRadius: '10px', marginBottom: '18px' }}>
-                <div style={{ fontSize: '13px', color: 'var(--ink-soft)' }}>Tenant:</div>
-                <div style={{ fontWeight: 700, fontSize: '14.5px' }}>{recordingPayment.tenant}</div>
-                <div style={{ fontSize: '13px', color: 'var(--ink-soft)', marginTop: '8px' }}>Amount:</div>
-                <div style={{ fontWeight: 800, fontSize: '18px', color: 'var(--forest-deep)' }}>
-                  GH₵{recordingPayment.amount?.toLocaleString()}
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ background: 'var(--fb-bg)', padding: '16px', borderRadius: '10px', border: '1px solid var(--fb-border)' }}>
+                  <div style={{ fontSize: '12.5px', color: 'var(--fb-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Tenant</div>
+                  <div style={{ fontWeight: 700, fontSize: '15px', color: 'var(--fb-text)', marginTop: '2px' }}>{recordingPayment.tenant}</div>
+                  
+                  <div style={{ fontSize: '12.5px', color: 'var(--fb-text-secondary)', textTransform: 'uppercase', fontWeight: 600, marginTop: '12px' }}>Amount Due</div>
+                  <div style={{ fontWeight: 800, fontSize: '20px', color: 'var(--fb-success-text)', marginTop: '2px' }}>
+                    GH₵{recordingPayment.amount?.toLocaleString()}
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Payment Received Date *</label>
+                  <input
+                    type="date"
+                    value={paidDate}
+                    onChange={(e) => setPaidDate(e.target.value)}
+                    required
+                    className="form-control"
+                  />
                 </div>
               </div>
 
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
-                  Payment Received Date
-                </label>
-                <input
-                  type="date"
-                  value={paidDate}
-                  onChange={(e) => setPaidDate(e.target.value)}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid var(--line)',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    outline: 'none'
-                  }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <div className="modal-foot">
                 <button type="button" onClick={() => setRecordingPayment(null)} className="btn btn-outline">
                   Cancel
                 </button>

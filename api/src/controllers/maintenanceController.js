@@ -2,14 +2,23 @@ const prisma = require('../prismaClient');
 
 exports.getTickets = async (req, res) => {
   try {
+    const where = req.user.role === 'ADMIN' ? {} : {
+      property: {
+        owner_id: req.user.id
+      }
+    };
+
     const tickets = await prisma.maintenanceTicket.findMany({
-      where: {
-        property: {
-          owner_id: req.user.id
-        }
-      },
+      where,
       include: {
-        property: true,
+        property: {
+          include: {
+            leases: {
+              where: { status: 'ACTIVE' },
+              include: { tenant: true }
+            }
+          }
+        },
         room: true,
         reported_by: true
       },
@@ -26,11 +35,15 @@ exports.getTickets = async (req, res) => {
 
 exports.createTicket = async (req, res) => {
   try {
-    const { property_id, room_id, title, description, type, status } = req.body;
+    const { property_id, room_id, title, description, type, status, reported_by_id } = req.body;
 
     // Validate ownership
+    const propertyWhere = req.user.role === 'ADMIN'
+      ? { id: property_id }
+      : { id: property_id, owner_id: req.user.id };
+
     const property = await prisma.property.findFirst({
-      where: { id: property_id, owner_id: req.user.id }
+      where: propertyWhere
     });
 
     if (!property) {
@@ -41,14 +54,21 @@ exports.createTicket = async (req, res) => {
       data: {
         property_id,
         room_id: room_id || null,
-        reported_by_id: req.user.id, // Logged by the homeowner for now
+        reported_by_id: reported_by_id || req.user.id,
         title,
-        description,
-        type: type || 'General',
+        description: description || '',
+        type: type || 'general',
         status: status || 'SCHEDULED'
       },
       include: {
-        property: true,
+        property: {
+          include: {
+            leases: {
+              where: { status: 'ACTIVE' },
+              include: { tenant: true }
+            }
+          }
+        },
         room: true,
         reported_by: true
       }
@@ -71,7 +91,7 @@ exports.updateTicket = async (req, res) => {
       include: { property: true }
     });
 
-    if (!existingTicket || existingTicket.property.owner_id !== req.user.id) {
+    if (!existingTicket || (req.user.role !== 'ADMIN' && existingTicket.property.owner_id !== req.user.id)) {
       return res.status(403).json({ error: 'Unauthorized' });
     }
 
@@ -86,7 +106,14 @@ exports.updateTicket = async (req, res) => {
         status: status || undefined
       },
       include: {
-        property: true,
+        property: {
+          include: {
+            leases: {
+              where: { status: 'ACTIVE' },
+              include: { tenant: true }
+            }
+          }
+        },
         room: true,
         reported_by: true
       }

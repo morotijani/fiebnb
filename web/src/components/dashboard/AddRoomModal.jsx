@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import axiosClient from '../../api/axiosClient';
+import MatIcon from '../common/MatIcon';
 
 export default function AddRoomModal({ propertyId, properties, onClose }) {
   const queryClient = useQueryClient();
@@ -66,10 +67,8 @@ export default function AddRoomModal({ propertyId, properties, onClose }) {
         {/* Header */}
         <div className="modal-head">
           <h2>Add New Room</h2>
-          <button type="button" onClick={onClose}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+          <button type="button" onClick={onClose} aria-label="Close">
+            <MatIcon name="close" size={20} />
           </button>
         </div>
 

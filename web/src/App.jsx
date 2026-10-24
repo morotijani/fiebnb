@@ -22,7 +22,7 @@ import ApartmentBuildingsView from './views/apartment/ApartmentBuildingsView';
 import ApartmentUnitsView from './views/apartment/ApartmentUnitsView';
 import TenantsView from './views/TenantsView';
 import RentRollView from './views/apartment/RentRollView';
-import MaintenanceView from './views/apartment/MaintenanceView';
+import MaintenanceView from './views/MaintenanceView';
 import HomeownerMyPropertiesView from './views/homeowner/MyPropertiesView';
 import HomeownerRentCollectionView from './views/homeowner/RentCollectionView';
 import HomeownerLeasesView from './views/homeowner/LeasesView';

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosClient from '../api/axiosClient';
-import { Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import EditPropertyModal from '../components/dashboard/EditPropertyModal';
+import MatIcon from '../components/common/MatIcon';
 
 const getImageUrl = (url) => {
   if (!url) return '';
@@ -71,8 +71,10 @@ export default function PropertiesView() {
           <button 
             onClick={() => setIsAdding(true)}
             className="btn btn-primary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            <Plus size={16} /> Add Property
+            <MatIcon name="add" size={18} />
+            <span>Add Property</span>
           </button>
         )}
       </div>
@@ -170,7 +172,7 @@ export default function PropertiesView() {
                     <span style={{fontSize: '13.5px'}}>{prop.property_type}</span>
                   </td>
                   <td>
-                    <span style={{fontWeight: 600}}>₵{prop.base_price}</span>
+                    <span style={{fontWeight: 600}}>GH₵ {Number(prop.base_price || 0).toLocaleString()}</span>
                   </td>
                   <td style={{fontSize: '13.5px', color: 'var(--ink-soft)'}}>
                     {prop.createdAt ? format(new Date(prop.createdAt), 'MMM d, yyyy') : 'N/A'}

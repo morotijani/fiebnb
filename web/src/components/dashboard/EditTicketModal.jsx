@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import axiosClient from '../../api/axiosClient';
+import MatIcon from '../common/MatIcon';
 
 export default function EditTicketModal({ ticket, onClose }) {
   const queryClient = useQueryClient();
@@ -70,10 +71,8 @@ export default function EditTicketModal({ ticket, onClose }) {
       <div className="modal" style={{ maxWidth: '500px' }}>
         <div className="modal-head">
           <h2>{isEditing ? 'Edit Maintenance Ticket' : 'Log Maintenance Issue'}</h2>
-          <button type="button" onClick={onClose}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+          <button type="button" onClick={onClose} aria-label="Close">
+            <MatIcon name="close" size={20} />
           </button>
         </div>
 

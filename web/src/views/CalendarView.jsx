@@ -1,5 +1,6 @@
 import ResourceTimeline from '../components/dashboard/ResourceTimeline';
 import { useDashboard } from '../context/DashboardContext';
+import MatIcon from '../components/common/MatIcon';
 
 export default function CalendarView() {
   const { openWalkInModal } = useDashboard();
@@ -11,8 +12,9 @@ export default function CalendarView() {
           <h1>Booking Calendar</h1>
           <p>Manage room availability and manual walk-in blocks.</p>
         </div>
-        <button className="btn btn-primary" onClick={() => openWalkInModal()}>
-          + New Walk-in
+        <button className="btn btn-primary" onClick={() => openWalkInModal()} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <MatIcon name="add" size={18} />
+          <span>New Walk-in</span>
         </button>
       </div>
 

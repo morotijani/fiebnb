@@ -4,6 +4,7 @@ import EditRoomModal from '../components/dashboard/EditRoomModal';
 import AddRoomModal from '../components/dashboard/AddRoomModal';
 import CategoriesModal from '../components/dashboard/CategoriesModal';
 import axiosClient from '../api/axiosClient';
+import MatIcon from '../components/common/MatIcon';
 
 const getImageUrl = (url) => {
   if (!url) return '';
@@ -102,18 +103,18 @@ export default function RoomsView() {
             onClick={() => setIsAddingRoom(true)}
             disabled={!selectedPropertyId}
             className="btn btn-primary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            + Add Room
+            <MatIcon name="add" size={18} />
+            <span>Add Room</span>
           </button>
         </div>
       </div>
 
       {/* Filters Bar */}
       <div className="filter-bar">
-        <div className="filter-search">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+        <div className="filter-search" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <MatIcon name="search" size={20} color="var(--fb-text-secondary)" />
           <input 
             type="text" 
             placeholder="Search by room name or number..." 
@@ -185,7 +186,7 @@ export default function RoomsView() {
                   </div>
                   <div style={{textAlign:'right'}}>
                     <span className="lbl">Rate</span>
-                    <span className="price">₵{room.category?.price_per_night || 0}</span>
+                    <span className="price">GH₵{room.category?.price_per_night || 0}</span>
                   </div>
                 </div>
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import axiosClient from '../api/axiosClient';
 
 export default function SettingsView() {
@@ -64,10 +65,10 @@ function ProfileForm() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['profile']);
-      alert('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
     },
     onError: (err) => {
-      alert(err.response?.data?.error || 'Failed to update profile');
+      toast.error(err.response?.data?.error || 'Failed to update profile');
     }
   });
 
@@ -76,10 +77,10 @@ function ProfileForm() {
     updateMutation.mutate(formData);
   };
 
-  if (isLoading) return <div style={{color: 'var(--ink-soft)'}}>Loading profile...</div>;
+  if (isLoading) return <div style={{ color: 'var(--fb-text-secondary)' }}>Loading profile...</div>;
 
   return (
-    <form onSubmit={handleSubmit} style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <div>
         <label className="form-label">Full Name</label>
         <input 
@@ -87,6 +88,7 @@ function ProfileForm() {
           value={formData.name}
           onChange={(e) => setFormData({...formData, name: e.target.value})}
           className="form-control"
+          required
         />
       </div>
       <div>
@@ -96,9 +98,9 @@ function ProfileForm() {
           value={profile?.email || ''}
           disabled
           className="form-control"
-          style={{background: 'var(--paper-dim)', color: 'var(--ink-soft)', cursor: 'not-allowed'}}
+          style={{ background: 'var(--fb-bg)', color: 'var(--fb-text-secondary)', cursor: 'not-allowed' }}
         />
-        <p style={{fontSize: '12.5px', color: 'var(--ink-soft)', marginTop: '4px'}}>Email cannot be changed directly.</p>
+        <p style={{ fontSize: '12px', color: 'var(--fb-text-secondary)', marginTop: '4px' }}>Email cannot be changed directly.</p>
       </div>
       <div>
         <label className="form-label">Account Role</label>
@@ -107,7 +109,7 @@ function ProfileForm() {
           value={profile?.role || ''}
           disabled
           className="form-control"
-          style={{background: 'var(--paper-dim)', color: 'var(--ink-soft)', cursor: 'not-allowed', textTransform: 'capitalize'}}
+          style={{ background: 'var(--fb-bg)', color: 'var(--fb-text-secondary)', cursor: 'not-allowed', textTransform: 'capitalize' }}
         />
       </div>
       <div>
@@ -129,7 +131,7 @@ function ProfileForm() {
           className="form-control"
         />
       </div>
-      <div style={{marginTop: '8px'}}>
+      <div style={{ marginTop: '8px' }}>
         <button 
           type="submit" 
           disabled={updateMutation.isPending}
@@ -155,18 +157,18 @@ function PasswordChangeForm() {
       return res.data;
     },
     onSuccess: () => {
-      alert('Password updated successfully!');
+      toast.success('Password updated successfully!');
       setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
     },
     onError: (err) => {
-      alert(err.response?.data?.error || 'Failed to update password');
+      toast.error(err.response?.data?.error || 'Failed to update password');
     }
   });
 
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
     if (passwords.newPassword !== passwords.confirmPassword) {
-      alert('New passwords do not match');
+      toast.error('New passwords do not match');
       return;
     }
     passwordMutation.mutate({
@@ -176,7 +178,7 @@ function PasswordChangeForm() {
   };
 
   return (
-    <form onSubmit={handlePasswordSubmit} style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
+    <form onSubmit={handlePasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <div>
         <label className="form-label">Current Password</label>
         <input 
@@ -209,7 +211,7 @@ function PasswordChangeForm() {
           className="form-control"
         />
       </div>
-      <div style={{marginTop: '8px'}}>
+      <div style={{ marginTop: '8px' }}>
         <button 
           type="submit" 
           disabled={passwordMutation.isPending}

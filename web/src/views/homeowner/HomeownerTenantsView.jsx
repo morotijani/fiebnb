@@ -2,22 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { format, differenceInDays } from 'date-fns';
-import {
-  Users,
-  Plus,
-  Edit2,
-  Trash2,
-  AlertTriangle,
-  Search,
-  Home,
-  Calendar,
-  Banknote,
-  CheckCircle2,
-  Clock,
-  Phone,
-  Mail,
-  X
-} from 'lucide-react';
+import MatIcon from '../../components/common/MatIcon';
 import axiosClient from '../../api/axiosClient';
 
 export default function HomeownerTenantsView() {
@@ -70,7 +55,7 @@ export default function HomeownerTenantsView() {
     }
   });
 
-  // Add/Edit mutation
+  // Create or Update Lease mutation
   const saveMutation = useMutation({
     mutationFn: async (payload) => {
       if (editingTenant) {
@@ -85,21 +70,22 @@ export default function HomeownerTenantsView() {
       closeModal();
     },
     onError: (err) => {
-      toast.error(err.response?.data?.error || 'Failed to save tenant');
+      toast.error(err.response?.data?.error || 'Failed to save lease agreement');
     }
   });
 
   const openAddModal = () => {
     setEditingTenant(null);
+    const firstProp = properties[0];
     const today = new Date().toISOString().split('T')[0];
     setFormData({
-      property_id: properties[0]?.id || '',
+      property_id: firstProp ? firstProp.id : '',
       tenant_name: '',
       tenant_phone: '',
       tenant_email: '',
       start_date: today,
       duration_months: 12,
-      rent_amount: properties[0]?.base_price || ''
+      rent_amount: firstProp ? firstProp.base_price : ''
     });
     setIsModalOpen(true);
   };
@@ -107,7 +93,7 @@ export default function HomeownerTenantsView() {
   const openEditModal = (lease) => {
     setEditingTenant(lease);
     setFormData({
-      property_id: lease.property_id || lease.property?.id || '',
+      property_id: lease.property_id,
       tenant_name: lease.tenant_name || lease.tenant?.name || '',
       tenant_phone: lease.tenant?.phone_number || '',
       tenant_email: lease.tenant?.email || '',
@@ -124,8 +110,8 @@ export default function HomeownerTenantsView() {
   };
 
   const handlePropertyChange = (propId) => {
-    const selected = properties.find(p => p.id === propId);
-    setFormData(prev => ({
+    const selected = properties.find((p) => p.id === propId);
+    setFormData((prev) => ({
       ...prev,
       property_id: propId,
       rent_amount: selected ? selected.base_price : prev.rent_amount
@@ -156,16 +142,19 @@ export default function HomeownerTenantsView() {
   };
 
   // Metrics
-  const activeTenants = tenants.filter(t => t.status === 'ACTIVE');
+  const activeTenants = tenants.filter((t) => t.status === 'ACTIVE');
   const totalMonthlyIncome = activeTenants.reduce((sum, t) => sum + (t.rent_amount || 0), 0);
-  const totalAdvanceCollected = activeTenants.reduce((sum, t) => sum + (t.advance_payment || (t.rent_amount * (t.duration_months || 12))), 0);
-  const expiringSoonCount = activeTenants.filter(t => {
+  const totalAdvanceCollected = activeTenants.reduce(
+    (sum, t) => sum + (t.advance_payment || (t.rent_amount * (t.duration_months || 12))),
+    0
+  );
+  const expiringSoonCount = activeTenants.filter((t) => {
     const diff = differenceInDays(new Date(t.end_date), new Date());
     return diff <= 60 && diff >= 0;
   }).length;
 
   // Filtered tenants
-  const filtered = tenants.filter(t => {
+  const filtered = tenants.filter((t) => {
     const q = searchTerm.toLowerCase();
     const name = (t.tenant_name || t.tenant?.name || '').toLowerCase();
     const propTitle = (t.property?.title || '').toLowerCase();
@@ -174,50 +163,61 @@ export default function HomeownerTenantsView() {
   });
 
   return (
-    <div className="dash-main">
+    <div>
       <div className="dash-topbar">
         <div>
           <h1>Tenants</h1>
           <p>Manage long-term tenants, multi-year advance leases, and contact details.</p>
         </div>
-        <button
-          onClick={openAddModal}
-          className="btn btn-primary"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
-        >
-          <Plus size={16} /> Onboard Tenant
+        <button onClick={openAddModal} className="btn btn-primary">
+          <MatIcon name="person_add" size={18} /> Onboard Tenant
         </button>
       </div>
 
       {/* Metrics Row */}
-      <div className="stat-grid" style={{ marginBottom: '24px' }}>
+      <div className="stat-grid">
         <div className="stat-card">
           <div className="top">
-            <div className="ic"><Users size={17} stroke="var(--brick-deep)" /></div>
+            <div className="ic">
+              <MatIcon name="group" size={22} />
+            </div>
             <span className="delta">Active</span>
           </div>
           <b>{activeTenants.length}</b>
           <span>Current residential tenants</span>
         </div>
+
         <div className="stat-card">
           <div className="top">
-            <div className="ic"><Clock size={17} stroke="var(--gold-deep)" /></div>
-            <span className="delta" style={{ background: 'var(--gold-pale)', color: 'var(--gold-deep)' }}>Next 60 days</span>
+            <div className="ic" style={{ background: '#FFF4E5', color: '#B25E00' }}>
+              <MatIcon name="schedule" size={22} />
+            </div>
+            <span className="delta" style={{ background: '#FFF4E5', color: '#B25E00' }}>
+              Next 60 days
+            </span>
           </div>
           <b>{expiringSoonCount}</b>
           <span>Renewals pending</span>
         </div>
+
         <div className="stat-card">
           <div className="top">
-            <div className="ic"><Banknote size={17} stroke="var(--forest-deep)" /></div>
-            <span className="delta" style={{ background: '#E1EAE0', color: 'var(--forest-deep)' }}>Monthly</span>
+            <div className="ic" style={{ background: '#E7F8ED', color: '#0F7B40' }}>
+              <MatIcon name="payments" size={22} />
+            </div>
+            <span className="delta" style={{ background: '#E7F8ED', color: '#0F7B40' }}>
+              Monthly
+            </span>
           </div>
           <b>GH₵{totalMonthlyIncome.toLocaleString()}</b>
           <span>Total monthly rent rate</span>
         </div>
+
         <div className="stat-card">
           <div className="top">
-            <div className="ic"><Banknote size={17} stroke="var(--brick-deep)" /></div>
+            <div className="ic">
+              <MatIcon name="account_balance_wallet" size={22} />
+            </div>
             <span className="delta">Advance Volume</span>
           </div>
           <b>GH₵{totalAdvanceCollected.toLocaleString()}</b>
@@ -226,65 +226,75 @@ export default function HomeownerTenantsView() {
       </div>
 
       {/* Search Bar */}
-      <div className="panel" style={{ padding: '16px 20px', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <div style={{ flex: 1, position: 'relative' }}>
-            <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-soft)' }} />
-            <input
-              type="text"
-              placeholder="Search by tenant name, property title, or phone number..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '9px 12px 9px 36px',
-                border: '1px solid var(--line)',
-                borderRadius: '8px',
-                fontSize: '14px',
-                outline: 'none'
-              }}
-            />
-          </div>
+      <div className="panel" style={{ padding: '16px 20px', marginBottom: '20px' }}>
+        <div style={{ position: 'relative', width: '100%' }}>
+          <MatIcon
+            name="search"
+            size={18}
+            style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--fb-text-secondary)' }}
+          />
+          <input
+            type="text"
+            placeholder="Search by tenant name, property title, or phone number..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="form-control"
+            style={{ paddingLeft: '38px', borderRadius: '20px', height: '40px' }}
+          />
         </div>
       </div>
 
       {/* Tenants Table */}
       <div className="panel" style={{ padding: 0, overflow: 'hidden' }}>
         {isLoading ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--ink-soft)' }}>
+          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--fb-text-secondary)' }}>
             Loading tenant records...
           </div>
         ) : error ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: 'red' }}>
+          <div style={{ padding: '40px', textAlign: 'center', color: '#E41E3F' }}>
             Failed to load tenants.
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ padding: '50px 20px', textAlign: 'center' }}>
-            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--sand)', margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Users size={28} stroke="var(--brick-deep)" />
+            <div
+              style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '50%',
+                background: 'var(--fb-hover)',
+                margin: '0 auto 16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--fb-primary)'
+              }}
+            >
+              <MatIcon name="group" size={28} />
             </div>
-            <h2 style={{ fontSize: '18px', marginBottom: '8px' }}>No tenants found</h2>
-            <p style={{ color: 'var(--ink-soft)', maxWidth: '420px', margin: '0 auto 20px', fontSize: '14px' }}>
-              {searchTerm ? 'No tenants match your search.' : 'You currently do not have any tenants onboarded. Click "Onboard Tenant" to add a lease agreement.'}
+            <h2 style={{ fontSize: '18px', marginBottom: '8px', color: 'var(--fb-text)' }}>No tenants found</h2>
+            <p style={{ color: 'var(--fb-text-secondary)', maxWidth: '420px', margin: '0 auto 20px', fontSize: '14px' }}>
+              {searchTerm
+                ? 'No tenants match your search.'
+                : 'You currently do not have any tenants onboarded. Click "Onboard Tenant" to add a lease agreement.'}
             </p>
             <button onClick={openAddModal} className="btn btn-primary">
-              <Plus size={16} /> Onboard Tenant
+              <MatIcon name="person_add" size={18} /> Onboard Tenant
             </button>
           </div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <table>
               <thead>
-                <tr style={{ background: 'var(--paper-dim)' }}>
-                  <th style={{ width: '40px', padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--ink-soft)' }}>#</th>
-                  <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--ink-soft)' }}>Tenant</th>
-                  <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--ink-soft)' }}>Rented Property</th>
-                  <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--ink-soft)' }}>Advance Term</th>
-                  <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--ink-soft)' }}>Monthly Rent</th>
-                  <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--ink-soft)' }}>Total Advance</th>
-                  <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--ink-soft)' }}>Lease Period &amp; Renewal</th>
-                  <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: 'var(--ink-soft)' }}>Status</th>
-                  <th style={{ padding: '14px 16px', textAlign: 'right', fontSize: '12px', color: 'var(--ink-soft)' }}>Actions</th>
+                <tr>
+                  <th style={{ width: '40px' }}>#</th>
+                  <th>Tenant</th>
+                  <th>Rented Property</th>
+                  <th>Advance Term</th>
+                  <th>Monthly Rent</th>
+                  <th>Total Advance</th>
+                  <th>Lease Period &amp; Renewal</th>
+                  <th>Status</th>
+                  <th style={{ textAlign: 'right' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -296,46 +306,46 @@ export default function HomeownerTenantsView() {
                   const totalAdvance = lease.advance_payment || (lease.rent_amount * (lease.duration_months || 12));
 
                   return (
-                    <tr key={lease.id} style={{ borderBottom: '1px solid var(--line)' }}>
-                      <td style={{ padding: '16px', color: 'var(--ink-soft)', fontWeight: '600' }}>{index + 1}</td>
+                    <tr key={lease.id}>
+                      <td style={{ color: 'var(--fb-text-secondary)', fontWeight: '600' }}>{index + 1}</td>
 
                       {/* Tenant Contact */}
-                      <td style={{ padding: '16px' }}>
-                        <div style={{ fontWeight: 700, fontSize: '14.5px', color: 'var(--ink)' }}>
+                      <td>
+                        <div style={{ fontWeight: 700, fontSize: '14.5px', color: 'var(--fb-text)' }}>
                           {lease.tenant_name || lease.tenant?.name || 'Unknown Tenant'}
                         </div>
                         {lease.tenant?.phone_number && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--ink-soft)', marginTop: '2px' }}>
-                            <Phone size={12} /> {lease.tenant.phone_number}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--fb-text-secondary)', marginTop: '2px' }}>
+                            <MatIcon name="call" size={13} /> {lease.tenant.phone_number}
                           </div>
                         )}
                         {lease.tenant?.email && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--ink-soft)' }}>
-                            <Mail size={12} /> {lease.tenant.email}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--fb-text-secondary)' }}>
+                            <MatIcon name="mail" size={13} /> {lease.tenant.email}
                           </div>
                         )}
                       </td>
 
                       {/* Property */}
-                      <td style={{ padding: '16px' }}>
-                        <div style={{ fontWeight: 600, fontSize: '14px' }}>
+                      <td>
+                        <div style={{ fontWeight: 600, fontSize: '14px', color: 'var(--fb-text)' }}>
                           {lease.property?.title || 'Residential Property'}
                         </div>
-                        <div style={{ fontSize: '12.5px', color: 'var(--ink-soft)' }}>
+                        <div style={{ fontSize: '12.5px', color: 'var(--fb-text-secondary)' }}>
                           {lease.property?.address || 'Accra, Ghana'}
                         </div>
                       </td>
 
                       {/* Advance Term */}
-                      <td style={{ padding: '16px' }}>
+                      <td>
                         <span
                           style={{
                             padding: '4px 10px',
                             borderRadius: '12px',
                             fontSize: '12px',
                             fontWeight: 700,
-                            background: 'var(--sand)',
-                            color: 'var(--ink)'
+                            background: 'var(--fb-bg)',
+                            color: 'var(--fb-text)'
                           }}
                         >
                           {durationYears} Year{durationYears > 1 ? 's' : ''} ({lease.duration_months || 12} mos)
@@ -343,53 +353,43 @@ export default function HomeownerTenantsView() {
                       </td>
 
                       {/* Monthly Rent */}
-                      <td style={{ padding: '16px', fontWeight: 600 }}>
+                      <td style={{ fontWeight: 600 }}>
                         GH₵{lease.rent_amount?.toLocaleString()}/mo
                       </td>
 
                       {/* Total Advance */}
-                      <td style={{ padding: '16px', fontWeight: 700, color: 'var(--forest-deep)' }}>
+                      <td style={{ fontWeight: 700, color: 'var(--fb-success-text)' }}>
                         GH₵{totalAdvance.toLocaleString()}
                       </td>
 
                       {/* Lease Period */}
-                      <td style={{ padding: '16px' }}>
+                      <td>
                         <div style={{ fontSize: '13px' }}>
                           {format(new Date(lease.start_date), 'MMM d, yyyy')} – {format(new Date(lease.end_date), 'MMM d, yyyy')}
                         </div>
                         {isExpiringSoon && (
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#B45309', background: '#FEF3C7', padding: '2px 8px', borderRadius: '4px', marginTop: '4px', fontWeight: 600 }}>
-                            <AlertTriangle size={12} />
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#B25E00', background: '#FFF4E5', padding: '2px 8px', borderRadius: '4px', marginTop: '4px', fontWeight: 700 }}>
+                            <MatIcon name="warning" size={13} />
                             Renewal in {daysUntilExpiry} days
                           </div>
                         )}
                         {isExpired && (
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#991B1B', background: '#FEE2E2', padding: '2px 8px', borderRadius: '4px', marginTop: '4px', fontWeight: 600 }}>
-                            <AlertTriangle size={12} />
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#E41E3F', background: '#FFEBEA', padding: '2px 8px', borderRadius: '4px', marginTop: '4px', fontWeight: 700 }}>
+                            <MatIcon name="warning" size={13} />
                             Lease Expired
                           </div>
                         )}
                       </td>
 
                       {/* Status */}
-                      <td style={{ padding: '16px' }}>
-                        <span
-                          style={{
-                            display: 'inline-block',
-                            padding: '4px 10px',
-                            borderRadius: '20px',
-                            fontSize: '11.5px',
-                            fontWeight: 700,
-                            background: lease.status === 'ACTIVE' ? '#E1EAE0' : (lease.status === 'PENDING' ? 'var(--gold-pale)' : '#F1F5F9'),
-                            color: lease.status === 'ACTIVE' ? 'var(--forest-deep)' : (lease.status === 'PENDING' ? 'var(--gold-deep)' : '#64748B')
-                          }}
-                        >
+                      <td>
+                        <span className={`status ${lease.status === 'ACTIVE' ? 'paid' : (lease.status === 'PENDING' ? 'due' : 'vacant')}`}>
                           {lease.status === 'ACTIVE' ? 'Active' : (lease.status === 'PENDING' ? 'Pending' : lease.status)}
                         </span>
                       </td>
 
                       {/* Actions */}
-                      <td style={{ padding: '16px', textAlign: 'right' }}>
+                      <td style={{ textAlign: 'right' }}>
                         <div style={{ display: 'inline-flex', gap: '6px' }}>
                           <button
                             onClick={() => openEditModal(lease)}
@@ -397,7 +397,7 @@ export default function HomeownerTenantsView() {
                             title="Edit lease"
                             style={{ padding: '6px 8px' }}
                           >
-                            <Edit2 size={14} />
+                            <MatIcon name="edit" size={15} />
                           </button>
                           <button
                             onClick={() => {
@@ -407,9 +407,9 @@ export default function HomeownerTenantsView() {
                             }}
                             className="btn btn-outline btn-sm"
                             title="Remove lease"
-                            style={{ padding: '6px 8px', color: '#DC2626', borderColor: '#FCA5A5' }}
+                            style={{ padding: '6px 8px', color: '#E41E3F', borderColor: '#FCA5A5' }}
                           >
-                            <Trash2 size={14} />
+                            <MatIcon name="delete" size={15} />
                           </button>
                         </div>
                       </td>
@@ -424,195 +424,112 @@ export default function HomeownerTenantsView() {
 
       {/* Onboard / Edit Tenant Modal */}
       {isModalOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '20px'
-          }}
-        >
-          <div
-            style={{
-              background: 'var(--white)',
-              borderRadius: '16px',
-              maxWidth: '560px',
-              width: '100%',
-              padding: '28px',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '19px', fontWeight: 700, margin: 0 }}>
-                {editingTenant ? 'Edit Tenant Lease' : 'Onboard New Tenant'}
-              </h2>
-              <button onClick={closeModal} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink-soft)' }}>
-                <X size={20} />
+        <div className="modal-overlay open">
+          <div className="modal" style={{ maxWidth: '540px' }}>
+            <div className="modal-head">
+              <h2>{editingTenant ? 'Edit Tenant Lease' : 'Onboard New Tenant'}</h2>
+              <button onClick={closeModal}>
+                <MatIcon name="close" size={20} />
               </button>
             </div>
 
             <form onSubmit={handleSubmit}>
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
-                  Select Property *
-                </label>
-                <select
-                  value={formData.property_id}
-                  onChange={(e) => handlePropertyChange(e.target.value)}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid var(--line)',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    outline: 'none'
-                  }}
-                >
-                  {properties.map(p => (
-                    <option key={p.id} value={p.id}>
-                      {p.title} — GH₵{p.base_price.toLocaleString()}/mo ({p.address || 'Accra'})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
-                  Tenant Full Name *
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Kwesi Mensah"
-                  value={formData.tenant_name}
-                  onChange={(e) => setFormData({ ...formData, tenant_name: e.target.value })}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid var(--line)',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    outline: 'none'
-                  }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    placeholder="e.g. 0244123456"
-                    value={formData.tenant_phone}
-                    onChange={(e) => setFormData({ ...formData, tenant_phone: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid var(--line)',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    placeholder="e.g. tenant@example.com"
-                    value={formData.tenant_email}
-                    onChange={(e) => setFormData({ ...formData, tenant_email: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid var(--line)',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '14px', marginBottom: '16px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
-                    Lease Start Date *
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.start_date}
-                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid var(--line)',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
-                    Advance Lease Period
-                  </label>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div className="form-group">
+                  <label>Select Property *</label>
                   <select
-                    value={formData.duration_months}
-                    onChange={(e) => setFormData({ ...formData, duration_months: parseInt(e.target.value) })}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid var(--line)',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
+                    value={formData.property_id}
+                    onChange={(e) => handlePropertyChange(e.target.value)}
+                    required
+                    className="form-control"
                   >
-                    <option value={12}>1 Year (12 months)</option>
-                    <option value={24}>2 Years (24 months)</option>
-                    <option value={36}>3 Years (36 months)</option>
+                    {properties.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.title} – GH₵{p.base_price.toLocaleString()}/mo ({p.address || 'Accra'})
+                      </option>
+                    ))}
                   </select>
                 </div>
-              </div>
 
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
-                  Monthly Rent Rate (GH₵) *
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={formData.rent_amount}
-                  onChange={(e) => setFormData({ ...formData, rent_amount: e.target.value })}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid var(--line)',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    outline: 'none'
-                  }}
-                />
-                {formData.rent_amount && (
-                  <div style={{ fontSize: '12.5px', color: 'var(--forest-deep)', fontWeight: 600, marginTop: '4px' }}>
-                    Total Advance Payment: GH₵{(formData.rent_amount * formData.duration_months).toLocaleString()}
+                <div className="form-group">
+                  <label>Tenant Full Name *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Kwesi Mensah"
+                    value={formData.tenant_name}
+                    onChange={(e) => setFormData({ ...formData, tenant_name: e.target.value })}
+                    required
+                    className="form-control"
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                  <div className="form-group">
+                    <label>Phone Number</label>
+                    <input
+                      type="tel"
+                      placeholder="e.g. 0244123456"
+                      value={formData.tenant_phone}
+                      onChange={(e) => setFormData({ ...formData, tenant_phone: e.target.value })}
+                      className="form-control"
+                    />
                   </div>
-                )}
+                  <div className="form-group">
+                    <label>Email Address</label>
+                    <input
+                      type="email"
+                      placeholder="e.g. tenant@example.com"
+                      value={formData.tenant_email}
+                      onChange={(e) => setFormData({ ...formData, tenant_email: e.target.value })}
+                      className="form-control"
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '14px' }}>
+                  <div className="form-group">
+                    <label>Lease Start Date *</label>
+                    <input
+                      type="date"
+                      value={formData.start_date}
+                      onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                      required
+                      className="form-control"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Advance Lease Period</label>
+                    <select
+                      value={formData.duration_months}
+                      onChange={(e) => setFormData({ ...formData, duration_months: parseInt(e.target.value) })}
+                      className="form-control"
+                    >
+                      <option value={12}>1 Year (12 months)</option>
+                      <option value={24}>2 Years (24 months)</option>
+                      <option value={36}>3 Years (36 months)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Monthly Rent Rate (GH₵) *</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={formData.rent_amount}
+                    onChange={(e) => setFormData({ ...formData, rent_amount: e.target.value })}
+                    required
+                    className="form-control"
+                  />
+                  {formData.rent_amount && (
+                    <div style={{ fontSize: '13px', color: 'var(--fb-success-text)', fontWeight: 600, marginTop: '6px' }}>
+                      Total Advance Payment: GH₵{(formData.rent_amount * formData.duration_months).toLocaleString()}
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <div className="modal-foot">
                 <button type="button" onClick={closeModal} className="btn btn-outline">
                   Cancel
                 </button>

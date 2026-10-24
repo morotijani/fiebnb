@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import axiosClient from '../../api/axiosClient';
 import toast from 'react-hot-toast';
+import MatIcon from '../common/MatIcon';
 
 const getImageUrl = (url) => {
   if (!url) return '';
@@ -137,8 +138,8 @@ export default function EditUnitModal({ unit = {}, onClose }) {
       <div className="modal" onClick={e => e.stopPropagation()} style={{maxWidth: '600px'}}>
         <div className="modal-head">
           <h2 style={{fontSize: '18px', fontWeight: '600', margin: 0}}>{isCreating ? 'Add New Unit' : 'Edit Unit Settings'}</h2>
-          <button onClick={onClose} style={{background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink-soft)'}}>
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          <button onClick={onClose} style={{background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink-soft)'}} aria-label="Close">
+            <MatIcon name="close" size={20} />
           </button>
         </div>
 
