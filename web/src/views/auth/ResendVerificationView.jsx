@@ -1,75 +1,117 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import MatIcon from '../../components/common/MatIcon';
+import './AuthPages.css';
 
 const ResendVerificationView = () => {
-  const [method, setMethod] = useState('email');
+  const [method, setMethod] = useState('phone');
   const [identifier, setIdentifier] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Front-end prototype logic
-    navigate('/verify-otp', { state: { phone_number: method === 'phone' ? identifier : '0240000000' } });
+    navigate('/verify-otp', { state: { phone_number: identifier } });
   };
 
   return (
-    <div className="auth-shell">
-      <aside className="auth-aside">
-        <img className="bg" src="https://picsum.photos/seed/fiebnb-auth-resend/900/1200" alt="Background" />
-        <div className="veil"></div>
-        <div className="content top-logo">
-          <Link to="/"><img src="/assets/fiebnb-logo-horizontal-reversed.svg" alt="Fiebnb" style={{height: '34px'}} /></Link>
+    <div className="auth-split-root">
+      <div className="auth-split-container">
+        
+        {/* Left Column: Brand & Value Proposition */}
+        <div className="auth-hero-pane">
+          <Link to="/" className="auth-brand-logo">
+            <img 
+              src="/logo_horizontal.png" 
+              alt="Fiebnb" 
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }} 
+            />
+            <div style={{ display: 'none', alignItems: 'center', gap: '8px' }}>
+              <span style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#0866FF', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <MatIcon name="home_work" size={22} />
+              </span>
+              <span className="brand-text">Fiebnb</span>
+            </div>
+          </Link>
+
+          <h1 className="auth-hero-headline">
+            Need a fresh verification code?
+          </h1>
+          <p className="auth-hero-sub">
+            Codes can occasionally take a moment to deliver via SMS. Enter your phone number and we'll dispatch a new code immediately.
+          </p>
+
+          <div className="auth-feature-list">
+            <div className="auth-feature-item">
+              <div className="auth-feature-icon">
+                <MatIcon name="send_to_mobile" size={20} />
+              </div>
+              <div className="auth-feature-text">
+                Direct SMS Dispatch
+                <span>High-deliverability network across MTN, Telecel, and AT Ghana.</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="content bottom">
-          <div className="weave-strip short"><span></span><span></span><span></span><span></span></div>
-          <h2>Didn't get a code?</h2>
-          <p>Codes can take a minute to arrive, or land in spam. If it's been a while, we'll send a fresh one.</p>
-        </div>
-      </aside>
 
-      <main className="auth-main">
-        <div className="auth-card">
-          <Link to="/" className="mobile-logo"><img src="/assets/fiebnb-logo-horizontal.svg" alt="Fiebnb" /></Link>
+        {/* Right Column: Meta Style Auth Card */}
+        <div className="auth-card-pane">
+          <div className="auth-card-meta">
+            
+            <Link to="/login" className="auth-back-link">
+              <MatIcon name="arrow_back" size={16} />
+              <span>Back to log in</span>
+            </Link>
 
-          <Link to="/login" className="back-link"><ArrowLeft size={15} /> Back to log in</Link>
-
-          <h1>Resend verification code</h1>
-          <p className="sub">Enter the email or phone number you used to sign up and we'll send a new code.</p>
-
-          <form onSubmit={handleSubmit}>
-            <div className="method-toggle">
-              <button 
-                type="button" 
-                className={method === 'email' ? 'active' : ''} 
-                onClick={() => setMethod('email')}
-              >Email</button>
-              <button 
-                type="button" 
-                className={method === 'phone' ? 'active' : ''} 
-                onClick={() => setMethod('phone')}
-              >Phone number</button>
+            <div className="auth-card-header">
+              <h2>Resend Code</h2>
+              <p>Enter the phone number you registered with.</p>
             </div>
 
-            <div className="form-field">
-              <label htmlFor="rv-id">{method === 'email' ? 'Email address' : 'Phone number'}</label>
-              <input 
-                id="rv-id" 
-                type={method === 'email' ? 'email' : 'tel'} 
-                placeholder={method === 'email' ? 'you@example.com' : '024 000 0000'} 
-                required 
-                value={identifier}
-                onChange={e => setIdentifier(e.target.value)}
-              />
+            <form onSubmit={handleSubmit}>
+              <div className="auth-form-group">
+                <label className="auth-form-label" htmlFor="rv-id">Phone Number</label>
+                <input 
+                  id="rv-id" 
+                  type="tel" 
+                  placeholder="024 000 0000" 
+                  required 
+                  className="auth-input-control"
+                  value={identifier}
+                  onChange={e => setIdentifier(e.target.value)}
+                />
+              </div>
+
+              <button type="submit" className="auth-btn-primary" style={{ marginTop: '12px' }}>
+                <span>Send Fresh Code</span>
+              </button>
+            </form>
+
+            <div className="auth-divider-line">
+              <div className="line"></div>
+              <span>or</span>
+              <div className="line"></div>
             </div>
 
-            <button type="submit" className="btn btn-primary btn-block">Resend code</button>
-          </form>
+            <div style={{ textAlign: 'center' }}>
+              <span style={{ fontSize: '13px', color: '#65676B' }}>
+                Already verified?{' '}
+                <Link to="/login" style={{ color: '#0866FF', fontWeight: 600, textDecoration: 'none' }}>
+                  Log in
+                </Link>
+              </span>
+            </div>
 
-          <p className="switch">Already verified? <Link to="/login">Log in</Link></p>
-          <p className="auth-footer-note">Still nothing? <Link to="/support">Message us on WhatsApp</Link></p>
+            <div className="auth-footer-sub">
+              Still having issues? <Link to="/support">Contact support via WhatsApp</Link>
+            </div>
+
+          </div>
         </div>
-      </main>
+
+      </div>
     </div>
   );
 };

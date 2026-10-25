@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate, Navigate, Link } from 'react-router-dom';
-import { MailCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import MatIcon from '../../components/common/MatIcon';
+import './AuthPages.css';
 
 const OtpVerificationView = () => {
   const location = useLocation();
@@ -38,13 +39,13 @@ const OtpVerificationView = () => {
     setOtpCodes(newOtpCodes);
 
     if (value !== '' && index < 5) {
-      inputRefs.current[index + 1].focus();
+      inputRefs.current[index + 1]?.focus();
     }
   };
 
   const handleKeyDown = (index, e) => {
     if (e.key === 'Backspace' && otpCodes[index] === '' && index > 0) {
-      inputRefs.current[index - 1].focus();
+      inputRefs.current[index - 1]?.focus();
     }
   };
 
@@ -58,9 +59,9 @@ const OtpVerificationView = () => {
       }
       setOtpCodes(newOtpCodes);
       if (pastedData.length < 6) {
-        inputRefs.current[pastedData.length].focus();
+        inputRefs.current[pastedData.length]?.focus();
       } else {
-        inputRefs.current[5].focus();
+        inputRefs.current[5]?.focus();
       }
     }
   };
@@ -99,95 +100,153 @@ const OtpVerificationView = () => {
     setSuccess('');
     try {
       await resendOtp(phone_number);
-      setSuccess('A new OTP has been sent to your phone number.');
-      setTimeLeft(60); // Reset cooldown
+      setSuccess('Verification code resent successfully.');
+      setTimeLeft(60);
     } catch (err) {
-      setError(err.response?.data?.message || err.response?.data?.error || 'Failed to resend OTP.');
+      setError(err.response?.data?.message || err.response?.data?.error || 'Failed to resend code.');
     }
   };
 
   const maskPhone = (phone) => {
-    if (!phone || phone.length < 5) return phone;
-    return phone.slice(0, 3) + '***' + phone.slice(-2);
+    if (!phone) return '';
+    if (phone.length <= 4) return phone;
+    return phone.slice(0, 3) + ' ••• ••• ' + phone.slice(-2);
   };
 
   return (
-    <div className="auth-shell">
-      <aside className="auth-aside">
-        <img className="bg" src="https://picsum.photos/seed/fiebnb-auth-verify/900/1200" alt="Background" />
-        <div className="veil"></div>
-        <div className="content top-logo">
-          <Link to="/"><img src="/assets/fiebnb-logo-horizontal-reversed.svg" alt="Fiebnb" style={{height: '34px'}} /></Link>
-        </div>
-        <div className="content bottom">
-          <div className="weave-strip short"><span></span><span></span><span></span><span></span></div>
-          <h2>One last step</h2>
-          <p>Verifying your account helps keep every stay, host and guest on Fiebnb trustworthy.</p>
-        </div>
-      </aside>
-
-      <main className="auth-main">
-        <div className="auth-card">
-          <Link to="/" className="mobile-logo"><img src="/assets/fiebnb-logo-horizontal.svg" alt="Fiebnb" /></Link>
-
-          <h1>Verify your account</h1>
-          <p className="sub">Enter the 6-digit code we sent to activate your account.</p>
-
-          <div className="contact-target">
-            <MailCheck size={18} stroke="var(--brick-deep)" />
-            <span>Sent to <b>{maskPhone(phone_number)}</b> · <Link to="/register" style={{color: 'var(--brick)', fontWeight: '600'}}>not you?</Link></span>
-          </div>
-
-          {error && (
-            <div style={{background: '#fee2e2', color: '#b91c1c', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px', border: '1px solid #fca5a5'}}>
-              {error}
+    <div className="auth-split-root">
+      <div className="auth-split-container">
+        
+        {/* Left Column: Brand & Value Proposition */}
+        <div className="auth-hero-pane">
+          <Link to="/" className="auth-brand-logo">
+            <img 
+              src="/logo_horizontal.png" 
+              alt="Fiebnb" 
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }} 
+            />
+            <div style={{ display: 'none', alignItems: 'center', gap: '8px' }}>
+              <span style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#0866FF', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <MatIcon name="home_work" size={22} />
+              </span>
+              <span className="brand-text">Fiebnb</span>
             </div>
-          )}
+          </Link>
 
-          {success && (
-            <div style={{background: '#dcfce7', color: '#15803d', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px', border: '1px solid #86efac'}}>
-              {success}
-            </div>
-          )}
+          <h1 className="auth-hero-headline">
+            One quick step to verify your account.
+          </h1>
+          <p className="auth-hero-sub">
+            Verifying your phone number keeps every landlord, tenant, and guest on Fiebnb authentic and trustworthy.
+          </p>
 
-          <form onSubmit={handleVerify}>
-            <div className="form-field">
-              <label>Verification code</label>
-              <div className="otp-row">
-                {otpCodes.map((digit, i) => (
-                  <input 
-                    key={i}
-                    ref={el => inputRefs.current[i] = el}
-                    type="text" 
-                    inputMode="numeric" 
-                    maxLength={1} 
-                    required 
-                    value={digit}
-                    onChange={e => handleInputChange(i, e.target.value)}
-                    onKeyDown={e => handleKeyDown(i, e)}
-                    onPaste={i === 0 ? handlePaste : undefined}
-                  />
-                ))}
+          <div className="auth-feature-list">
+            <div className="auth-feature-item">
+              <div className="auth-feature-icon">
+                <MatIcon name="verified" size={20} />
+              </div>
+              <div className="auth-feature-text">
+                Fraud Prevention
+                <span>Protects you from fake agents and unauthorized bookings.</span>
               </div>
             </div>
+          </div>
+        </div>
 
-            <div className="resend-row" style={{marginBottom: '20px'}}>
-              <span>Didn't get a code?</span>
-              {timeLeft > 0 ? (
-                <span style={{color: 'var(--ink-soft)'}}>Resend in {timeLeft}s</span>
-              ) : (
-                <button type="button" onClick={handleResend} style={{background: 'none', border: 'none', color: 'var(--brick)', fontWeight: '600', cursor: 'pointer', padding: 0}}>Resend it</button>
-              )}
+        {/* Right Column: Meta Style Auth Card */}
+        <div className="auth-card-pane">
+          <div className="auth-card-meta">
+            
+            <div className="auth-card-header">
+              <h2>Verify Phone Number</h2>
+              <p>Enter the 6-digit code we sent to your device.</p>
             </div>
 
-            <button type="submit" className="btn btn-primary btn-block" disabled={isLoading}>
-              {isLoading ? 'Verifying...' : 'Verify account'}
-            </button>
-          </form>
+            <div className="auth-target-badge">
+              <MatIcon name="mark_email_read" size={20} color="#0866FF" />
+              <span>
+                Sent to <b>{maskPhone(phone_number)}</b> ·{' '}
+                <Link to="/register" style={{ color: '#0866FF', fontWeight: 600, textDecoration: 'none' }}>
+                  change?
+                </Link>
+              </span>
+            </div>
 
-          <p className="auth-footer-note">Wrong email or phone? <Link to="/register">Go back and edit it</Link></p>
+            {error && (
+              <div className="auth-alert-error">
+                <MatIcon name="error" size={18} />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {success && (
+              <div className="auth-alert-success">
+                <MatIcon name="check_circle" size={18} />
+                <span>{success}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleVerify}>
+              <div className="auth-form-group">
+                <div className="auth-otp-row">
+                  {otpCodes.map((digit, i) => (
+                    <input 
+                      key={i}
+                      ref={el => inputRefs.current[i] = el}
+                      type="text" 
+                      inputMode="numeric" 
+                      maxLength={1} 
+                      required 
+                      className="auth-otp-input"
+                      value={digit}
+                      onChange={e => handleInputChange(i, e.target.value)}
+                      onKeyDown={e => handleKeyDown(i, e)}
+                      onPaste={i === 0 ? handlePaste : undefined}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="auth-row-between" style={{ marginBottom: '20px' }}>
+                <span style={{ fontSize: '13px', color: '#65676B' }}>Didn't receive a code?</span>
+                {timeLeft > 0 ? (
+                  <span style={{ fontSize: '13px', color: '#8A8D91', fontWeight: 500 }}>
+                    Resend in {timeLeft}s
+                  </span>
+                ) : (
+                  <button 
+                    type="button" 
+                    onClick={handleResend} 
+                    style={{ background: 'none', border: 'none', color: '#0866FF', fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: '13px', fontFamily: 'inherit' }}
+                  >
+                    Resend Code
+                  </button>
+                )}
+              </div>
+
+              <button type="submit" className="auth-btn-primary" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <MatIcon name="sync" size={18} />
+                    <span>Verifying...</span>
+                  </>
+                ) : (
+                  <span>Verify & Proceed</span>
+                )}
+              </button>
+            </form>
+
+            <div className="auth-footer-sub">
+              Need help? <Link to="/support">Contact Fiebnb Support</Link>
+            </div>
+
+          </div>
         </div>
-      </main>
+
+      </div>
     </div>
   );
 };

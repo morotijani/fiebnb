@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import MatIcon from '../../components/common/MatIcon';
+import './AuthPages.css';
 
 const ForgotPasswordView = () => {
   const [method, setMethod] = useState('email');
@@ -9,67 +10,137 @@ const ForgotPasswordView = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Front-end prototype logic
     navigate('/reset-password');
   };
 
   return (
-    <div className="auth-shell">
-      <aside className="auth-aside">
-        <img className="bg" src="https://picsum.photos/seed/fiebnb-auth-forgot/900/1200" alt="Background" />
-        <div className="veil"></div>
-        <div className="content top-logo">
-          <Link to="/"><img src="/assets/fiebnb-logo-horizontal-reversed.svg" alt="Fiebnb" style={{height: '34px'}} /></Link>
-        </div>
-        <div className="content bottom">
-          <div className="weave-strip short"><span></span><span></span><span></span><span></span></div>
-          <h2>It happens to everyone</h2>
-          <p>Tell us how to reach you and we'll send a code to get you straight back into your account.</p>
-        </div>
-      </aside>
+    <div className="auth-split-root">
+      <div className="auth-split-container">
+        
+        {/* Left Column: Brand & Value Proposition */}
+        <div className="auth-hero-pane">
+          <Link to="/" className="auth-brand-logo">
+            <img 
+              src="/logo_horizontal.png" 
+              alt="Fiebnb" 
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }} 
+            />
+            <div style={{ display: 'none', alignItems: 'center', gap: '8px' }}>
+              <span style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#0866FF', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <MatIcon name="home_work" size={22} />
+              </span>
+              <span className="brand-text">Fiebnb</span>
+            </div>
+          </Link>
 
-      <main className="auth-main">
-        <div className="auth-card">
-          <Link to="/" className="mobile-logo"><img src="/assets/fiebnb-logo-horizontal.svg" alt="Fiebnb" /></Link>
+          <h1 className="auth-hero-headline">
+            Recover access to your properties and bookings.
+          </h1>
+          <p className="auth-hero-sub">
+            Tell us how to reach you and we'll send a secure one-time verification code to reset your password.
+          </p>
 
-          <Link to="/login" className="back-link"><ArrowLeft size={15} /> Back to log in</Link>
-
-          <h1>Forgot your password?</h1>
-          <p className="sub">Enter the email or phone number linked to your account and we'll send a reset code.</p>
-
-          <form onSubmit={handleSubmit}>
-            <div className="method-toggle">
-              <button 
-                type="button" 
-                className={method === 'email' ? 'active' : ''} 
-                onClick={() => setMethod('email')}
-              >Email</button>
-              <button 
-                type="button" 
-                className={method === 'phone' ? 'active' : ''} 
-                onClick={() => setMethod('phone')}
-              >Phone number</button>
+          <div className="auth-feature-list">
+            <div className="auth-feature-item">
+              <div className="auth-feature-icon">
+                <MatIcon name="lock_reset" size={20} />
+              </div>
+              <div className="auth-feature-text">
+                Instant Recovery
+                <span>Receive code via SMS or email within seconds.</span>
+              </div>
             </div>
 
-            <div className="form-field">
-              <label htmlFor="fp-id">{method === 'email' ? 'Email address' : 'Phone number'}</label>
-              <input 
-                id="fp-id" 
-                type={method === 'email' ? 'email' : 'tel'} 
-                placeholder={method === 'email' ? 'you@example.com' : '024 000 0000'} 
-                required 
-                value={identifier}
-                onChange={e => setIdentifier(e.target.value)}
-              />
+            <div className="auth-feature-item">
+              <div className="auth-feature-icon">
+                <MatIcon name="security" size={20} />
+              </div>
+              <div className="auth-feature-text">
+                Account Protection
+                <span>Your rental contracts and account data stay fully encrypted.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Meta Style Auth Card */}
+        <div className="auth-card-pane">
+          <div className="auth-card-meta">
+            
+            <Link to="/login" className="auth-back-link">
+              <MatIcon name="arrow_back" size={16} />
+              <span>Back to log in</span>
+            </Link>
+
+            <div className="auth-card-header">
+              <h2>Forgot Password?</h2>
+              <p>Enter the email or phone number linked to your Fiebnb account.</p>
             </div>
 
-            <button type="submit" className="btn btn-primary btn-block">Send reset code</button>
-          </form>
+            <form onSubmit={handleSubmit}>
+              <div className="auth-method-capsule">
+                <button 
+                  type="button" 
+                  className={method === 'email' ? 'active' : ''} 
+                  onClick={() => setMethod('email')}
+                >
+                  Email Address
+                </button>
+                <button 
+                  type="button" 
+                  className={method === 'phone' ? 'active' : ''} 
+                  onClick={() => setMethod('phone')}
+                >
+                  Phone Number
+                </button>
+              </div>
 
-          <p className="switch">Remembered it after all? <Link to="/login">Log in</Link></p>
-          <p className="auth-footer-note">Need more help? <Link to="/support">Contact support</Link></p>
+              <div className="auth-form-group">
+                <label className="auth-form-label" htmlFor="fp-id">
+                  {method === 'email' ? 'Email Address' : 'Phone Number'}
+                </label>
+                <input 
+                  id="fp-id" 
+                  type={method === 'email' ? 'email' : 'tel'} 
+                  placeholder={method === 'email' ? 'you@example.com' : '024 000 0000'} 
+                  required 
+                  className="auth-input-control"
+                  value={identifier}
+                  onChange={e => setIdentifier(e.target.value)}
+                />
+              </div>
+
+              <button type="submit" className="auth-btn-primary" style={{ marginTop: '8px' }}>
+                <span>Send Reset Code</span>
+              </button>
+            </form>
+
+            <div className="auth-divider-line">
+              <div className="line"></div>
+              <span>or</span>
+              <div className="line"></div>
+            </div>
+
+            <div style={{ textAlign: 'center' }}>
+              <span style={{ fontSize: '13px', color: '#65676B' }}>
+                Remembered your password?{' '}
+                <Link to="/login" style={{ color: '#0866FF', fontWeight: 600, textDecoration: 'none' }}>
+                  Log in
+                </Link>
+              </span>
+            </div>
+
+            <div className="auth-footer-sub">
+              Need assistance? <Link to="/support">Contact support</Link>
+            </div>
+
+          </div>
         </div>
-      </main>
+
+      </div>
     </div>
   );
 };

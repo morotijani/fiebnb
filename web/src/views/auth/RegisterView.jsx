@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Briefcase, Home, Eye, EyeOff, Globe } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import MatIcon from '../../components/common/MatIcon';
+import './AuthPages.css';
 
 const RegisterView = () => {
   const [accountType, setAccountType] = useState('GUEST'); // GUEST or HOMEOWNER
-  const [method, setMethod] = useState('email');
-  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -31,14 +30,6 @@ const RegisterView = () => {
         role: accountType
       };
 
-      // If method is email, we might not have a phone number, but backend requires it. 
-      // For this UI to work as-is, we must enforce a phone number or default it if email is used.
-      // Wait, the new UI in signup.html toggle between email AND phone. But the DB requires both.
-      // I'll combine the field logically: if they enter email, we still need a phone, but the UI only shows one?
-      // Ah, the UI had "Full name", then a method toggle for Email / Phone.
-      // If we strictly follow the new UI, they only enter one. 
-      // Let's modify the new UI slightly to ask for both, because backend requires both.
-      
       await register(payload);
       navigate('/verify-otp', { state: { phone_number: formData.phone_number, isNewRegistration: true } });
     } catch (err) {
@@ -57,131 +48,217 @@ const RegisterView = () => {
   };
 
   return (
-    <div className="auth-shell">
-      <aside className="auth-aside">
-        <img className="bg" src="https://picsum.photos/seed/fiebnb-auth-signup/900/1200" alt="Background" />
-        <div className="veil"></div>
-        <div className="content top-logo">
-          <Link to="/"><img src="/assets/fiebnb-logo-horizontal-reversed.svg" alt="Fiebnb" style={{height: '34px'}} /></Link>
-        </div>
-        <div className="content bottom">
-          <div className="weave-strip short"><span></span><span></span><span></span><span></span></div>
-          <h2>Join Fiebnb</h2>
-          <p>Create an account to book verified stays across Ghana, or list your own property and start earning.</p>
-          <div className="quote">
-            <p>"Moved to Accra for work and found a 6-month furnished flat in two days. No agent fees, no drama."</p>
-            <span>Kwabena T. · Long-term tenant</span>
+    <div className="auth-split-root">
+      <div className="auth-split-container">
+        
+        {/* Left Column: Brand & Value Proposition */}
+        <div className="auth-hero-pane">
+          <Link to="/" className="auth-brand-logo">
+            <img 
+              src="/logo_horizontal.png" 
+              alt="Fiebnb" 
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }} 
+            />
+            <div style={{ display: 'none', alignItems: 'center', gap: '8px' }}>
+              <span style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#0866FF', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <MatIcon name="home_work" size={22} />
+              </span>
+              <span className="brand-text">Fiebnb</span>
+            </div>
+          </Link>
+
+          <h1 className="auth-hero-headline">
+            Join Ghana's modern real estate and verified hospitality community.
+          </h1>
+          <p className="auth-hero-sub">
+            Whether you are listing residential homes, managing apartment complexes, or booking your next stay.
+          </p>
+
+          <div className="auth-feature-list">
+            <div className="auth-feature-item">
+              <div className="auth-feature-icon">
+                <MatIcon name="real_estate_agent" size={20} />
+              </div>
+              <div className="auth-feature-text">
+                Homeowners & Landlords
+                <span>Post long-term listings, set 1-2 year advance terms, and track rent collection.</span>
+              </div>
+            </div>
+
+            <div className="auth-feature-item">
+              <div className="auth-feature-icon">
+                <MatIcon name="apartment" size={20} />
+              </div>
+              <div className="auth-feature-text">
+                Apartment Complexes & Hotels
+                <span>Manage multiple units, maintenance tickets, staff access, and front-desk check-ins.</span>
+              </div>
+            </div>
+
+            <div className="auth-feature-item">
+              <div className="auth-feature-icon">
+                <MatIcon name="security" size={20} />
+              </div>
+              <div className="auth-feature-text">
+                Verified Direct Booking
+                <span>Transparent agreements, direct communication, and no hidden agent fees.</span>
+              </div>
+            </div>
           </div>
         </div>
-      </aside>
 
-      <main className="auth-main">
-        <div className="auth-card">
-          <Link to="/" className="mobile-logo"><img src="/assets/fiebnb-logo-horizontal.svg" alt="Fiebnb" /></Link>
-
-          <h1>Create your account</h1>
-          <p className="sub">Already on Fiebnb? <Link to="/login">Log in</Link></p>
-
-          {error && (
-            <div style={{background: '#fee2e2', color: '#b91c1c', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px', border: '1px solid #fca5a5'}}>
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div className="type-select">
-              <label className={`type-card ${accountType === 'GUEST' ? 'selected' : ''}`} onClick={() => setAccountType('GUEST')}>
-                <input type="radio" name="accountType" value="GUEST" checked={accountType === 'GUEST'} readOnly />
-                <Briefcase size={24} strokeWidth={1.5} />
-                <h4>I'm booking a stay</h4>
-                <p>Find hotels, guesthouses & rentals</p>
-              </label>
-              <label className={`type-card ${accountType === 'HOMEOWNER' ? 'selected' : ''}`} onClick={() => setAccountType('HOMEOWNER')}>
-                <input type="radio" name="accountType" value="HOMEOWNER" checked={accountType === 'HOMEOWNER'} readOnly />
-                <Home size={24} strokeWidth={1.5} />
-                <h4>I'm listing a property</h4>
-                <p>Earn as a host or landlord</p>
-              </label>
+        {/* Right Column: Meta Style Auth Card */}
+        <div className="auth-card-pane">
+          <div className="auth-card-meta">
+            
+            <div className="auth-card-header">
+              <h2>Create an Account</h2>
+              <p>It's quick and easy to get started with Fiebnb.</p>
             </div>
 
-            <div className="form-field">
-              <label htmlFor="name">Full name</label>
-              <input 
-                id="name" 
-                name="name" 
-                type="text" 
-                placeholder="Ama Owusu" 
-                required 
-                value={formData.name}
-                onChange={handleChange}
-              />
-            </div>
+            {error && (
+              <div className="auth-alert-error">
+                <MatIcon name="error" size={18} />
+                <span>{error}</span>
+              </div>
+            )}
 
-            {/* Changed from the static HTML method-toggle to ensure both email and phone are collected */}
-            <div className="form-field">
-              <label htmlFor="email">Email address</label>
-              <input 
-                id="email" 
-                name="email" 
-                type="email" 
-                placeholder="you@example.com" 
-                required 
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
+            <form onSubmit={handleSubmit}>
+              
+              {/* Account Type Selection */}
+              <label className="auth-form-label">I want to:</label>
+              <div className="auth-role-grid">
+                <div 
+                  className={`auth-role-card ${accountType === 'GUEST' ? 'active' : ''}`}
+                  onClick={() => setAccountType('GUEST')}
+                >
+                  <div className="role-icon-box">
+                    <MatIcon name="luggage" size={18} />
+                  </div>
+                  <h4>Book Stays</h4>
+                  <p>Hotels & rentals</p>
+                </div>
 
-            <div className="form-field">
-              <label htmlFor="phone_number">Phone number</label>
-              <input 
-                id="phone_number" 
-                name="phone_number" 
-                type="tel" 
-                placeholder="024 000 0000" 
-                required 
-                value={formData.phone_number}
-                onChange={handleChange}
-              />
-            </div>
+                <div 
+                  className={`auth-role-card ${accountType === 'HOMEOWNER' ? 'active' : ''}`}
+                  onClick={() => setAccountType('HOMEOWNER')}
+                >
+                  <div className="role-icon-box">
+                    <MatIcon name="real_estate_agent" size={18} />
+                  </div>
+                  <h4>List & Manage</h4>
+                  <p>Homes & apartments</p>
+                </div>
+              </div>
 
-            <div className="form-field">
-              <label htmlFor="password">Password</label>
-              <div className="pw-field">
+              <div className="auth-form-group">
+                <label className="auth-form-label" htmlFor="name">Full Name</label>
                 <input 
-                  id="password" 
-                  name="password" 
-                  type={showPassword ? 'text' : 'password'} 
-                  placeholder="Create a password" 
-                  minLength="8" 
+                  id="name" 
+                  name="name" 
+                  type="text" 
+                  placeholder="e.g. Kwesi Mensah" 
                   required 
-                  value={formData.password}
+                  className="auth-input-control"
+                  value={formData.name}
                   onChange={handleChange}
                 />
-                <button type="button" className="pw-toggle" aria-label="Show password" onClick={() => setShowPassword(!showPassword)}>
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
               </div>
-              <p className="pw-hint">At least 8 characters, with one number.</p>
+
+              <div className="auth-form-group">
+                <label className="auth-form-label" htmlFor="email">Email Address</label>
+                <input 
+                  id="email" 
+                  name="email" 
+                  type="email" 
+                  placeholder="name@example.com" 
+                  required 
+                  className="auth-input-control"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="auth-form-group">
+                <label className="auth-form-label" htmlFor="phone_number">Phone Number</label>
+                <input 
+                  id="phone_number" 
+                  name="phone_number" 
+                  type="tel" 
+                  placeholder="024 000 0000" 
+                  required 
+                  className="auth-input-control"
+                  value={formData.phone_number}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="auth-form-group">
+                <label className="auth-form-label" htmlFor="password">Password</label>
+                <div className="auth-pw-wrap">
+                  <input 
+                    id="password" 
+                    name="password" 
+                    type={showPassword ? 'text' : 'password'} 
+                    placeholder="Create a strong password" 
+                    minLength="8" 
+                    required 
+                    className="auth-input-control"
+                    value={formData.password}
+                    onChange={handleChange}
+                  />
+                  <button 
+                    type="button" 
+                    className="auth-pw-btn" 
+                    aria-label="Toggle password visibility" 
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    <MatIcon name={showPassword ? "visibility_off" : "visibility"} size={18} />
+                  </button>
+                </div>
+                <div style={{ fontSize: '11.5px', color: '#65676B', marginTop: '4px' }}>
+                  At least 8 characters with letters & numbers.
+                </div>
+              </div>
+
+              <label className="auth-check-row">
+                <input type="checkbox" required />
+                <span>I agree to Fiebnb's <Link to="/terms" style={{ color: '#0866FF', fontWeight: 600 }}>Terms</Link> and <Link to="/privacy" style={{ color: '#0866FF', fontWeight: 600 }}>Privacy Policy</Link></span>
+              </label>
+
+              <button type="submit" className="auth-btn-primary" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <MatIcon name="sync" size={18} />
+                    <span>Creating Account...</span>
+                  </>
+                ) : (
+                  <span>Create Account</span>
+                )}
+              </button>
+            </form>
+
+            <div className="auth-divider-line">
+              <div className="line"></div>
+              <span>already registered?</span>
+              <div className="line"></div>
             </div>
 
-            <label className="check-row">
-              <input type="checkbox" required />
-              <span>I agree to Fiebnb's <Link to="/terms">Terms of Service</Link> and <Link to="/privacy">Privacy Policy</Link></span>
-            </label>
+            <Link to="/login" className="auth-btn-secondary">
+              Log in to existing account
+            </Link>
 
-            <button type="submit" className="btn btn-primary btn-block" disabled={isLoading}>
-              {isLoading ? 'Creating account...' : 'Create account'}
-            </button>
-          </form>
+            <div className="auth-footer-sub">
+              We'll send an OTP code to confirm your phone number.
+            </div>
 
-          <div className="divider-row"><div className="line"></div><span>or</span><div className="line"></div></div>
-          <button type="button" className="btn btn-outline btn-block" onClick={() => alert("Google sign-up isn't wired up yet.")}>
-            <Globe size={17} /> Continue with Google
-          </button>
-
-          <p className="auth-footer-note">We'll send a verification code to confirm your account.</p>
+          </div>
         </div>
-      </main>
+
+      </div>
     </div>
   );
 };
